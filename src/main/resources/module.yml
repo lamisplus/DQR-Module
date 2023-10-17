@@ -1,0 +1,19 @@
+basePackage: org.lamisplus.modules.hepatitis
+name: HepatitisModule
+store: true
+menus:
+  - icon: fa fa-virus
+    disabled: false
+    name: Hepatitis
+    state: hepatitis
+    url: /across/resources/static/hepatitis/index.html
+umdLocation: /across/resources/static/hepatitis/index.html
+webModules:
+  - breadcrumb: HEPATITIS
+    name: HepatitisModule
+    path: hepatitis
+    position: 99
+permissions:
+  - name: create_hepatitis
+    description: create hepatitis
+    moduleName: HepatitisModule
