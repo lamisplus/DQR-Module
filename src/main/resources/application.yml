@@ -13,8 +13,8 @@ acrossHibernate:
     hibernate.show_sql: false
     hibernate.event.merge.enty_copy_observer: allow
 applicationInfo:
-  applicationId: covid
-  applicationName: COVID
+  applicationId: dqa
+  applicationName: DQA
   buildDate: "@timestamp@"
   buildId: "@pom.version@-@build.revision@"
 build:
@@ -111,7 +111,7 @@ spring:
       hibernate.enable_lazy_load_no_trans: true
 
 remote:
-  lamis.url: http://localhost:8081/api/covid/
+  lamis.url: http://localhost:8081/api/dqa/
 
 jwt:
   # This token must be encoded using Base64 and be at least 256 bits long (you can type `openssl rand -base64 64` on your command line to generate a 512 bits one)

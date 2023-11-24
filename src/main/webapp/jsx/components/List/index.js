@@ -1,19 +1,15 @@
 import React, { useState, useEffect} from "react";
-import axios from "axios";
-import MatButton from "@material-ui/core/Button";
-//import Button from "@material-ui/core/Button";
-import { Spinner,Form,FormGroup, Label, InputGroup, Input } from "reactstrap";
+
+import {Form } from "reactstrap";
 import {makeStyles} from "@material-ui/core/styles";
 import {Card, CardContent} from "@material-ui/core";
-import SaveIcon from "@material-ui/icons/Save";
-//import AddIcon from "@material-ui/icons/Add";
-import CancelIcon from "@material-ui/icons/Cancel";
+
 import {ToastContainer, toast} from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "react-widgets/dist/css/react-widgets.css";
-import {FaPlus, FaAngleDown} from 'react-icons/fa'
-import {token, url as baseUrl } from "../../../api";
-import moment from "moment";
+import {FaPlus, FaAngleDown} from 'react-icons/fa';
+import Demographic  from './../DataCompleteness/Demographics/index'
+import Clinical  from './../DataCompleteness/Clinical/index'
 
 
 const useStyles = makeStyles((theme) => ({
@@ -89,7 +85,11 @@ const useStyles = makeStyles((theme) => ({
 
 const DQAList = (props) => {
     const classes = useStyles();
-    const [showEligibility, setShowEligibility] = useState(false);
+    const [showDemographics, setShowDemographic] = useState(false);
+    const [showClinical, setShowClinical] = useState(false);
+    const [showClinicals, setShowClinicals] = useState(false);
+    const [showPharmacy, setShowPharmacy] = useState(false);
+
     const [showNutrition, setShowNutrition] = useState(false);
     const [showGenderBase, setShowGenderBase] = useState(false);
     const [showChronicCondition, setShowChronicCondition] = useState(false);
@@ -98,11 +98,15 @@ const DQAList = (props) => {
     const [showTb, setShowTb] = useState(false);//Tpt
     const [showTpt, setShowTpt] = useState(false);
 
-    const onClickEligibility =() =>{
-        setShowEligibility(!showEligibility)
+    const onClickDemographics =() =>{
+        setShowDemographic(!showDemographics)
     }
-    const onClickTb =() =>{
-        setShowTb(!showTb)
+    const onClickClinical =() =>{
+        setShowClinical(!showClinical)
+    }
+
+    const onClickClinicals =() =>{
+        setShowClinicals(!showClinicals)
     }
     const onClickNutrition =() =>{
         setShowNutrition(!showNutrition)
@@ -137,47 +141,49 @@ const DQAList = (props) => {
 
                     <div className="col-xl-12 col-lg-12">
                         <Form >
-
+                            <h2>Data Completeness Scorecard</h2>
                             <div className="card">
                                 <div className="card-header" style={{backgroundColor:"#014d88",color:'#fff',fontWeight:'bolder',  borderRadius:"0.2rem"}}>
-                                    <h5 className="card-title" style={{color:'#fff'}}>Data Completeness Scorecard</h5>
-                                    {showEligibility===false  ? (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickEligibility}><FaPlus /></span></>) :  (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickEligibility}><FaAngleDown /></span> </>)}
+                                    <h5 className="card-title" style={{color:'#fff'}}>Demographics Variable</h5>
+                                    {showDemographics===false  ? (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickDemographics}><FaPlus /></span></>) :  (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickDemographics}><FaAngleDown /></span> </>)}
                                 </div>
+                                {showDemographics && (
+                                    <Demographic /> 
+                                )}
 
                             </div>
                             <div className="card">
                                 <div className="card-header" style={{backgroundColor:"#014d88",color:'#fff',fontWeight:'bolder',  borderRadius:"0.2rem"}}>
-                                    <h5 className="card-title" style={{color:'#fff'}}>Data Consistency Scorecard</h5>
-                                    {showEligibility===false  ? (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickEligibility}><FaPlus /></span></>) :  (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickEligibility}><FaAngleDown /></span> </>)}
+                                    <h5 className="card-title" style={{color:'#fff'}}>Clinical Variables</h5>
+                                    {showClinical===false  ? (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickClinical}><FaPlus /></span></>) :  (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickClinical}><FaAngleDown /></span> </>)}
                                 </div>
-
+                                {showClinical && (
+                                    <Clinical /> 
+                                )}
                             </div>
+
+                            <h2>Data Consistency Scorecard</h2>
                             <div className="card">
                                 <div className="card-header" style={{backgroundColor:"#014d88",color:'#fff',fontWeight:'bolder',  borderRadius:"0.2rem"}}>
-                                    <h5 className="card-title" style={{color:'#fff'}}>Data Validity Scorecard</h5>
-                                    {showEligibility===false  ? (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickEligibility}><FaPlus /></span></>) :  (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickEligibility}><FaAngleDown /></span> </>)}
+                                    <h5 className="card-title" style={{color:'#fff'}}>Clinicals</h5>
+                                    {showClinicals===false  ? (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickClinicals}><FaPlus /></span></>) :  (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickClinicals}><FaAngleDown /></span> </>)}
                                 </div>
-
+                                {showClinicals && (
+                                    <Clinicals /> 
+                                )}
                             </div>
-                            <div className="card">
-                                <div className="card-header" style={{backgroundColor:"#014d88",color:'#fff',fontWeight:'bolder',  borderRadius:"0.2rem"}}>
-                                    <h5 className="card-title" style={{color:'#fff'}}>Clinical</h5>
-                                    {showEligibility===false  ? (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickEligibility}><FaPlus /></span></>) :  (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickEligibility}><FaAngleDown /></span> </>)}
-                                </div>
 
-                            </div>
-                            {/* End Eligibility Assessment */}
-                            {/* TB & IPT  Screening  */}
                             <div className="card">
 
                                 <div className="card-header" style={{backgroundColor:"#014d88",color:'#fff',fontWeight:'bolder',  borderRadius:"0.2rem"}}>
                                     <h5 className="card-title" style={{color:'#fff'}}>Pharmacy</h5>
-                                    {showTb===false  ? (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickTb}><FaPlus /></span></>) :  (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickTb}><FaAngleDown /></span> </>)}
+                                    {showPharmacy===false  ? (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickPharmacy}><FaPlus /></span></>) :  (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickPharmacy}><FaAngleDown /></span> </>)}
                                 </div>
-
+                                {showPharmacy && (
+                                    <Pharmacy /> 
+                                )}
                             </div>
-                            {/* End TB & IPT  Screening  */}
-                            {/* TPT MONITORING */}
+                            
                             <div className="card">
                                 <div className="card-header" style={{backgroundColor:"#014d88",color:'#fff',fontWeight:'bolder',  borderRadius:"0.2rem"}}>
                                     <h5 className="card-title" style={{color:'#fff'}}>Laboratory</h5>
@@ -215,7 +221,14 @@ const DQAList = (props) => {
                                 </div>
 
                             </div>
+                            <h2>Data Validity Scorecard</h2>
+                            <div className="card">
+                                <div className="card-header" style={{backgroundColor:"#014d88",color:'#fff',fontWeight:'bolder',  borderRadius:"0.2rem"}}>
+                                    <h5 className="card-title" style={{color:'#fff'}}>Data Validation Report</h5>
+                                    {showNutrition===false  ? (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickNutrition}><FaPlus /></span></>) :  (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickNutrition}><FaAngleDown /></span> </>)}
+                                </div>
 
+                            </div>
                             <br />
 
                         </Form>

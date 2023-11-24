@@ -1,19 +1,19 @@
-basePackage: org.lamisplus.modules.hepatitis
-name: HepatitisModule
+basePackage: org.lamisplus.modules.dqa
+name: DQAModule
 store: true
 menus:
   - icon: fa fa-virus
     disabled: false
-    name: Hepatitis
-    state: hepatitis
-    url: /across/resources/static/hepatitis/index.html
-umdLocation: /across/resources/static/hepatitis/index.html
+    name: DQA
+    state: dqa
+    url: /across/resources/static/dqa/index.html
+umdLocation: /across/resources/static/dqa/index.html
 webModules:
-  - breadcrumb: HEPATITIS
-    name: HepatitisModule
-    path: hepatitis
+  - breadcrumb: DQA
+    name: DQAModule
+    path: dqa
     position: 99
 permissions:
-  - name: create_hepatitis
-    description: create hepatitis
-    moduleName: HepatitisModule
+  - name: create_dqa
+    description: create dqa
+    moduleName: DQAModule

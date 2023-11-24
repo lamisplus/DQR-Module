@@ -14,7 +14,7 @@
 	<artifactId>starter_module</artifactId>
 	<version>1.0.0</version>
 	<packaging>jar</packaging>
-	<name>starter_module</name>
+	<name>DQA Module</name>
 	<description>starter module</description>
 
 	<properties>
