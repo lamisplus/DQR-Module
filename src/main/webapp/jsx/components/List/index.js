@@ -104,6 +104,9 @@ const DQAList = (props) => {
     const onClickClinical =() =>{
         setShowClinical(!showClinical)
     }
+    const onClickPharmacy =() =>{
+            setShowClinical(!showClinical)
+        }
 
     const onClickClinicals =() =>{
         setShowClinicals(!showClinicals)
