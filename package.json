@@ -1,5 +1,5 @@
 {
-  "name": "LamisPlus",
+  "name": "DQR",
   "version": "0.1.0",
   "homepage": ".",
   "private": true,
@@ -124,11 +124,10 @@
   },
   "scripts": {
     "start": "react-scripts  start",
-    "build": "react-scripts  --max-old-space-size=15096 build && xcopy /s /y build src\\main\\resources\\views\\static\\hepatitis",
+    "build": "react-scripts  --max-old-space-size=15096 build && xcopy /s /y build src\\main\\resources\\views\\static\\dqa",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
-  
   "browserslist": {
     "production": [
       ">0.2%",
