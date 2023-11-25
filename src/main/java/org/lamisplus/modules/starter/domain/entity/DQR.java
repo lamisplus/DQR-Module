@@ -1,5 +1,5 @@
 package org.lamisplus.modules.starter.domain.entity;
 
-public class Starter {
+public class DQR {
     private Long id;
 }
