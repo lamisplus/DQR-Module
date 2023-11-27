@@ -7,7 +7,7 @@ public interface PatientDTOProjection {
     //basic information
     String getPatientId();
     String getHospitalNumber();
-    String getGender();
+    String getSex();
     Date getDateOfBirth();
 
     String getStatus();
