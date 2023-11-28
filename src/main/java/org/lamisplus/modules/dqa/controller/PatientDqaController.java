@@ -19,7 +19,7 @@ import java.util.concurrent.ExecutionException;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/dqr/")
-public class PatientDemoController {
+public class PatientDqaController {
     private final DQAService dqaService;
 
     @GetMapping(value = "/no-dob", produces = MediaType.APPLICATION_JSON_VALUE)
