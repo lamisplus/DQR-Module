@@ -20,8 +20,8 @@ public class ClinicalDQAService {
     private final ClinicalSummaryRepository clinicalSummaryRepository;
 
     public List <PatientDTOProjection> getNoArtDate (Long facilityId) {
-        List<PatientDTOProjection> cWithouArtDate = clinicalRepository.getClinicalWithoutArtDate(currentUserOrganizationService.getCurrentUserOrganization());
-        return cWithouArtDate;
+        List<PatientDTOProjection> cWithoutArtDate = clinicalRepository.getClinicalWithoutArtDate(currentUserOrganizationService.getCurrentUserOrganization());
+        return cWithoutArtDate;
     }
 
     public List <PatientDTOProjection> getNoHivDate (Long facilityId) {

@@ -123,7 +123,7 @@ const DemographicsDQA = (props) => {
                                     Proportion of all active patients with Date of Birth (DOB)
                                 </td>
                                 <td>
-                                    
+
                                 </td>
                                 <td>
                                     
