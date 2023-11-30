@@ -1,5 +1,5 @@
 {
-  "name": "DQR",
+  "name": "LamisPlus",
   "version": "0.1.0",
   "homepage": ".",
   "private": true,
@@ -123,11 +123,12 @@
     "yup": "^0.32.8"
   },
   "scripts": {
-    "start": "react-scripts  start",
-    "build": "react-scripts  --max-old-space-size=15096 build && xcopy /s /y build src\\main\\resources\\views\\static\\dqa",
+    "start": "react-scripts --openssl-legacy-provider start",
+    "build": "react-scripts --openssl-legacy-provider --max-old-space-size=15096 build && xcopy /s /y build src\\main\\resources\\views\\static\\dqr",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
+  
   "browserslist": {
     "production": [
       ">0.2%",
