@@ -42,8 +42,8 @@ public interface PrepRepository extends JpaRepository<DQA, Long> {
 //            "AND hc.prep_accepted = true AND pc.is_commencement is true AND pe.date_enrolled < pc.encounter_date", nativeQuery = true)
 //    List<PatientDTOProjection> getCurrentUrinalysisGreaterThanDateEnrolled(Long facilityId);
 
-    @Query(value = "", nativeQuery = true)
-    List<PatientDTOProjection> getCurrentUrinalysisGreaterThanHivStatus(Long facilityId);
+//    @Query(value = "", nativeQuery = true)
+//    List<PatientDTOProjection> getCurrentUrinalysisGreaterThanHivStatus(Long facilityId);
 
     @Query(value = "vSELECT DISTINCT ON (hc.person_uuid) hc.person_uuid, hc.client_code, hc.date_visit,  hc.prep_offered, hc.prep_accepted, hc.hiv_test_result,\n" +
             "pc.encounter_date AS commence_date, pe.date_enrolled,\n" +
@@ -86,20 +86,15 @@ public interface PrepRepository extends JpaRepository<DQA, Long> {
     List<PatientSummaryDTOProjection> getInitiatedWithUrinalysisPrepSumm (Long facilityId);
 
 
-    @Query(value = "", nativeQuery = true)
-    List<PatientSummaryDTOProjection> getCurrentUrinalysisGreaterThanHivStatusSumm (Long facilityId);
-
-
-    @Query(value = "", nativeQuery = true)
-    List<PatientSummaryDTOProjection> getDateRegisterLessThanDateCommencedSumm (Long facilityId);
-
-    @Query(value = "", nativeQuery = true)
-   List<PatientSummaryDTOProjection> getCurrentUrinalysisGreaterThanDateEnrolledSumm(Long facilityId);
-
-
-
-
-
+//    @Query(value = "", nativeQuery = true)
+//    List<PatientSummaryDTOProjection> getCurrentUrinalysisGreaterThanHivStatusSumm (Long facilityId);
+//
+//
+//    @Query(value = "", nativeQuery = true)
+//    List<PatientSummaryDTOProjection> getDateRegisterLessThanDateCommencedSumm (Long facilityId);
+//
+//    @Query(value = "", nativeQuery = true)
+//   List<PatientSummaryDTOProjection> getCurrentUrinalysisGreaterThanDateEnrolledSumm(Long facilityId);
 
 
 }

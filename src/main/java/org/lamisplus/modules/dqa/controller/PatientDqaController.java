@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.lamisplus.modules.dqa.domain.PatientDTOProjection;
 import org.lamisplus.modules.dqa.domain.PatientSummaryDTOProjection;
+import org.lamisplus.modules.dqa.domain.SummaryDTOProjection;
 import org.lamisplus.modules.dqa.service.DQAService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -58,43 +59,43 @@ public class PatientDqaController {
     }
 
     //this section/code block below endpoints for summaries
-    @GetMapping(value = "/dqa-dob-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientSummaryDTOProjection>> dobSummary(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return ResponseEntity.ok(dqaService.getDobSummary(facility));
-    }
+//    @GetMapping(value = "/dqa-dob-summary", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<List<PatientSummaryDTOProjection>> dobSummary(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
+//        return ResponseEntity.ok(dqaService.getDobSummary(facility));
+//    }
 
-    @GetMapping(value = "/dqa-age-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientSummaryDTOProjection>>ageSummary(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-    return  ResponseEntity.ok(dqaService.getAgeSummary(facility));
+    @GetMapping(value = "/patient-demo-summary", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<SummaryDTOProjection>>ageSummary(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
+    return  ResponseEntity.ok(dqaService.getPatientSummary(facility));
     }
-
-    @GetMapping(value = "/dqa-sex-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientSummaryDTOProjection>> sexSummary(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return  ResponseEntity.ok(dqaService.getSexSummary(facility));
-    }
-
-    @GetMapping(value = "/dqa-marrit-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientSummaryDTOProjection>> marritalStaSummary(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return  ResponseEntity.ok(dqaService.getMarritalStaSummary(facility));
-    }
-
-    @GetMapping(value = "/dqa-education-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientSummaryDTOProjection>> educationSummary(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return  ResponseEntity.ok(dqaService.getEducationalSummary(facility));
-    }
-
-    @GetMapping(value = "/dqa-occupation-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientSummaryDTOProjection>> occupationSummary(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return  ResponseEntity.ok(dqaService.getOccupSummary(facility));
-    }
-
-    @GetMapping(value = "/dqa-address-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientSummaryDTOProjection>> addressSummary(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return  ResponseEntity.ok(dqaService.getAddressSummary(facility));
-    }
-
-    @GetMapping(value = "/dqa-identifier-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientSummaryDTOProjection>> identifierSummary(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return  ResponseEntity.ok(dqaService.getIdentifierSummary(facility));
-    }
+//
+//    @GetMapping(value = "/dqa-sex-summary", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<List<PatientSummaryDTOProjection>> sexSummary(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
+//        return  ResponseEntity.ok(dqaService.getSexSummary(facility));
+//    }
+//
+//    @GetMapping(value = "/dqa-marrit-summary", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<List<PatientSummaryDTOProjection>> marritalStaSummary(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
+//        return  ResponseEntity.ok(dqaService.getMarritalStaSummary(facility));
+//    }
+//
+//    @GetMapping(value = "/dqa-education-summary", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<List<PatientSummaryDTOProjection>> educationSummary(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
+//        return  ResponseEntity.ok(dqaService.getEducationalSummary(facility));
+//    }
+//
+//    @GetMapping(value = "/dqa-occupation-summary", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<List<PatientSummaryDTOProjection>> occupationSummary(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
+//        return  ResponseEntity.ok(dqaService.getOccupSummary(facility));
+//    }
+//
+//    @GetMapping(value = "/dqa-address-summary", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<List<PatientSummaryDTOProjection>> addressSummary(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
+//        return  ResponseEntity.ok(dqaService.getAddressSummary(facility));
+//    }
+//
+//    @GetMapping(value = "/dqa-identifier-summary", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<List<PatientSummaryDTOProjection>> identifierSummary(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
+//        return  ResponseEntity.ok(dqaService.getIdentifierSummary(facility));
+//    }
 }

@@ -5,4 +5,5 @@ public interface PatientSummaryDTOProjection {
     Integer getNumerator();
     Integer getDenominator();
     Double getPerformance();
+
 }

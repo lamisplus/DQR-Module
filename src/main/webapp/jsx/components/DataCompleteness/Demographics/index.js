@@ -98,11 +98,12 @@ const DemographicsDQA = (props) => {
 
   const loadDemography = () => {
     axios
-      .get(`${baseUrl}dqr/dqa-dob-summary?facilityId=${facilities}`, {
+      .get(`${baseUrl}dqr/patient-demo-summary?facilityId=${facilities}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
         setDemographic(response.data);
+        console.log(response.data)
       })
       .catch((error) => {
         console.log(error);
@@ -137,17 +138,17 @@ const DemographicsDQA = (props) => {
                   <td>
                     Proportion of all active patients with Date of Birth (DOB)
                   </td>
-                  <td>{demographics[0]?.numerator}</td>
-                  <td>{demographics[0]?.denominator}</td>
-                  <td>{demographics[0]?.performance}%</td>
+                  <td>{demographics[0]?.dobNumerator}</td>
+                  <td>{demographics[0]?.dobDenominator}</td>
+                  <td>{demographics[0]?.dobPerformance} %</td>
                   <td></td>
                 </tr>
                 <tr>
                   <th scope="row">2</th>
                   <td>Proportion of all active patients with Current Age</td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
+                  <td>{demographics[0]?.ageNumerator}</td>
+                   <td>{demographics[0]?.ageDenominator}</td>
+                   <td>{demographics[0]?.agePerformance} %</td>
                   <td></td>
                 </tr>
                 <tr>
@@ -155,17 +156,17 @@ const DemographicsDQA = (props) => {
                   <td>
                     Proportion of all active patients with Patient Identifier
                   </td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
+                  <td>{demographics[0]?.pidNumerator}</td>
+                  <td>{demographics[0]?.pidDenominator}</td>
+                  <td>{demographics[0]?.pidPerformance} %</td>
                   <td></td>
                 </tr>
                 <tr>
                   <th scope="row">4</th>
                   <td>Proportion of all active patients with Sex</td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
+                  <td>{demographics[0]?.sexNumerator}</td>
+                  <td>{demographics[0]?.sexDenominator}</td>
+                  <td>{demographics[0]?.sexPerformance} %</td>
                   <td></td>
                 </tr>
                 <tr>
@@ -174,30 +175,29 @@ const DemographicsDQA = (props) => {
                     Proportion of all active patients with a documented
                     educational Status
                   </td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
+                  <td>{demographics[0]?.eduNumerator}</td>
+                  <td>{demographics[0]?.eduDenominator}</td>
+                  <td>{demographics[0]?.eduPerformance} %</td>
                   <td></td>
                 </tr>
                 <tr>
                   <th scope="row">6</th>
                   <td>
-                    Proportion of all active patients with Date of Birth (DOB)
+                    Proportion of all active patients with a documented marital
                   </td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
+                  <td>{demographics[0]?.maritalNumerator}</td>
+                  <td>{demographics[0]?.maritalDenominator}</td>
+                  <td>{demographics[0]?.maritalPerformance} %</td>
                   <td></td>
                 </tr>
                 <tr>
                   <th scope="row">7</th>
                   <td>
-                    Proportion of all active patients with a documented marital
-                    status
+                    Proportion of all active patients with documented occupational status
                   </td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
+                  <td>{demographics[0]?.employNumerator}</td>
+                  <td>{demographics[0]?.employDenominator}</td>
+                  <td>{demographics[0]?.employPerformance} %</td>
                   <td></td>
                 </tr>
                 <tr>
@@ -206,9 +206,9 @@ const DemographicsDQA = (props) => {
                     Proportion of all active patients with registered
                     address/LGA of residence
                   </td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
+                  <td>{demographics[0]?.addressNumerator}</td>
+                  <td>{demographics[0]?.addressDenominator}</td>
+                  <td>{demographics[0]?.addressPerformance} %</td>
                   <td></td>
                 </tr>
               </tbody>
