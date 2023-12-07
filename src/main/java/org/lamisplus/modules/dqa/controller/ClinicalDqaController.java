@@ -84,64 +84,64 @@ public class ClinicalDqaController {
     }
 
     // summary block below
-    @GetMapping(value = "/arv-month-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientSummaryDTOProjection>> summMonthOfArv(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return ResponseEntity.ok(clinicalDQAService.getArvMnthSumm(facility));
-    }
-
-    @GetMapping(value = "/art-start-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientSummaryDTOProjection>> summArtStartDate(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return ResponseEntity.ok(clinicalDQAService.getStrtDaSumm(facility));
-    }
-    @GetMapping(value = "/hiv-confirm-date-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientSummaryDTOProjection>> summHivConfirmDate(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return ResponseEntity.ok(clinicalDQAService.getConfirmHivTestSumm(facility));
-    }
-
-    @GetMapping(value = "/age-start-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientSummaryDTOProjection>> summAgeArtStart(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return ResponseEntity.ok(clinicalDQAService.getAgeSumm(facility));
-    }
-
-    @GetMapping(value = "/target-group-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientSummaryDTOProjection>> summTargetGroup(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return ResponseEntity.ok(clinicalDQAService.getTargGroupSumm(facility));
-    }
-
-    @GetMapping(value = "/care-entry-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientSummaryDTOProjection>> summCareEntryPoint(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return ResponseEntity.ok(clinicalDQAService.getEntryPointSumm(facility));
-    }
-
-    @GetMapping(value = "/lastclinic-visit-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientSummaryDTOProjection>> summLastClinicVisitDate(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return ResponseEntity.ok(clinicalDQAService.getLastVisitClinicSumm(facility));
-    }
-
-    @GetMapping(value = "/last-weight-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientSummaryDTOProjection>> summLastWeight(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return ResponseEntity.ok(clinicalDQAService.getLastWeightSumm(facility));
-    }
-
-    @GetMapping(value = "/pregnant-status-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientSummaryDTOProjection>> summPregStatus(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return ResponseEntity.ok(clinicalDQAService.getPregStatusSumm(facility));
-    }
-
-    @GetMapping(value = "/hiv-diagnosis-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientSummaryDTOProjection>> summHivDiagnosis(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return ResponseEntity.ok(clinicalDQAService.getConfirmHivTestSumm(facility));
-    }
-
-    @GetMapping(value = "/hiv-enrollment-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientSummaryDTOProjection>> summEnrollmentDate(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return ResponseEntity.ok(clinicalDQAService.getHivEnrollDateSumm(facility));
-    }
-
-    @GetMapping(value = "/commencement-date-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientSummaryDTOProjection>> summCommencementDate (@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return ResponseEntity.ok(clinicalDQAService.getCommenceDatSumm(facility));
-    }
+//    @GetMapping(value = "/arv-month-summary", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<List<PatientSummaryDTOProjection>> summMonthOfArv(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
+//        return ResponseEntity.ok(clinicalDQAService.getArvMnthSumm(facility));
+//    }
+//
+//    @GetMapping(value = "/art-start-summary", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<List<PatientSummaryDTOProjection>> summArtStartDate(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
+//        return ResponseEntity.ok(clinicalDQAService.getStrtDaSumm(facility));
+//    }
+//    @GetMapping(value = "/hiv-confirm-date-summary", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<List<PatientSummaryDTOProjection>> summHivConfirmDate(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
+//        return ResponseEntity.ok(clinicalDQAService.getConfirmHivTestSumm(facility));
+//    }
+//
+//    @GetMapping(value = "/age-start-summary", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<List<PatientSummaryDTOProjection>> summAgeArtStart(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
+//        return ResponseEntity.ok(clinicalDQAService.getAgeSumm(facility));
+//    }
+//
+//    @GetMapping(value = "/target-group-summary", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<List<PatientSummaryDTOProjection>> summTargetGroup(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
+//        return ResponseEntity.ok(clinicalDQAService.getTargGroupSumm(facility));
+//    }
+//
+//    @GetMapping(value = "/care-entry-summary", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<List<PatientSummaryDTOProjection>> summCareEntryPoint(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
+//        return ResponseEntity.ok(clinicalDQAService.getEntryPointSumm(facility));
+//    }
+//
+//    @GetMapping(value = "/lastclinic-visit-summary", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<List<PatientSummaryDTOProjection>> summLastClinicVisitDate(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
+//        return ResponseEntity.ok(clinicalDQAService.getLastVisitClinicSumm(facility));
+//    }
+//
+//    @GetMapping(value = "/last-weight-summary", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<List<PatientSummaryDTOProjection>> summLastWeight(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
+//        return ResponseEntity.ok(clinicalDQAService.getLastWeightSumm(facility));
+//    }
+//
+//    @GetMapping(value = "/pregnant-status-summary", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<List<PatientSummaryDTOProjection>> summPregStatus(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
+//        return ResponseEntity.ok(clinicalDQAService.getPregStatusSumm(facility));
+//    }
+//
+//    @GetMapping(value = "/hiv-diagnosis-summary", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<List<PatientSummaryDTOProjection>> summHivDiagnosis(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
+//        return ResponseEntity.ok(clinicalDQAService.getConfirmHivTestSumm(facility));
+//    }
+//
+//    @GetMapping(value = "/hiv-enrollment-summary", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<List<PatientSummaryDTOProjection>> summEnrollmentDate(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
+//        return ResponseEntity.ok(clinicalDQAService.getHivEnrollDateSumm(facility));
+//    }
+//
+//    @GetMapping(value = "/commencement-date-summary", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<List<PatientSummaryDTOProjection>> summCommencementDate (@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
+//        return ResponseEntity.ok(clinicalDQAService.getCommenceDatSumm(facility));
+//    }
 
 
 }

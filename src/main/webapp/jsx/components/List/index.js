@@ -10,6 +10,11 @@ import "react-widgets/dist/css/react-widgets.css";
 import {FaPlus, FaAngleDown} from 'react-icons/fa';
 import Demographic  from './../DataCompleteness/Demographics/index'
 import Clinical  from './../DataCompleteness/Clinical/index'
+import Pharmacy  from './../DataConsistency/Pharmacy/index'
+import Clinicals  from './../DataConsistency/Clinical/index'
+import Biometric  from './../DataConsistency/Biometric/index'
+
+
 
 
 const useStyles = makeStyles((theme) => ({
@@ -89,7 +94,7 @@ const DQAList = (props) => {
     const [showClinical, setShowClinical] = useState(false);
     const [showClinicals, setShowClinicals] = useState(false);
     const [showPharmacy, setShowPharmacy] = useState(false);
-
+    const [showBiometric, setShowBiometric] = useState(false);
     const [showNutrition, setShowNutrition] = useState(false);
     const [showGenderBase, setShowGenderBase] = useState(false);
     const [showChronicCondition, setShowChronicCondition] = useState(false);
@@ -105,7 +110,7 @@ const DQAList = (props) => {
         setShowClinical(!showClinical)
     }
     const onClickPharmacy =() =>{
-            setShowClinical(!showClinical)
+            setShowPharmacy(!showPharmacy)
         }
 
     const onClickClinicals =() =>{
@@ -113,6 +118,9 @@ const DQAList = (props) => {
     }
     const onClickNutrition =() =>{
         setShowNutrition(!showNutrition)
+    }
+    const onClickBiometric =() =>{
+            setShowBiometric(!showBiometric)
     }
     const onClickGenderBase =() =>{
         setShowGenderBase(!showGenderBase)
@@ -220,9 +228,11 @@ const DQAList = (props) => {
                             <div className="card">
                                 <div className="card-header" style={{backgroundColor:"#014d88",color:'#fff',fontWeight:'bolder',  borderRadius:"0.2rem"}}>
                                     <h5 className="card-title" style={{color:'#fff'}}>Biometric</h5>
-                                    {showNutrition===false  ? (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickNutrition}><FaPlus /></span></>) :  (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickNutrition}><FaAngleDown /></span> </>)}
+                                    {showBiometric===false  ? (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickBiometric}><FaPlus /></span></>) :  (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickBiometric}><FaAngleDown /></span> </>)}
                                 </div>
-
+                                {showBiometric && (
+                                  <Biometric />
+                                 )}
                             </div>
                             <h2>Data Validity Scorecard</h2>
                             <div className="card">

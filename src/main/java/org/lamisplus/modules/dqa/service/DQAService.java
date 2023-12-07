@@ -2,11 +2,8 @@ package org.lamisplus.modules.dqa.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.lamisplus.modules.dqa.domain.PatientDTOProjection;
-import org.lamisplus.modules.dqa.domain.PatientSummaryDTOProjection;
-import org.lamisplus.modules.dqa.domain.SummaryDTOProjection;
-import org.lamisplus.modules.dqa.repository.PatientDemoRepository;
-import org.lamisplus.modules.dqa.repository.PatientSummaryRepository;
+import org.lamisplus.modules.dqa.domain.*;
+import org.lamisplus.modules.dqa.repository.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,6 +15,11 @@ public class DQAService {
     private final CurrentUserOrganizationService currentUserOrganizationService;
     private final PatientDemoRepository patientDemoRepository;
     private final PatientSummaryRepository patientSummaryRepository;
+    private final ClinicalSummaryRepository clinicalSummaryRepository;
+    private final BiometricRepository biometricRepository;
+    private final PharmacyRepository pharmacyRepository;
+    private final DataConsistencyRepository dataConsistencyRepository;
+
 
     public List<PatientDTOProjection> getPatient(Long facilityId) {
         List<PatientDTOProjection> patientDemo = patientDemoRepository.getPatientWithoutDob(currentUserOrganizationService.getCurrentUserOrganization());
@@ -72,41 +74,27 @@ public class DQAService {
         List<SummaryDTOProjection> pDemograph = patientSummaryRepository.patientDemoSummary(currentUserOrganizationService.getCurrentUserOrganization());
         return pDemograph;
     }
-//
-//    public List <PatientSummaryDTOProjection> getAgeSummary (Long facility) {
-//        List <PatientSummaryDTOProjection> pAge = patientSummaryRepository.getWithAgeSum(currentUserOrganizationService.getCurrentUserOrganization());
-//        return pAge;
-//    }
-//
-//    public List <PatientSummaryDTOProjection> getSexSummary (Long facility) {
-//        List <PatientSummaryDTOProjection> pSex = patientSummaryRepository.getWithSexSum(currentUserOrganizationService.getCurrentUserOrganization());
-//        return pSex;
-//            }
-//
-//public List <PatientSummaryDTOProjection> getMarritalStaSummary (Long facility) {
-//        List<PatientSummaryDTOProjection> pMarritalStatus = patientSummaryRepository.getWithMaritalStaSum(currentUserOrganizationService.getCurrentUserOrganization());
-//        return pMarritalStatus;
-//}
-//
-//    public List <PatientSummaryDTOProjection> getEducationalSummary (Long facility) {
-//        List<PatientSummaryDTOProjection> pEducational = patientSummaryRepository.getWithEducationSumm(currentUserOrganizationService.getCurrentUserOrganization());
-//        return pEducational;
-//    }
-//
-//    public List <PatientSummaryDTOProjection> getOccupSummary (Long facility) {
-//        List<PatientSummaryDTOProjection> pOccupation = patientSummaryRepository.getWithOccupSumm(currentUserOrganizationService.getCurrentUserOrganization());
-//        return pOccupation;
-//    }
-//
-//    public List <PatientSummaryDTOProjection> getAddressSummary (Long facility) {
-//        List<PatientSummaryDTOProjection> pAddress = patientSummaryRepository.getWithAddressSumm(currentUserOrganizationService.getCurrentUserOrganization());
-//        return pAddress;
-//    }
-//
-//    public List <PatientSummaryDTOProjection> getIdentifierSummary (Long facility) {
-//        List<PatientSummaryDTOProjection> pIdentifier = patientSummaryRepository.getWithIdentifier(currentUserOrganizationService.getCurrentUserOrganization());
-//        return pIdentifier;
-//    }
+
+    public List<ClinicalSummaryDTOProjection> getClinicaSummary (Long facility) {
+        List<ClinicalSummaryDTOProjection> pClinicalVariables = clinicalSummaryRepository.getClinicalSummary(currentUserOrganizationService.getCurrentUserOrganization());
+        return pClinicalVariables;
+    }
+
+    public List<BiometricSummaryDTOProjection> getBiometricSummary (Long facility) {
+        List<BiometricSummaryDTOProjection> pBiometricSummary = biometricRepository.getBiometricSummary(currentUserOrganizationService.getCurrentUserOrganization());
+        return pBiometricSummary;
+    }
+
+    public List<PatientSummaryDTOProjection> getPharmacySummary (Long facility) {
+        List<PatientSummaryDTOProjection> pPharmacySummary = pharmacyRepository.getPharmacySummary(currentUserOrganizationService.getCurrentUserOrganization());
+        return pPharmacySummary;
+    }
+
+    public List<ClinicalConsistencyDTOProjection> getDataConsistencySummary (Long facilityId) {
+        List<ClinicalConsistencyDTOProjection> pDataConsistencySummary = dataConsistencyRepository.getClinicalConsistencySummary(currentUserOrganizationService.getCurrentUserOrganization());
+        return pDataConsistencySummary;
+    }
+
 
 
 }

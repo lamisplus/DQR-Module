@@ -45,24 +45,24 @@ private final BiometricDQAService biometricDQAService;
 
 
     // summary
-    @GetMapping(value = "/biometric-captured-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientSummaryDTOProjection>> biometricCaptureSummary(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return  ResponseEntity.ok(biometricDQAService.getBiometricCaptureSumm(facility));
-    }
-
-    @GetMapping(value = "/biometric-Valid-capture-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientSummaryDTOProjection>> biometricValidCaptureSummary(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return  ResponseEntity.ok(biometricDQAService.getValidCaptureSumm(facility));
-    }
-
-    @GetMapping(value = "/no-recapture-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientSummaryDTOProjection>> biometricNoRecaptureSummary(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return  ResponseEntity.ok(biometricDQAService.getNotRecaptureSumm(facility));
-    }
-
-    @GetMapping(value = "/valid-recapture-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientSummaryDTOProjection>> biometricValidRecaptureSummary(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return  ResponseEntity.ok(biometricDQAService.getValidRecaptureSumm(facility));
-    }
+//    @GetMapping(value = "/biometric-captured-summary", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<List<PatientSummaryDTOProjection>> biometricCaptureSummary(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
+//        return  ResponseEntity.ok(biometricDQAService.getBiometricCaptureSumm(facility));
+//    }
+//
+//    @GetMapping(value = "/biometric-Valid-capture-summary", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<List<PatientSummaryDTOProjection>> biometricValidCaptureSummary(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
+//        return  ResponseEntity.ok(biometricDQAService.getValidCaptureSumm(facility));
+//    }
+//
+//    @GetMapping(value = "/no-recapture-summary", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<List<PatientSummaryDTOProjection>> biometricNoRecaptureSummary(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
+//        return  ResponseEntity.ok(biometricDQAService.getNotRecaptureSumm(facility));
+//    }
+//
+//    @GetMapping(value = "/valid-recapture-summary", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<List<PatientSummaryDTOProjection>> biometricValidRecaptureSummary(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
+//        return  ResponseEntity.ok(biometricDQAService.getValidRecaptureSumm(facility));
+//    }
 
 }

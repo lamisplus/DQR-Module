@@ -31,14 +31,5 @@ public class PharmacyDQAService {
 
     // summary code block below
 
-    public List<PatientSummaryDTOProjection> getNoRegimenSumm (Long facilityId) {
-        List<PatientSummaryDTOProjection> summWithoutRegimen = pharmacySummaryRepository.getPharmacyRegimenSumm(currentUserOrganizationService.getCurrentUserOrganization());
-        return summWithoutRegimen;
-    }
-
-    public List<PatientSummaryDTOProjection> getNoRegimenDurationSumm (Long facilityId) {
-        List<PatientSummaryDTOProjection> summWithoutRegimenDuration = pharmacySummaryRepository.getPharmacyLastRefillDurationSumm(currentUserOrganizationService.getCurrentUserOrganization());
-        return summWithoutRegimenDuration;
-    }
 
 }

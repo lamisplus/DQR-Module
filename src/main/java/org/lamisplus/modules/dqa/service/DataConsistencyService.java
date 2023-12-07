@@ -2,6 +2,7 @@ package org.lamisplus.modules.dqa.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.lamisplus.modules.dqa.domain.ClinicalConsistencyDTOProjection;
 import org.lamisplus.modules.dqa.domain.PatientDTOProjection;
 import org.lamisplus.modules.dqa.domain.PatientSummaryDTOProjection;
 import org.lamisplus.modules.dqa.repository.DataConsistencyRepository;
@@ -49,30 +50,7 @@ public class DataConsistencyService {
 
     //                  Summary Block
 
-    public List<PatientSummaryDTOProjection> getPatientTargetGroupSumm (Long facilityId) {
-        List<PatientSummaryDTOProjection> pTargetGroupSumm = consistencyRepository.getTargetGroupSumm(currentUserOrganizationService.getCurrentUserOrganization());
-        return pTargetGroupSumm;
-    }
 
-    public List<PatientSummaryDTOProjection> getPatientCareEntryPointSumm (Long facilityId) {
-        List<PatientSummaryDTOProjection> pEntryPointSumm = consistencyRepository.getCareEntryPointSumm(currentUserOrganizationService.getCurrentUserOrganization());
-        return pEntryPointSumm;
-    }
-
-    public List<PatientSummaryDTOProjection> getPatientAbnormalWeightSumm (Long facilityId) {
-        List<PatientSummaryDTOProjection> pAbnormalWeightSumm = consistencyRepository.getAbnormalWeightGreaterThan121Summ(currentUserOrganizationService.getCurrentUserOrganization());
-        return pAbnormalWeightSumm;
-    }
-
-    public List<PatientSummaryDTOProjection> getPaediatricAbnormalWeightSumm (Long facilityId) {
-        List<PatientSummaryDTOProjection> pChildrenWeightSumm = consistencyRepository.getAbnormalWeightGreaterThan121Summ(currentUserOrganizationService.getCurrentUserOrganization());
-        return pChildrenWeightSumm;
-    }
-
-    public List<PatientSummaryDTOProjection> getPatientPregStatusSumm (Long facilityId) {
-        List<PatientSummaryDTOProjection> pFemalePregStatusSumm = consistencyRepository.getFemalePregStatusSumm(currentUserOrganizationService.getCurrentUserOrganization());
-        return pFemalePregStatusSumm;
-    }
 
 
 }

@@ -2,6 +2,7 @@ package org.lamisplus.modules.dqa.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.lamisplus.modules.dqa.domain.ClinicalConsistencyDTOProjection;
 import org.lamisplus.modules.dqa.domain.PatientDTOProjection;
 import org.lamisplus.modules.dqa.domain.PatientSummaryDTOProjection;
 import org.lamisplus.modules.dqa.service.DataConsistencyService;
@@ -52,28 +53,4 @@ public class DataConsistencyDqaController {
 
     // summary API's for Data Consistency
 
-    @GetMapping(value = "/target-group-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientSummaryDTOProjection>> patientTargetGroupSumm (@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return ResponseEntity.ok(consistencyService.getPatientTargetGroupSumm(facility));
-    }
-
-    @GetMapping(value = "/entry-point-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientSummaryDTOProjection>> patientCareEntryPointSumm (@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return ResponseEntity.ok(consistencyService.getPatientCareEntryPointSumm(facility));
-    }
-
-    @GetMapping(value = "/patient-weight-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientSummaryDTOProjection>> patientAbnormalWeightSumm (@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return ResponseEntity.ok(consistencyService.getPatientAbnormalWeightSumm(facility));
-    }
-
-    @GetMapping(value = "/peadiatric-weight-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientSummaryDTOProjection>> peadiatricAbnormalWeightSumm (@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return ResponseEntity.ok(consistencyService.getPaediatricAbnormalWeightSumm(facility));
-    }
-
-    @GetMapping(value = "/pregnancy-status-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientSummaryDTOProjection>> pregnancyStatusSumm (@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return ResponseEntity.ok(consistencyService.getPatientPregStatusSumm(facility));
-    }
 }

@@ -34,13 +34,4 @@ public class PharmacyDQAController {
         return ResponseEntity.ok(pharmacyDQAService.getNoDrugDuration(facility));
     }
 
-    @GetMapping(value = "/last-regimen-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientSummaryDTOProjection>> summLastRegimen (@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return ResponseEntity.ok(pharmacyDQAService.getNoRegimenSumm(facility));
-    }
-
-    @GetMapping(value = "/drug-duration-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientSummaryDTOProjection>> summLastDrugDuration (@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return ResponseEntity.ok(pharmacyDQAService.getNoRegimenDurationSumm(facility));
-    }
 }
