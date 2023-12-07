@@ -86,8 +86,8 @@ public class DQAService {
         return pBiometricSummary;
     }
 
-    public List<PatientSummaryDTOProjection> getPharmacySummary (Long facility) {
-        List<PatientSummaryDTOProjection> pPharmacySummary = pharmacyRepository.getPharmacySummary(currentUserOrganizationService.getCurrentUserOrganization());
+    public List<PharmacySummaryDTOProjection> getPharmacySummary (Long facility) {
+        List<PharmacySummaryDTOProjection> pPharmacySummary = pharmacyRepository.getPharmacySummary(currentUserOrganizationService.getCurrentUserOrganization());
         return pPharmacySummary;
     }
 

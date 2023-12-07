@@ -13,6 +13,7 @@ import Clinical  from './../DataCompleteness/Clinical/index'
 import Pharmacy  from './../DataConsistency/Pharmacy/index'
 import Clinicals  from './../DataConsistency/Clinical/index'
 import Biometric  from './../DataConsistency/Biometric/index'
+import PrEP from "../DataConsistency/PrEp";
 
 
 
@@ -95,6 +96,7 @@ const DQAList = (props) => {
     const [showClinicals, setShowClinicals] = useState(false);
     const [showPharmacy, setShowPharmacy] = useState(false);
     const [showBiometric, setShowBiometric] = useState(false);
+    const [showPrep, setShowPrep] = useState(false);
     const [showNutrition, setShowNutrition] = useState(false);
     const [showGenderBase, setShowGenderBase] = useState(false);
     const [showChronicCondition, setShowChronicCondition] = useState(false);
@@ -115,6 +117,9 @@ const DQAList = (props) => {
 
     const onClickClinicals =() =>{
         setShowClinicals(!showClinicals)
+    }
+    const onClickPrep =() =>{
+        setShowPrep(!showPrep)
     }
     const onClickNutrition =() =>{
         setShowNutrition(!showNutrition)
@@ -208,13 +213,17 @@ const DQAList = (props) => {
                                 <div className="card-header" style={{backgroundColor:"#014d88",color:'#fff',fontWeight:'bolder',  borderRadius:"0.2rem"}}>
                                     <h5 className="card-title" style={{color:'#fff'}}>EAC</h5>
                                     {showNutrition===false  ? (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickNutrition}><FaPlus /></span></>) :  (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickNutrition}><FaAngleDown /></span> </>)}
+                                    
                                 </div>
 
                             </div>
                             <div className="card">
                                 <div className="card-header" style={{backgroundColor:"#014d88",color:'#fff',fontWeight:'bolder',  borderRadius:"0.2rem"}}>
                                     <h5 className="card-title" style={{color:'#fff'}}>PrEP</h5>
-                                    {showNutrition===false  ? (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickNutrition}><FaPlus /></span></>) :  (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickNutrition}><FaAngleDown /></span> </>)}
+                                    {showPrep===false  ? (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickPrep}><FaPlus /></span></>) :  (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickPrep}><FaAngleDown /></span> </>)}
+                                    {showPrep && (
+                                    <PrEP /> 
+                                )}
                                 </div>
 
                             </div>

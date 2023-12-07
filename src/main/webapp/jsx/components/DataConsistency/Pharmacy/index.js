@@ -85,8 +85,43 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-const Pharmacy = (props) => {
+    const Pharmacy = (props) => {
     const classes = useStyles();
+    const [pharmacy, setPharmacy] = useState({});
+   
+
+  const Facilities = () => {
+    axios
+      .get(`${baseUrl}account`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((response) => {
+        setFacilities(response.data.currentOrganisationUnitId);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const loadPharmacy = () => {
+    axios
+      .get(`${baseUrl}dqr/pharmacy-summary`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((response) => {
+        setPharmacy(response.data);
+        console.log(response.data)
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  useEffect(() => {
+    Facilities();
+    loadPharmacy();
+  }, []);
+
 
 
     return (
@@ -125,17 +160,11 @@ const Pharmacy = (props) => {
                                     1
                                 </th>
                                 <td>
-                                    Proportion of all active patients with 
+                                Proportion of all active patients with a documented ART regimen duration in the last refill visit   
                                 </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
+                                <td>{pharmacy[0]?.refillNumerator}</td>
+                                <td>{pharmacy[0]?.refillDenominator}</td>
+                                <td>{pharmacy[0]?.refillPerformance} %</td>
                                 <td>
                                     
                                 </td>
@@ -145,141 +174,17 @@ const Pharmacy = (props) => {
                                     2
                                 </th>
                                 <td>
-                                    Proportion of all active patients with ART Start Date
+                                    Proportion of all active patients with documented ART regimen in the last drug refill visit
                                 </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
+                                <td>{pharmacy[0]?.regimenNumerator}</td>
+                                <td>{pharmacy[0]?.regimenDenominator}</td>
+                                <td>{pharmacy[0]?.regimenPerformance} %</td>
                                 <td>
                                     
                                 </td>
                             </tr>
-                            <tr>
-                                <th scope="row">
-                                    3
-                                </th>
-                                <td>
-                                    Proportion of all active patients with Patient Identifier
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                            </tr>
-                            <tr>
-                                <th scope="row">
-                                    4
-                                </th>
-                                <td>
-                                    Proportion of all active patients with Sex
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                            </tr>
-                            <tr>
-                                <th scope="row">
-                                    5
-                                </th>
-                                <td>
-                                    Proportion of all active patients with a documented educational Status
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                            </tr>
-                            <tr>
-                                <th scope="row">
-                                    6
-                                </th>
-                                <td>
-                                    Proportion of all active patients with Date of Birth (DOB)
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                            </tr>
-                            <tr>
-                                <th scope="row">
-                                    7
-                                </th>
-                                <td>
-                                    Proportion of all active patients with a documented marital status
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                            </tr>
-                            <tr>
-                                <th scope="row">
-                                    8
-                                </th>
-                                <td>
-                                Proportion of all active patients with registered address/LGA of residence
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                            </tr>
+                            
+                            
 
                             </tbody>
                         </Table>

@@ -1,8 +1,15 @@
-import React from "react";
-import {Form, Table } from "reactstrap";
-import {makeStyles} from "@material-ui/core/styles";
-import {Card, CardContent} from "@material-ui/core";
-
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { token, url as baseUrl } from "../../../../api";
+import { Form, Table } from "reactstrap";
+import { makeStyles } from "@material-ui/core/styles";
+import { Card, CardContent } from "@material-ui/core";
+import "semantic-ui-css/semantic.min.css";
+import { Dropdown, Button as Buuton2, Menu, Icon } from "semantic-ui-react";
+import CloudUpload from "@material-ui/icons/CloudUpload";
+import CloudDownloadIcon from "@material-ui/icons/CloudDownload";
+import ErrorIcon from "@mui/icons-material/Error";
+import { FiUploadCloud } from "react-icons/fi";
 import "react-toastify/dist/ReactToastify.css";
 import "react-widgets/dist/css/react-widgets.css";
 
@@ -85,204 +92,141 @@ const PrEP = (props) => {
 
     return (
         <>
-           
-            <Card className={classes.root}>
-                <CardContent>
-                    <h3>PrEP</h3>
-                    <div className="col-xl-12 col-lg-12">
-                        <Table bordered>
-                            <thead>
-                            <tr>
-                                <th>
-                                    #
-                                </th>
-                                <th>
-                                    Complete Variables
-                                </th>
-                                <th>
-                                    Numerator
-                                </th>
-                                <th>
-                                  Denominator
-                                </th>
-                                <th>
-                                  Performance
-                                </th>
-                                <th>
-                                    Action
-                                </th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                <th scope="row">
-                                    1
-                                </th>
-                                <td>
-                                    Proportion of all active patients with 
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                            </tr>
-                            <tr>
-                                <th scope="row">
-                                    2
-                                </th>
-                                <td>
-                                    Proportion of all active patients with ART Start Date
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                            </tr>
-                            <tr>
-                                <th scope="row">
-                                    3
-                                </th>
-                                <td>
-                                    Proportion of all active patients with Patient Identifier
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                            </tr>
-                            <tr>
-                                <th scope="row">
-                                    4
-                                </th>
-                                <td>
-                                    Proportion of all active patients with Sex
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                            </tr>
-                            <tr>
-                                <th scope="row">
-                                    5
-                                </th>
-                                <td>
-                                    Proportion of all active patients with a documented educational Status
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                            </tr>
-                            <tr>
-                                <th scope="row">
-                                    6
-                                </th>
-                                <td>
-                                    Proportion of all active patients with Date of Birth (DOB)
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                            </tr>
-                            <tr>
-                                <th scope="row">
-                                    7
-                                </th>
-                                <td>
-                                    Proportion of all active patients with a documented marital status
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                            </tr>
-                            <tr>
-                                <th scope="row">
-                                    8
-                                </th>
-                                <td>
-                                Proportion of all active patients with registered address/LGA of residence
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                            </tr>
-
-                            </tbody>
-                        </Table>
-                    </div>
-                </CardContent>
-            </Card>
-
+          <Card className={classes.root}>
+            <CardContent>
+              <h3>Demographics Variables</h3>
+              <div className="col-xl-12 col-lg-12">
+              {!showPatientDetail &&(<>
+                <Table bordered>
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Complete Variables</th>
+                      <th>Numerator</th>
+                      <th>Denominator</th>
+                      <th>Performance</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <th scope="row">1</th>
+                      <td>
+                        Proportion of all active patients with Date of Birth (DOB)
+                      </td>
+                      <td>{demographics[0]?.dobNumerator}</td>
+                      <td>{demographics[0]?.dobDenominator}</td>
+                      <td>{demographics[0]?.dobPerformance} %</td>
+                      <td>
+                      <div>
+    
+                            <p onClick={() => viewDetail("Proportion of all active patients with Date of Birth (DOB)")}> View</p>
+    
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <th scope="row">2</th>
+                      <td>Proportion of all active patients with Current Age</td>
+                      <td>{demographics[0]?.ageNumerator}</td>
+                       <td>{demographics[0]?.ageDenominator}</td>
+                       <td>{demographics[0]?.agePerformance} %</td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <th scope="row">3</th>
+                      <td>
+                        Proportion of all active patients with Patient Identifier
+                      </td>
+                      <td>{demographics[0]?.pidNumerator}</td>
+                      <td>{demographics[0]?.pidDenominator}</td>
+                      <td>{demographics[0]?.pidPerformance} %</td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <th scope="row">4</th>
+                      <td>Proportion of all active patients with Sex</td>
+                      <td>{demographics[0]?.sexNumerator}</td>
+                      <td>{demographics[0]?.sexDenominator}</td>
+                      <td>{demographics[0]?.sexPerformance} %</td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <th scope="row">5</th>
+                      <td>
+                        Proportion of all active patients with a documented
+                        educational Status
+                      </td>
+                      <td>{demographics[0]?.eduNumerator}</td>
+                      <td>{demographics[0]?.eduDenominator}</td>
+                      <td>{demographics[0]?.eduPerformance} %</td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <th scope="row">6</th>
+                      <td>
+                        Proportion of all active patients with a documented marital
+                      </td>
+                      <td>{demographics[0]?.maritalNumerator}</td>
+                      <td>{demographics[0]?.maritalDenominator}</td>
+                      <td>{demographics[0]?.maritalPerformance} %</td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <th scope="row">7</th>
+                      <td>
+                        Proportion of all active patients with documented occupational status
+                      </td>
+                      <td>{demographics[0]?.employNumerator}</td>
+                      <td>{demographics[0]?.employDenominator}</td>
+                      <td>{demographics[0]?.employPerformance} %</td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <th scope="row">8</th>
+                      <td>
+                        Proportion of all active patients with registered
+                        address/LGA of residence
+                      </td>
+                      <td>{demographics[0]?.addressNumerator}</td>
+                      <td>{demographics[0]?.addressDenominator}</td>
+                      <td>{demographics[0]?.addressPerformance} %</td>
+                      <td>
+    
+                      </td>
+                    </tr>
+                  </tbody>
+                </Table>
+                </>)}
+                {showPatientDetail &&(<>
+                            <h3>{getHeaderInfo!=="" ? getHeaderInfo : ""}</h3>
+                            <Table bordered>
+                              <thead>
+                                <tr>
+    
+                                  <th>Hospital Number</th>
+                                  <th>Sex</th>
+                                  <th>DOB</th>
+                                  <th>Status</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <th scope="row"></th>
+    
+                                  <td>{demographicsPatientsView.hospitalNumber}</td>
+                                  <td>{demographicsPatientsView.dateOfBirth}</td>
+                                  <td>{demographicsPatientsView.sex}</td>
+                                  <td>{demographicsPatientsView.status}</td>
+                                </tr>
+    
+                              </tbody>
+                            </Table>
+                            </>)}
+              </div>
+            </CardContent>
+          </Card>
         </>
-    );
-};
-
+      );
+    };
 export default PrEP

@@ -3,6 +3,7 @@ package org.lamisplus.modules.dqa.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.lamisplus.modules.dqa.domain.*;
+import org.lamisplus.modules.dqa.service.CurrentUserOrganizationService;
 import org.lamisplus.modules.dqa.service.DQAService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,39 +21,41 @@ import java.util.concurrent.ExecutionException;
 @RequestMapping("/api/v1/dqr/")
 public class PatientDqaController {
     private final DQAService dqaService;
+    private final CurrentUserOrganizationService organizationService;
 
 
     @GetMapping(value = "/patient-demo", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<PatientDTOProjection>> getPatientsWithoutData(
-            @RequestParam("facilityId") Long facility,
+            //@RequestParam("facilityId") Long facility,
             @RequestParam("indicator") String indicator
     ) throws ExecutionException, InterruptedException {
+        Long facilityId = organizationService.getCurrentUserOrganization();
         List<PatientDTOProjection> result;
 
         switch (indicator) {
-            case "Proportion of all active patients with Date of Birth (DOB)":
-                result = dqaService.getPatient(facility);
+            case "patientDemo0":
+                result = dqaService.getPatient(facilityId);
                 break;
-            case "Proportion of all active patients with Current Age":
-                result = dqaService.getPatientWithoutAge(facility);
+            case "patientDemo1":
+                result = dqaService.getPatientWithoutAge(facilityId);
                 break;
-            case "Proportion of all active patients with Sex":
-                result = dqaService.getPatientWithoutSex(facility);
+            case "patientDemo2":
+                result = dqaService.getPatientWithoutSex(facilityId);
                 break;
-            case "Proportion of all active patients with a documented marital status":
-                result = dqaService.getPatientWithoutMStatus(facility);
+            case "patientDemo3":
+                result = dqaService.getPatientWithoutMStatus(facilityId);
                 break;
-            case "Proportion of all active patients with a documented educational Status":
-                result = dqaService.getPatientWithoutEdu(facility);
+            case "patientDemo4":
+                result = dqaService.getPatientWithoutEdu(facilityId);
                 break;
-            case "Proportion of all active patients with documented occupational status":
-                result = dqaService.getPatientWithoutOccu(facility);
+            case "patientDemo5":
+                result = dqaService.getPatientWithoutOccu(facilityId);
                 break;
-            case "Proportion of all active patients with registered address/LGA of residence":
-                result = dqaService.getPatientWithoutAdd(facility);
+            case "patientDemo6":
+                result = dqaService.getPatientWithoutAdd(facilityId);
                 break;
-            case "Proportion of all active patients with Patient Identifier":
-                result = dqaService.getPatientWithoutIdentifier(facility);
+            case "patientDemo7":
+                result = dqaService.getPatientWithoutIdentifier(facilityId);
                 break;
             default:
                 // Handle unknown dataType
@@ -63,41 +66,6 @@ public class PatientDqaController {
     }
 
 
-//    @GetMapping(value = "/no-dob", produces = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<List<PatientDTOProjection>> patientDemo(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-//        return ResponseEntity.ok(dqaService.getPatient(facility));
-//    }
-//
-//    @GetMapping(value = "/no-age", produces = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<List<PatientDTOProjection>> patientNoAge(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-//        return ResponseEntity.ok(dqaService.getPatientWithoutAge(facility));
-//    }
-//    @GetMapping(value = "/no-sex", produces = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<List<PatientDTOProjection>> patientNoSex(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-//        return ResponseEntity.ok(dqaService.getPatientWithoutSex(facility));
-//    }
-//    @GetMapping(value = "/no-marital-status", produces = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<List<PatientDTOProjection>> patientNoMar(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-//        return ResponseEntity.ok(dqaService.getPatientWithoutMStatus(facility));
-//    }
-//    @GetMapping(value = "/no-education", produces = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<List<PatientDTOProjection>> patientNoEdu(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-//        return ResponseEntity.ok(dqaService.getPatientWithoutEdu(facility));
-//    }
-//    @GetMapping(value = "/no-occupation", produces = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<List<PatientDTOProjection>> patientNoOcc(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-//        return ResponseEntity.ok(dqaService.getPatientWithoutOccu(facility));
-//    }
-//    @GetMapping(value = "/no-address", produces = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<List<PatientDTOProjection>> patientNoAddress(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-//        return ResponseEntity.ok(dqaService.getPatientWithoutAdd(facility));
-//    }
-//
-//    @GetMapping(value = "/no-identifier", produces = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<List<PatientDTOProjection>> patientNoIdentifier(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-//        return ResponseEntity.ok(dqaService.getPatientWithoutIdentifier(facility));
-//    }
-
     //this section/code block below endpoints for summaries
 
     @GetMapping(value = "/patient-demo-summary", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -107,29 +75,34 @@ public class PatientDqaController {
 
     // clinical summary
     @GetMapping(value = "/clinical-variable-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<ClinicalSummaryDTOProjection>>clinicalSummary(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
+    public ResponseEntity<List<ClinicalSummaryDTOProjection>>clinicalSummary() throws ExecutionException, InterruptedException {
+        Long facility = organizationService.getCurrentUserOrganization();
         return  ResponseEntity.ok(dqaService.getClinicaSummary(facility));
     }
 
     // biometric summary
     @GetMapping(value = "/biometric-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<BiometricSummaryDTOProjection>> biometricSummary(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
+    public ResponseEntity<List<BiometricSummaryDTOProjection>> biometricSummary() throws ExecutionException, InterruptedException {
+        Long facility = organizationService.getCurrentUserOrganization();
         return  ResponseEntity.ok(dqaService.getBiometricSummary(facility));
     }
 
     @GetMapping(value = "/pharmacy-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientSummaryDTOProjection>> pharmacySummary(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
+    public ResponseEntity<List<PharmacySummaryDTOProjection>> pharmacySummary() throws ExecutionException, InterruptedException {
+        Long facility = organizationService.getCurrentUserOrganization();
         return  ResponseEntity.ok(dqaService.getPharmacySummary(facility));
     }
 
     // data consistency summary
     @GetMapping(value = "/data-consistency-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<ClinicalConsistencyDTOProjection>> patientClinicalConsistencySummary (@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
+    public ResponseEntity<List<ClinicalConsistencyDTOProjection>> patientClinicalConsistencySummary () throws ExecutionException, InterruptedException {
+        Long facility = organizationService.getCurrentUserOrganization();
         return ResponseEntity.ok(dqaService.getDataConsistencySummary(facility));
     }
 
     @GetMapping(value = "/prep-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PrepSummaryDTOProjection>> prepSummary (@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
+    public ResponseEntity<List<PrepSummaryDTOProjection>> prepSummary () throws ExecutionException, InterruptedException {
+        Long facility = organizationService.getCurrentUserOrganization();
         return ResponseEntity.ok(dqaService.getPrepSummary(facility));
     }
 }

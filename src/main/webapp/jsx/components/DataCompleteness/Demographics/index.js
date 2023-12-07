@@ -89,7 +89,13 @@ const DemographicsDQA = (props) => {
   const [facilities, setFacilities] = useState([]);
   const [showPatientDetail, setPatientDetail] = useState(false);
   const [getHeaderInfo, setGetHeaderInfo] = useState("");
-  const [demographicsPatientsView, setDemographicsPatientsView] = useState({})
+  const [demographicsPatientsView, setDemographicsPatientsView] = useState({status: null,
+  dateOfBirth: "1994-06-15",
+  sex: "Female",
+  patientId: "2602",
+  hospitalNumber: "2602"})
+  const [demographicOption, setDemographicOption] = useState()
+
     useEffect(() => {
       Facilities();
       loadDemography();
@@ -106,7 +112,7 @@ const DemographicsDQA = (props) => {
         console.log(error);
       });
   };
-    console.log(demographicsPatientsView)
+    
   const loadDemography = () => {
     axios
       .get(`${baseUrl}dqr/patient-demo-summary?facilityId=${facilities}`, {
@@ -124,19 +130,20 @@ const DemographicsDQA = (props) => {
   const viewDetail =(headerTitle)=>{
   setPatientDetail(true)
   setGetHeaderInfo(headerTitle)
+  const patientDemo ="patientDemo5"
   axios
-        .get(`${baseUrl}dqr/no-dob/?facilityId=${facilities}`, {
+        .get(`${baseUrl}dqr/patient-demo?indicator=${patientDemo}`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((response) => {
-          setDemographicsPatientsView(response.data);
-
+          setDemographicsPatientsView(response.data[0]);
+          //console.log(response.data[0])
         })
         .catch((error) => {
           console.log(error);
         });
   }
-
+  console.log(demographicsPatientsView)
 
   return (
     <>
@@ -262,10 +269,10 @@ const DemographicsDQA = (props) => {
                             <tr>
                               <th scope="row"></th>
 
-                              <td>{demographicsPatientsView[0]?.hospitalNumber}</td>
-                              //<td>{demographicsPatientsView[0]?.dateOfBirth}</td>
-                              //<td>{demographicsPatientsView[0]?.sex}</td>
-                              //<td>{demographicsPatientsView[0]?.status}</td>
+                              <td>{demographicsPatientsView.hospitalNumber}</td>
+                              <td>{demographicsPatientsView.dateOfBirth}</td>
+                              <td>{demographicsPatientsView.sex}</td>
+                              <td>{demographicsPatientsView.status}</td>
                             </tr>
 
                           </tbody>
