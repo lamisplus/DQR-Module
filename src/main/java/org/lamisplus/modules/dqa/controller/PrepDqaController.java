@@ -49,23 +49,23 @@ public class PrepDqaController {
     }
 
     // summary
-    @GetMapping(value = "/prep-enrolled-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientSummaryDTOProjection>> prepEnrolledSummary(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return  ResponseEntity.ok(prepDQAService.getNotEnrolledSummary(facility));
-    }
-
-    @GetMapping(value = "/prep-offered-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientSummaryDTOProjection>> prepOfferedSummary(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return  ResponseEntity.ok(prepDQAService.getNegativeOfferedSummary(facility));
-    }
-
-    @GetMapping(value = "/prep-initiated-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientSummaryDTOProjection>> prepInitiatedSummary(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return  ResponseEntity.ok(prepDQAService.getInitiatedOnPrepSummary(facility));
-    }
-
-    @GetMapping(value = "/prep-urinalysis-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientSummaryDTOProjection>> prepWithUrinalysisSummary(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return  ResponseEntity.ok(prepDQAService.getInitiatedWithUrinalysisPrepSummary(facility));
-    }
+//    @GetMapping(value = "/prep-enrolled-summary", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<List<PatientSummaryDTOProjection>> prepEnrolledSummary(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
+//        return  ResponseEntity.ok(prepDQAService.getNotEnrolledSummary(facility));
+//    }
+//
+//    @GetMapping(value = "/prep-offered-summary", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<List<PatientSummaryDTOProjection>> prepOfferedSummary(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
+//        return  ResponseEntity.ok(prepDQAService.getNegativeOfferedSummary(facility));
+//    }
+//
+//    @GetMapping(value = "/prep-initiated-summary", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<List<PatientSummaryDTOProjection>> prepInitiatedSummary(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
+//        return  ResponseEntity.ok(prepDQAService.getInitiatedOnPrepSummary(facility));
+//    }
+//
+//    @GetMapping(value = "/prep-urinalysis-summary", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<List<PatientSummaryDTOProjection>> prepWithUrinalysisSummary(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
+//        return  ResponseEntity.ok(prepDQAService.getInitiatedWithUrinalysisPrepSummary(facility));
+//    }
 }

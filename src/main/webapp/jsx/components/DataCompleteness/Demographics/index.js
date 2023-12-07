@@ -88,6 +88,8 @@ const DemographicsDQA = (props) => {
   const [demographics, setDemographic] = useState({});
   const [facilities, setFacilities] = useState([]);
   const [showPatientDetail, setPatientDetail] = useState(false);
+  const [getHeaderInfo, setGetHeaderInfo] = useState("");
+  const [demographicsPatientsView, setDemographicsPatientsView] = useState({})
     useEffect(() => {
       Facilities();
       loadDemography();
@@ -104,7 +106,7 @@ const DemographicsDQA = (props) => {
         console.log(error);
       });
   };
-
+    console.log(demographicsPatientsView)
   const loadDemography = () => {
     axios
       .get(`${baseUrl}dqr/patient-demo-summary?facilityId=${facilities}`, {
@@ -119,9 +121,20 @@ const DemographicsDQA = (props) => {
       });
   };
 
-  const viewDetail =()=>{
+  const viewDetail =(headerTitle)=>{
   setPatientDetail(true)
-  return alert("this is here")
+  setGetHeaderInfo(headerTitle)
+  axios
+        .get(`${baseUrl}dqr/no-dob/?facilityId=${facilities}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((response) => {
+          setDemographicsPatientsView(response.data);
+
+        })
+        .catch((error) => {
+          console.log(error);
+        });
   }
 
 
@@ -155,7 +168,7 @@ const DemographicsDQA = (props) => {
                   <td>
                   <div>
 
-                        <p onClick={() => viewDetail()}> View</p>
+                        <p onClick={() => viewDetail("Proportion of all active patients with Date of Birth (DOB)")}> View</p>
 
                     </div>
                   </td>
@@ -227,152 +240,34 @@ const DemographicsDQA = (props) => {
                   <td>{demographics[0]?.addressDenominator}</td>
                   <td>{demographics[0]?.addressPerformance} %</td>
                   <td>
-                    <div>
-                                  <Menu.Menu position="right">
-                                    <Menu.Item>
-                                      <Buuton2
-                                        style={{ backgroundColor: "rgb(153,46,98)" }}
-                                        primary
-                                      >
-                                        <Dropdown item text="Action">
-                                          <Dropdown.Menu style={{ marginTop: "10px" }}>
-                                            <Dropdown.Item
-                                              //onClick={() => downloadFile(row.fileName)}
-                                            >
-                                              <CloudDownloadIcon color="primary" /> Download File
-                                            </Dropdown.Item>
 
-
-                                          </Dropdown.Menu>
-                                        </Dropdown>
-                                      </Buuton2>
-                                    </Menu.Item>
-                                  </Menu.Menu>
-                                </div>
                   </td>
                 </tr>
               </tbody>
             </Table>
             </>)}
             {showPatientDetail &&(<>
-                        <h3>Patient Detail</h3>
+                        <h3>{getHeaderInfo!=="" ? getHeaderInfo : ""}</h3>
                         <Table bordered>
                           <thead>
                             <tr>
-                              <th>#</th>
-                              <th>Complete Variables</th>
-                              <th>Numerator</th>
 
+                              <th>Hospital Number</th>
+                              <th>Sex</th>
+                              <th>DOB</th>
+                              <th>Status</th>
                             </tr>
                           </thead>
                           <tbody>
                             <tr>
-                              <th scope="row">1</th>
-                              <td>
-                                Proportion of all active patients with Date of Birth (DOB)
-                              </td>
-                              <td>{demographics[0]?.dobNumerator}</td>
-                              <td>{demographics[0]?.dobDenominator}</td>
-                              <td>{demographics[0]?.dobPerformance} %</td>
-                              <td>
-                              <div>
+                              <th scope="row"></th>
 
-                                    <p onClick={() => viewDetail()}> View</p>
+                              <td>{demographicsPatientsView[0]?.hospitalNumber}</td>
+                              //<td>{demographicsPatientsView[0]?.dateOfBirth}</td>
+                              //<td>{demographicsPatientsView[0]?.sex}</td>
+                              //<td>{demographicsPatientsView[0]?.status}</td>
+                            </tr>
 
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <th scope="row">2</th>
-                              <td>Proportion of all active patients with Current Age</td>
-                              <td>{demographics[0]?.ageNumerator}</td>
-                               <td>{demographics[0]?.ageDenominator}</td>
-                               <td>{demographics[0]?.agePerformance} %</td>
-                              <td></td>
-                            </tr>
-                            <tr>
-                              <th scope="row">3</th>
-                              <td>
-                                Proportion of all active patients with Patient Identifier
-                              </td>
-                              <td>{demographics[0]?.pidNumerator}</td>
-                              <td>{demographics[0]?.pidDenominator}</td>
-                              <td>{demographics[0]?.pidPerformance} %</td>
-                              <td></td>
-                            </tr>
-                            <tr>
-                              <th scope="row">4</th>
-                              <td>Proportion of all active patients with Sex</td>
-                              <td>{demographics[0]?.sexNumerator}</td>
-                              <td>{demographics[0]?.sexDenominator}</td>
-                              <td>{demographics[0]?.sexPerformance} %</td>
-                              <td></td>
-                            </tr>
-                            <tr>
-                              <th scope="row">5</th>
-                              <td>
-                                Proportion of all active patients with a documented
-                                educational Status
-                              </td>
-                              <td>{demographics[0]?.eduNumerator}</td>
-                              <td>{demographics[0]?.eduDenominator}</td>
-                              <td>{demographics[0]?.eduPerformance} %</td>
-                              <td></td>
-                            </tr>
-                            <tr>
-                              <th scope="row">6</th>
-                              <td>
-                                Proportion of all active patients with a documented marital
-                              </td>
-                              <td>{demographics[0]?.maritalNumerator}</td>
-                              <td>{demographics[0]?.maritalDenominator}</td>
-                              <td>{demographics[0]?.maritalPerformance} %</td>
-                              <td></td>
-                            </tr>
-                            <tr>
-                              <th scope="row">7</th>
-                              <td>
-                                Proportion of all active patients with documented occupational status
-                              </td>
-                              <td>{demographics[0]?.employNumerator}</td>
-                              <td>{demographics[0]?.employDenominator}</td>
-                              <td>{demographics[0]?.employPerformance} %</td>
-                              <td></td>
-                            </tr>
-                            <tr>
-                              <th scope="row">8</th>
-                              <td>
-                                Proportion of all active patients with registered
-                                address/LGA of residence
-                              </td>
-                              <td>{demographics[0]?.addressNumerator}</td>
-                              <td>{demographics[0]?.addressDenominator}</td>
-                              <td>{demographics[0]?.addressPerformance} %</td>
-                              <td>
-                                <div>
-                                              <Menu.Menu position="right">
-                                                <Menu.Item>
-                                                  <Buuton2
-                                                    style={{ backgroundColor: "rgb(153,46,98)" }}
-                                                    primary
-                                                  >
-                                                    <Dropdown item text="Action">
-                                                      <Dropdown.Menu style={{ marginTop: "10px" }}>
-                                                        <Dropdown.Item
-                                                          //onClick={() => downloadFile(row.fileName)}
-                                                        >
-                                                          <CloudDownloadIcon color="primary" /> Download File
-                                                        </Dropdown.Item>
-
-
-                                                      </Dropdown.Menu>
-                                                    </Dropdown>
-                                                  </Buuton2>
-                                                </Menu.Item>
-                                              </Menu.Menu>
-                                            </div>
-                              </td>
-                            </tr>
                           </tbody>
                         </Table>
                         </>)}

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.lamisplus.modules.dqa.domain.PatientDTOProjection;
 import org.lamisplus.modules.dqa.domain.PatientSummaryDTOProjection;
+import org.lamisplus.modules.dqa.domain.PrepSummaryDTOProjection;
 import org.lamisplus.modules.dqa.repository.PrepRepository;
 import org.springframework.stereotype.Service;
 
@@ -47,29 +48,6 @@ public class PrepDQAService {
 
     // summary
 
-    public List <PatientSummaryDTOProjection> getNotEnrolledSummary (Long facility) {
-        List<PatientSummaryDTOProjection> pNotEnrolled = prepRepository.getNegativeNotEnrolledOnPrepSumm(currentUserOrganizationService.getCurrentUserOrganization());
-        return pNotEnrolled;
-    }
 
-    public List <PatientSummaryDTOProjection> getNegativeOfferedSummary (Long facility) {
-        List<PatientSummaryDTOProjection> pOfferedPrep= prepRepository.getNegativeOfferedPrepSumm(currentUserOrganizationService.getCurrentUserOrganization());
-        return pOfferedPrep;
-    }
-
-    public List <PatientSummaryDTOProjection> getInitiatedOnPrepSummary (Long facility) {
-        List<PatientSummaryDTOProjection> pInitiatedPrep= prepRepository.getInitiatedPrepSumm(currentUserOrganizationService.getCurrentUserOrganization());
-        return pInitiatedPrep;
-    }
-
-    public List <PatientSummaryDTOProjection> getInitiatedWithUrinalysisPrepSummary (Long facility) {
-        List<PatientSummaryDTOProjection> pInitiatedAndUrinalysisPrep= prepRepository.getInitiatedWithUrinalysisPrepSumm(currentUserOrganizationService.getCurrentUserOrganization());
-        return pInitiatedAndUrinalysisPrep;
-    }
-
-//    public List <PatientSummaryDTOProjection> getInitiatedWithUrinalysisGreaterThanPrepSummary (Long facility) {
-//        List<PatientSummaryDTOProjection> pInitiatedAndUrinalysisPrep= prepRepository.getCurrentUrinalysisGreaterThanHivStatusSumm(currentUserOrganizationService.getCurrentUserOrganization());
-//        return pInitiatedAndUrinalysisPrep;
-//    }
 
 }

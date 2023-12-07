@@ -19,6 +19,7 @@ public class DQAService {
     private final BiometricRepository biometricRepository;
     private final PharmacyRepository pharmacyRepository;
     private final DataConsistencyRepository dataConsistencyRepository;
+    private final  PrepRepository prepRepository;
 
 
     public List<PatientDTOProjection> getPatient(Long facilityId) {
@@ -93,6 +94,10 @@ public class DQAService {
     public List<ClinicalConsistencyDTOProjection> getDataConsistencySummary (Long facilityId) {
         List<ClinicalConsistencyDTOProjection> pDataConsistencySummary = dataConsistencyRepository.getClinicalConsistencySummary(currentUserOrganizationService.getCurrentUserOrganization());
         return pDataConsistencySummary;
+    }
+    public List <PrepSummaryDTOProjection> getPrepSummary (Long facility) {
+        List<PrepSummaryDTOProjection> pSummary = prepRepository.getPrepSummary(currentUserOrganizationService.getCurrentUserOrganization());
+        return pSummary;
     }
 
 
