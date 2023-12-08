@@ -148,7 +148,7 @@ const DQAList = (props) => {
             <ToastContainer autoClose={3000} hideProgressBar />
             <div className="row page-titles mx-0" style={{marginTop:"0px", marginBottom:"-10px"}}>
                 <ol className="breadcrumb">
-                    <li className="breadcrumb-item active"><h2> DQA </h2></li>
+                    <li className="breadcrumb-item active"><h2> DQR </h2></li>
                 </ol>
             </div>
 
