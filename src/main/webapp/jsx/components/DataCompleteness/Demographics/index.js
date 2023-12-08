@@ -131,7 +131,7 @@ const DemographicsDQA = (props) => {
     
   const loadDemography = () => {
     axios
-      .get(`${baseUrl}dqr/patient-demo-summary?facilityId=${facilities}`, {
+      .get(`${baseUrl}dqr/patient-demo-summary`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
