@@ -35,19 +35,19 @@ public class DataConsistencyDqaController {
         List<PatientDTOProjection> result;
 
         switch (indicator) {
-            case "DataCon0":
+            case "dataCon0":
                 result = consistencyService.getPWithoutTargGroup(facilityId);
                 break;
-            case "DataCon1":
+            case "dataCon1":
                 result = consistencyService.getPWithoutCareEntryPoint(facilityId);
                 break;
-            case "DataCon2":
+            case "dataCon2":
                 result = consistencyService.getAbnormalWeight(facilityId);
                 break;
-            case "DataCon3":
+            case "dataCon3":
                 result = consistencyService.getChildrenAbnormalWeight(facilityId);
                 break;
-            case "pDataCon4":
+            case "dataCon4":
                 result = consistencyService.getPatientPregStatusLastVisit(facilityId);
                 break;
 //            case "DataCon5":
