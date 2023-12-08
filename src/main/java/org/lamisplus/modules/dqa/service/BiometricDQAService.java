@@ -38,25 +38,4 @@ public class BiometricDQAService {
     }
 
 
-    // summary section/ code block below
-//    public List<PatientSummaryDTOProjection> getBiometricCaptureSumm (Long facilityId) {
-//        List<PatientSummaryDTOProjection> cWithCapturedSumm = biometricRepository.getPatientCapturedSumm(currentUserOrganizationService.getCurrentUserOrganization());
-//        return cWithCapturedSumm;
-//    }
-//
-//    public List<PatientSummaryDTOProjection> getValidCaptureSumm (Long facilityId) {
-//        List<PatientSummaryDTOProjection> cWithValidCapturedSumm = biometricRepository.getPatientsValidCapturedSumm(currentUserOrganizationService.getCurrentUserOrganization());
-//        return cWithValidCapturedSumm;
-//    }
-//
-//    public List<PatientSummaryDTOProjection> getNotRecaptureSumm (Long facilityId) {
-//        List<PatientSummaryDTOProjection> cWithRecapturedSumm = biometricRepository.getPatientsNotRecapturedSumm(currentUserOrganizationService.getCurrentUserOrganization());
-//        return cWithRecapturedSumm;
-//    }
-//
-//    public List<PatientSummaryDTOProjection> getValidRecaptureSumm (Long facilityId) {
-//        List<PatientSummaryDTOProjection> cWithValidRecapturedSumm = biometricRepository.getPatientsValidRecapturedSumm(currentUserOrganizationService.getCurrentUserOrganization());
-//        return cWithValidRecapturedSumm;
-//    }
-
 }
