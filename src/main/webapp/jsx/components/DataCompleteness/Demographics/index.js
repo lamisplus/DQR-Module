@@ -2,19 +2,15 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import MaterialTable from 'material-table';
 import { token, url as baseUrl } from "../../../../api";
-import { Form, Table } from "reactstrap";
+import {  Table } from "reactstrap";
 import { makeStyles } from "@material-ui/core/styles";
 import { Card, CardContent } from "@material-ui/core";
 import "semantic-ui-css/semantic.min.css";
-import { Dropdown, Button, Menu, Icon } from "semantic-ui-react";
+import {  Button, } from "semantic-ui-react";
 
-import ErrorIcon from "@mui/icons-material/Error";
-import { FiUploadCloud } from "react-icons/fi";
 import { forwardRef } from 'react';
 import "react-toastify/dist/ReactToastify.css";
 import "react-widgets/dist/css/react-widgets.css";
-import CloudUpload from '@material-ui/icons/CloudUpload';
-import moment from "moment";
 import AddBox from '@material-ui/icons/AddBox';
 import ArrowUpward from '@material-ui/icons/ArrowUpward';
 import Check from '@material-ui/icons/Check';
@@ -124,28 +120,14 @@ const useStyles = makeStyles((theme) => ({
 const DemographicsDQA = (props) => {
   const classes = useStyles();
   const [demographics, setDemographic] = useState({});
-  const [facilities, setFacilities] = useState([]);
   const [showPatientDetail, setPatientDetail] = useState(false);
   const [getHeaderInfo, setGetHeaderInfo] = useState("");
   const [demographicsPatientsView, setDemographicsPatientsView] = useState([])
-  const [demographicOption, setDemographicOption] = useState()
 
     useEffect(() => {
-      Facilities();
       loadDemography();
     }, []);
-  const Facilities = () => {
-    axios
-      .get(`${baseUrl}account`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setFacilities(response.data.currentOrganisationUnitId);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
+
     
   const loadDemography = () => {
     axios
@@ -371,7 +353,7 @@ const DemographicsDQA = (props) => {
                               debounceInterval: 400
                             }}
                         />
-                        </>)}
+            </>)}
           </div>
         </CardContent>
       </Card>

@@ -6,12 +6,50 @@ import { makeStyles } from "@material-ui/core/styles";
 import { Card, CardContent } from "@material-ui/core";
 import "semantic-ui-css/semantic.min.css";
 import { Dropdown, Button as Buuton2, Menu, Icon } from "semantic-ui-react";
-import CloudUpload from "@material-ui/icons/CloudUpload";
-import CloudDownloadIcon from "@material-ui/icons/CloudDownload";
-import ErrorIcon from "@mui/icons-material/Error";
-import { FiUploadCloud } from "react-icons/fi";
+
 import "react-toastify/dist/ReactToastify.css";
 import "react-widgets/dist/css/react-widgets.css";
+import "semantic-ui-css/semantic.min.css";
+import {  Button, } from "semantic-ui-react";
+
+import { forwardRef } from 'react';
+import "react-toastify/dist/ReactToastify.css";
+import "react-widgets/dist/css/react-widgets.css";
+import AddBox from '@material-ui/icons/AddBox';
+import ArrowUpward from '@material-ui/icons/ArrowUpward';
+import Check from '@material-ui/icons/Check';
+import ChevronLeft from '@material-ui/icons/ChevronLeft';
+import ChevronRight from '@material-ui/icons/ChevronRight';
+import Clear from '@material-ui/icons/Clear';
+import DeleteOutline from '@material-ui/icons/DeleteOutline';
+import Edit from '@material-ui/icons/Edit';
+import FilterList from '@material-ui/icons/FilterList';
+import FirstPage from '@material-ui/icons/FirstPage';
+import LastPage from '@material-ui/icons/LastPage';
+import Remove from '@material-ui/icons/Remove';
+import SaveAlt from '@material-ui/icons/SaveAlt';
+import Search from '@material-ui/icons/Search';
+import ViewColumn from '@material-ui/icons/ViewColumn';
+
+const tableIcons = {
+  Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
+  Check: forwardRef((props, ref) => <Check {...props} ref={ref} />),
+  Clear: forwardRef((props, ref) => <Clear {...props} ref={ref} />),
+  Delete: forwardRef((props, ref) => <DeleteOutline {...props} ref={ref} />),
+  DetailPanel: forwardRef((props, ref) => <ChevronRight {...props} ref={ref} />),
+  Edit: forwardRef((props, ref) => <Edit {...props} ref={ref} />),
+  Export: forwardRef((props, ref) => <SaveAlt {...props} ref={ref} />),
+  Filter: forwardRef((props, ref) => <FilterList {...props} ref={ref} />),
+  FirstPage: forwardRef((props, ref) => <FirstPage {...props} ref={ref} />),
+  LastPage: forwardRef((props, ref) => <LastPage {...props} ref={ref} />),
+  NextPage: forwardRef((props, ref) => <ChevronRight {...props} ref={ref} />),
+  PreviousPage: forwardRef((props, ref) => <ChevronLeft {...props} ref={ref} />),
+  ResetSearch: forwardRef((props, ref) => <Clear {...props} ref={ref} />),
+  Search: forwardRef((props, ref) => <Search {...props} ref={ref} />),
+  SortArrow: forwardRef((props, ref) => <ArrowUpward {...props} ref={ref} />),
+  ThirdStateCheck: forwardRef((props, ref) => <Remove {...props} ref={ref} />),
+  ViewColumn: forwardRef((props, ref) => <ViewColumn {...props} ref={ref} />)
+  };
 
 
 
@@ -89,39 +127,47 @@ const useStyles = makeStyles((theme) => ({
     const Clinicals = (props) => {
     const classes = useStyles();
     const [clinicals, setClinical] = useState({});
-      const [facilities, setFacilities] = useState([]);
+    const [showPatientDetail, setPatientDetail] = useState(false);
+    const [getHeaderInfo, setGetHeaderInfo] = useState("");
+    const [demographicsPatientsView, setDemographicsPatientsView] = useState([])
 
-      const Facilities = () => {
-        axios
-          .get(`${baseUrl}account`, {
-            headers: { Authorization: `Bearer ${token}` },
-          })
-          .then((response) => {
-            setFacilities(response.data.currentOrganisationUnitId);
-          })
-          .catch((error) => {
-            console.log(error);
-          });
-      };
-
+    useEffect(() => {
+        loadClinical();
+      }, []);
+       
       const loadClinical = () => {
         axios
-          .get(`${baseUrl}dqr/data-consistency-summary?facilityId=${facilities}`, {
+          .get(`${baseUrl}dqr/data-consistency-summary`, {
             headers: { Authorization: `Bearer ${token}` },
           })
           .then((response) => {
             setClinical(response.data);
-            console.log(response.data)
           })
           .catch((error) => {
             console.log(error);
           });
       };
 
-      useEffect(() => {
-        Facilities();
-        loadClinical();
-      }, []);
+  
+    const viewDetail =(headerTitle,patientDemoObj)=>{
+    setPatientDetail(true)
+    setGetHeaderInfo(headerTitle)
+    const patientDemo =patientDemoObj
+    axios
+          .get(`${baseUrl}dqr/patient-demo?indicator=${patientDemo}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+          .then((response) => {
+            setDemographicsPatientsView(response.data);
+            //console.log(response.data[0])
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+    }
+    const BackToList=()=> {
+      setPatientDetail(false)
+    }
 
 
     return (
@@ -131,6 +177,7 @@ const useStyles = makeStyles((theme) => ({
                 <CardContent>
                     <h3>Clinicals</h3>
                     <div className="col-xl-12 col-lg-12">
+                    {!showPatientDetail &&(<>
                         <Table bordered>
                             <thead>
                             <tr>
@@ -166,7 +213,9 @@ const useStyles = makeStyles((theme) => ({
                                  <td>{clinicals[0]?.targDenominator}</td>
                                  <td>{clinicals[0]?.targPerformance} %</td>
                                 <td>
-                                    
+                                    <div>
+                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients without documented target group", "DataCon0" )}> View</p>
+                                    </div>
                                 </td>
                             </tr>
                             <tr>
@@ -180,7 +229,9 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{clinicals[0]?.entryDenominator}</td>
                                 <td>{clinicals[0]?.entryPerformance} %</td>
                                 <td>
-                                    
+                                <div>
+                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with a documented care entry point", "DataCon1" )}> View</p>
+                                    </div>
                                 </td>
                             </tr>
                             <tr>
@@ -194,7 +245,9 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{clinicals[0]?.adultWeightDenominator}</td>
                                 <td>{clinicals[0]?.adultWeightPerformance} %</td>
                                 <td>
-                                    
+                                    <div>
+                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with documented abnormal weight of 121 and above", "DataCon2" )}> View</p>
+                                    </div>
                                 </td>
                             </tr>
                             <tr>
@@ -208,7 +261,9 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{clinicals[0]?.peadWeightDenominator}</td>
                                 <td>{clinicals[0]?.peadWeightPerformance} %</td>
                                 <td>
-                                    
+                                    <div>
+                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportions of all active paediatric patients age 0 – 14 on ART that had documented weight of 61 and above", "DataCon3" )}> View</p>
+                                    </div>
                                 </td>
                             </tr>
                             <tr>
@@ -222,7 +277,9 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{clinicals[0]?.pregDenominator}</td>
                                 <td>{clinicals[0]?.pregPerformance} %</td>
                                 <td>
-                                    
+                                <div>
+                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active female patient 12 year and above with a documented pregnancy status", "DataCon4" )}> View</p>
+                                    </div>
                                 </td>
                             </tr>
                             <tr>
@@ -236,7 +293,9 @@ const useStyles = makeStyles((theme) => ({
                                <td>{clinicals[0]?.artDateLessTodayNumerator}</td>
                                <td>{clinicals[0]?.artDateLessTodayPerformance} %</td>
                                 <td>
-                                    
+                                    <div>
+                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with an ART start date on or before the current calendar date", "DataCon5" )}> View</p>
+                                    </div>
                                 </td>
                             </tr>
                             <tr>
@@ -250,7 +309,9 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{clinicals[0]?.artEqClinicDenominator}</td>
                                 <td>{clinicals[0]?.artEqClinicPerformance} %</td>
                                 <td>
-                                    
+                                    <div>
+                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with an ART start date on or before last clinic visit date", "DataCon6" )}> View</p>
+                                    </div>
                                 </td>
                             </tr>
                             <tr>
@@ -264,7 +325,9 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{clinicals[0]?.artEqLastPickupDenominator}</td>
                                 <td>{clinicals[0]?.artEqLastPickupPerformance} %</td>
                                 <td>
-                                    
+                                    <div>
+                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with an ART start date on or before last drug pickup date", "DataCon7" )}> View</p>
+                                    </div>
                                 </td>
                             </tr>
                             <tr>
@@ -278,7 +341,9 @@ const useStyles = makeStyles((theme) => ({
                               <td>{clinicals[0]?.lgreaterConfDenominator}</td>
                               <td>{clinicals[0]?.lgreaterConfPerformance} %</td>
                               <td>
-
+                                    <div>
+                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with last drug pickup date on or after first confirmed HIV date", "DataCon8" )}> View</p>
+                                    </div>
                               </td>
                               </tr>
                               <tr>
@@ -292,7 +357,9 @@ const useStyles = makeStyles((theme) => ({
                              <td>{clinicals[0]?.artGreaterTransDenominator}</td>
                              <td>{clinicals[0]?.artGreaterTransPerformance} %</td>
                              <td>
-
+                                    <div>
+                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with ART start date before transfer-in date", "DataCon9" )}> View</p>
+                                    </div>
                              </td>
                              </tr>
 
@@ -307,7 +374,9 @@ const useStyles = makeStyles((theme) => ({
                             <td>{clinicals[0]?.lgreaterConfDenominator}</td>
                             <td>{clinicals[0]?.lgreaterConfPerformance} %</td>
                             <td>
-
+                                <div>
+                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Last clinic visit date on or after first confirmed HIV date", "DataCon10" )}> View</p>
+                                </div>
                             </td>
                             </tr>
 
@@ -322,7 +391,9 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{clinicals[0]?.lstPickGreaterDObDenominator}</td>
                                 <td>{clinicals[0]?.lstPickGreaterDObPerformance} %</td>
                                 <td>
-
+                                    <div>
+                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Last drug pickup date after date of birth", "DataCon11" )}> View</p>
+                                    </div>
                                 </td>
                             </tr>
                             <tr>
@@ -336,7 +407,9 @@ const useStyles = makeStyles((theme) => ({
                             <td>N/A</td>
                             <td> %</td>
                             <td>
-
+                                <div>
+                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients Newly initiated on ART (TX_NEW) in the quarter but has previous quarter drug pickup date", "DataCon12" )}> View</p>
+                                </div>
                             </td>
                             </tr>
                             <tr>
@@ -350,7 +423,9 @@ const useStyles = makeStyles((theme) => ({
                             <td>{clinicals[0]?.ldrugPickHighDenominator}</td>
                             <td>{clinicals[0]?.ldrugPickHighPerformance} %</td>
                             <td>
-
+                                <div>
+                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Last drug pickup date on or after transferred in date", "DataCon13" )}> View</p>
+                                </div>
                             </td>
                             </tr>
                             <tr>
@@ -364,7 +439,9 @@ const useStyles = makeStyles((theme) => ({
                              <td>{clinicals[0]?.clinicPickLessTodayDenominator}</td>
                              <td>{clinicals[0]?.clinicPickLessTodayPerformance} %</td>
                              <td>
-
+                                    <div>
+                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Last drug pickup date on or before current calendar date", "DataCon14" )}> View</p>
+                                    </div>
                              </td>
                              </tr>
 <tr>
@@ -378,7 +455,9 @@ const useStyles = makeStyles((theme) => ({
                              <td>{clinicals[0]?.clinicPickLessTodayDenominator}</td>
                              <td>{clinicals[0]?.clinicPickLessTodayPerformance} %</td>
                              <td>
-
+                                     <div>
+                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Last clinic visit date on or before current calendar date", "DataCon15" )}> View</p>
+                                    </div>
                              </td>
                              </tr>
 <tr>
@@ -392,7 +471,9 @@ const useStyles = makeStyles((theme) => ({
                              <td></td>
                              <td> %</td>
                              <td>
-
+                                <div>
+                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Date of VL result after the date of VL sample collection", "DataCon16" )}> View</p>
+                                </div>
                              </td>
                              </tr>
 <tr>
@@ -406,11 +487,67 @@ const useStyles = makeStyles((theme) => ({
                              <td></td>
                              <td> %</td>
                              <td>
-
+                                    <div>
+                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of new patients (TX_NEW) with CD4 count", "DataCon17" )}> View</p>
+                                    </div>
                              </td>
                              </tr>
                             </tbody>
                         </Table>
+                        </>)}
+                        {showPatientDetail &&(<>
+                        <Button
+                        variant="contained"
+                        style={{backgroundColor:"#014d88", }}
+                        className=" float-right mr-1"
+                        //startIcon={<FaUserPlus />}
+                        onClick={BackToList}
+                        >
+                        <span style={{ textTransform: "capitalize", color:"#fff" }}> {"<<"} Back </span>
+                        </Button>
+                        <br/>
+                        <br/> 
+                        <MaterialTable
+                            icons={tableIcons}
+                            title={getHeaderInfo}
+                            columns={[
+
+                              {
+                                title: "Hospital Number",
+                                field: "hospitalNumber",
+                              },
+                              { title: "Sex ", field: "sex", filtering: false },
+                              { title: "Date Of Birth", field: "dob", filtering: false },
+                              { title: "Status", field: "status", filtering: false },
+
+                            ]}
+                            data={ demographicsPatientsView.map((row) => ({
+                              //Id: manager.id,
+                              hospitalNumber: row.hospitalNumber,
+                              sex: row.sex,
+                              dob: row.dateOfBirth,
+                              status:row.status
+
+                            }))}
+
+                            options={{
+                              headerStyle: {
+                                backgroundColor: "#014d88",
+                                color: "#fff",
+                              },
+                              searchFieldStyle: {
+                                width : '200%',
+                                margingLeft: '250px',
+                              },
+                              filtering: false,
+                              exportButton: true,
+                              searchFieldAlignment: 'left',
+                              pageSizeOptions:[10,20,100],
+                              pageSize:10,
+                              debounceInterval: 400
+                            }}
+                        />
+            </>)}
                     </div>
                 </CardContent>
             </Card>
