@@ -69,8 +69,9 @@ public class PatientDqaController {
     //this section/code block below endpoints for summaries
 
     @GetMapping(value = "/patient-demo-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<SummaryDTOProjection>>patientSummary(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-    return  ResponseEntity.ok(dqaService.getPatientSummary(facility));
+    public ResponseEntity<List<SummaryDTOProjection>>patientSummary() throws ExecutionException, InterruptedException {
+        Long facility = organizationService.getCurrentUserOrganization();
+        return  ResponseEntity.ok(dqaService.getPatientSummary(facility));
     }
 
     // clinical summary
