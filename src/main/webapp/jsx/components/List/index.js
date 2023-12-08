@@ -14,6 +14,7 @@ import Pharmacy  from './../DataConsistency/Pharmacy/index'
 import Clinicals  from './../DataConsistency/Clinical/index'
 import Biometric  from './../DataConsistency/Biometric/index'
 import PrEP from "../DataConsistency/PrEp";
+import Hts from "../DataConsistency/Hts";
 
 
 
@@ -97,6 +98,7 @@ const DQAList = (props) => {
     const [showPharmacy, setShowPharmacy] = useState(false);
     const [showBiometric, setShowBiometric] = useState(false);
     const [showPrep, setShowPrep] = useState(false);
+    const [showHts, setShowHts] = useState(false);
     const [showNutrition, setShowNutrition] = useState(false);
     const [showGenderBase, setShowGenderBase] = useState(false);
     const [showChronicCondition, setShowChronicCondition] = useState(false);
@@ -120,6 +122,9 @@ const DQAList = (props) => {
     }
     const onClickPrep =() =>{
         setShowPrep(!showPrep)
+    }
+    const onClickHts =() =>{
+        setShowHts(!showNutrition)
     }
     const onClickNutrition =() =>{
         setShowNutrition(!showNutrition)
@@ -229,9 +234,11 @@ const DQAList = (props) => {
                             <div className="card">
                                 <div className="card-header" style={{backgroundColor:"#014d88",color:'#fff',fontWeight:'bolder',  borderRadius:"0.2rem"}}>
                                     <h5 className="card-title" style={{color:'#fff'}}>HTS</h5>
-                                    {showNutrition===false  ? (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickNutrition}><FaPlus /></span></>) :  (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickNutrition}><FaAngleDown /></span> </>)}
+                                    {showHts===false  ? (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickHts}><FaPlus /></span></>) :  (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickHts}><FaAngleDown /></span> </>)}
                                 </div>
-
+                                {showHts && (
+                                    <Hts /> 
+                                )}
                             </div>
                             <div className="card">
                                 <div className="card-header" style={{backgroundColor:"#014d88",color:'#fff',fontWeight:'bolder',  borderRadius:"0.2rem"}}>

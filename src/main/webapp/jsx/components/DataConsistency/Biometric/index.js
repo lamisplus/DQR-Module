@@ -123,11 +123,8 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-
-
-
-    const Biometrics = (props) => {
-    const classes = useStyles();
+  const Biometrics = (props) => {
+  const classes = useStyles();
   const [biometrics, setBiometric] = useState({});
   const [facilities, setFacilities] = useState([]);
   const [showPatientDetail, setPatientDetail] = useState(false);
