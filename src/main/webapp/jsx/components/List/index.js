@@ -221,11 +221,10 @@ const DQAList = (props) => {
                                 <div className="card-header" style={{backgroundColor:"#014d88",color:'#fff',fontWeight:'bolder',  borderRadius:"0.2rem"}}>
                                     <h5 className="card-title" style={{color:'#fff'}}>PrEP</h5>
                                     {showPrep===false  ? (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickPrep}><FaPlus /></span></>) :  (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickPrep}><FaAngleDown /></span> </>)}
+                                </div>
                                     {showPrep && (
                                     <PrEP /> 
                                 )}
-                                </div>
-
                             </div>
                             <div className="card">
                                 <div className="card-header" style={{backgroundColor:"#014d88",color:'#fff',fontWeight:'bolder',  borderRadius:"0.2rem"}}>
