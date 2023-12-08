@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.lamisplus.modules.dqa.domain.PatientDTOProjection;
 import org.lamisplus.modules.dqa.domain.PatientSummaryDTOProjection;
+import org.lamisplus.modules.dqa.service.CurrentUserOrganizationService;
 import org.lamisplus.modules.dqa.service.PrepDQAService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,50 +23,47 @@ import java.util.concurrent.ExecutionException;
 public class PrepDqaController {
 
     private final PrepDQAService prepDQAService;
+    private final CurrentUserOrganizationService organizationService;
 
-    @GetMapping(value = "/not-offered-prep", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientDTOProjection>> patientNotOfferedPrep(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return ResponseEntity.ok(prepDQAService.getClientNotOfferedPrep(facility));
+    @GetMapping(value = "/prep-dqa", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<PatientDTOProjection>> getPrepPatientData(
+            @RequestParam("indicator") String indicator
+    ) throws ExecutionException, InterruptedException {
+        Long facilityId = organizationService.getCurrentUserOrganization();
+        List<PatientDTOProjection> result;
+
+        switch (indicator) {
+            case "validity0":
+                result = prepDQAService.getClientNotOfferedPrep(facilityId);
+                break;
+            case "validity1":
+                result = prepDQAService.getClientNotAcceptedPrep(facilityId);
+                break;
+            case "validity2":
+                result = prepDQAService.getClientNotInitiatedPrep(facilityId);
+                break;
+            case "validity3":
+                result = prepDQAService.getClientWithNoUrinalysis(facilityId);
+                break;
+            case "validity4":
+                result = prepDQAService.getClientWithDateRegisterLessThanDateCommenced(facilityId);
+                break;
+//            case "validity5":
+//                result = validityService.getPatientNotWithinPeriod(facilityId);
+//                break;
+//            case "validity6":
+//                result = dqaService.getPatientWithoutAdd(facilityId);
+//                break;
+//            case "validity7":
+//                result = dqaService.getPatientWithoutIdentifier(facilityId);
+//                break;
+            default:
+                // Handle unknown dataType
+                return ResponseEntity.badRequest().build();
+        }
+
+        return ResponseEntity.ok(result);
     }
 
-    @GetMapping(value = "/not-accepted-prep", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientDTOProjection>> patientNotAcceptedPrep(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return ResponseEntity.ok(prepDQAService.getClientNotAcceptedPrep(facility));
-    }
 
-    @GetMapping(value = "/not-initiated-prep", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientDTOProjection>> patientNotInitiatedPrep(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return ResponseEntity.ok(prepDQAService.getClientNotInitiatedPrep(facility));
-    }
-
-    @GetMapping(value = "/no-urinalysis-prep", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientDTOProjection>> patientNotInitiatedNoUrinalysisPrep(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return ResponseEntity.ok(prepDQAService.getClientWithNoUrinalysis(facility));
-    }
-
-    @GetMapping(value = "/register-lessthan-commenced", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientDTOProjection>> patientNotDateRegisterLessThanDateCommenced(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return ResponseEntity.ok(prepDQAService.getClientWithDateRegisterLessThanDateCommenced(facility));
-    }
-
-    // summary
-//    @GetMapping(value = "/prep-enrolled-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<List<PatientSummaryDTOProjection>> prepEnrolledSummary(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-//        return  ResponseEntity.ok(prepDQAService.getNotEnrolledSummary(facility));
-//    }
-//
-//    @GetMapping(value = "/prep-offered-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<List<PatientSummaryDTOProjection>> prepOfferedSummary(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-//        return  ResponseEntity.ok(prepDQAService.getNegativeOfferedSummary(facility));
-//    }
-//
-//    @GetMapping(value = "/prep-initiated-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<List<PatientSummaryDTOProjection>> prepInitiatedSummary(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-//        return  ResponseEntity.ok(prepDQAService.getInitiatedOnPrepSummary(facility));
-//    }
-//
-//    @GetMapping(value = "/prep-urinalysis-summary", produces = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<List<PatientSummaryDTOProjection>> prepWithUrinalysisSummary(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-//        return  ResponseEntity.ok(prepDQAService.getInitiatedWithUrinalysisPrepSummary(facility));
-//    }
 }

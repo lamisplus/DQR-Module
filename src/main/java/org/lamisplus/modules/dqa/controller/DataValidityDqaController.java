@@ -3,6 +3,7 @@ package org.lamisplus.modules.dqa.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.lamisplus.modules.dqa.domain.PatientDTOProjection;
+import org.lamisplus.modules.dqa.service.CurrentUserOrganizationService;
 import org.lamisplus.modules.dqa.service.DataValidityService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,36 +22,46 @@ import java.util.concurrent.ExecutionException;
 public class DataValidityDqaController {
 
     private final DataValidityService validityService;
+    private final CurrentUserOrganizationService organizationService;
 
-    @GetMapping(value = "/dob-notin-range", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientDTOProjection>> patientDobNotWithinRange(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return ResponseEntity.ok(validityService.getPatientWithDobLessThanNineteenTwenty(facility));
+    @GetMapping(value = "/patient-validity", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<PatientDTOProjection>> getPatientValidityData(
+            @RequestParam("indicator") String indicator
+    ) throws ExecutionException, InterruptedException {
+        Long facilityId = organizationService.getCurrentUserOrganization();
+        List<PatientDTOProjection> result;
+
+        switch (indicator) {
+            case "validity0":
+                result = validityService.getPatientWithDobLessThanNineteenTwenty(facilityId);
+                break;
+            case "validity1":
+                result = validityService.getPatientWithAgeBetweenZeroAndNinety(facilityId);
+                break;
+            case "validity2":
+                result = validityService.getPatientWithArtStartDateLessThanNinetyEightyFive(facilityId);
+                break;
+            case "validity3":
+                result = validityService.getPatientWithHivConfirmDateLessThanNinetyEightyFive(facilityId);
+                break;
+            case "validity4":
+                result = validityService.getPatientWithoutValidBiometric(facilityId);
+                break;
+            case "validity5":
+                result = validityService.getPatientNotWithinPeriod(facilityId);
+                break;
+//            case "validity6":
+//                result = dqaService.getPatientWithoutAdd(facilityId);
+//                break;
+//            case "validity7":
+//                result = dqaService.getPatientWithoutIdentifier(facilityId);
+//                break;
+            default:
+                // Handle unknown dataType
+                return ResponseEntity.badRequest().build();
+        }
+
+        return ResponseEntity.ok(result);
     }
 
-    @GetMapping(value = "/age-not-range", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientDTOProjection>> patientAgeNotInRange(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return ResponseEntity.ok(validityService.getPatientWithAgeBetweenZeroAndNinety(facility));
-    }
-
-    @GetMapping(value = "/art-date-lesser", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientDTOProjection>> patientNoArtDateLesser(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return ResponseEntity.ok(validityService.getPatientWithArtStartDateLessThanNinetyEightyFive(facility));
-    }
-
-    @GetMapping(value = "/less-confirmed-date", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientDTOProjection>> patientNoLesserConfirmHivDate(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return ResponseEntity.ok(validityService.getPatientWithHivConfirmDateLessThanNinetyEightyFive(facility));
-    }
-
-    @GetMapping(value = "/no-valid-biometric", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientDTOProjection>> patientNoValidBiometric(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return ResponseEntity.ok(validityService.getPatientWithoutValidBiometric(facility));
-    }
-
-    @GetMapping(value = "/not-within-period", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientDTOProjection>> patientNotWithingPeriod(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-        return ResponseEntity.ok(validityService.getPatientNotWithinPeriod(facility));
-    }
-
-    // summary section below
 }
