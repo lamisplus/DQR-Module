@@ -188,7 +188,7 @@ const useStyles = makeStyles((theme) => ({
 
   const loadbio = () => {
     axios
-      .get(`${baseUrl}dqr/biometric-summary?facilityId=${facilities}`, {
+      .get(`${baseUrl}dqr/biometric-summary`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
@@ -249,7 +249,7 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{biometrics[0]?.capturePerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with a documented educational Status", "bioDemo0" )}> View</p>
+                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Biometric fingerprint captured", "bioDemo0" )}> View</p>
                                     </div>
                                 </td>
                             </tr>
@@ -265,7 +265,7 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{biometrics[0]?.validCapPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with a documented educational Status", "bioDemo1" )}> View</p>
+                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with valid Biometric fingerprint captured", "bioDemo1" )}> View</p>
                                     </div>
                                     
                                 </td>
@@ -282,7 +282,7 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{biometrics[0]?.recapPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with a documented educational Status", "bioDemo2" )}> View</p>
+                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Biometric fingerprint (recapture)", "bioDemo2" )}> View</p>
                                     </div>   
                                 </td>
                             </tr>
@@ -298,7 +298,7 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{biometrics[0]?.validRecapPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with a documented educational Status", "bioDemo3" )}> View</p>
+                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patients with valid Biometric fingerprint (recapture)", "bioDemo3" )}> View</p>
                                     </div> 
                                 </td>
                             </tr>
