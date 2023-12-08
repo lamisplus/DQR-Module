@@ -105,4 +105,10 @@ public class PatientDqaController {
         Long facility = organizationService.getCurrentUserOrganization();
         return ResponseEntity.ok(dqaService.getPrepSummary(facility));
     }
+
+    @GetMapping(value = "/hts-summary", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<HtsSummaryDTOProjection>> htsSummary () throws ExecutionException, InterruptedException {
+        Long facility = organizationService.getCurrentUserOrganization();
+        return ResponseEntity.ok(dqaService.getHtsSummary(facility));
+    }
 }

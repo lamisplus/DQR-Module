@@ -20,6 +20,7 @@ public class DQAService {
     private final PharmacyRepository pharmacyRepository;
     private final DataConsistencyRepository dataConsistencyRepository;
     private final  PrepRepository prepRepository;
+    private final HtsRepository htsRepository;
 
 
     public List<PatientDTOProjection> getPatient(Long facilityId) {
@@ -100,6 +101,10 @@ public class DQAService {
         return pSummary;
     }
 
+    public List <HtsSummaryDTOProjection> getHtsSummary (Long facility) {
+        List<HtsSummaryDTOProjection> htsSummary = htsRepository.getHtsSummary(currentUserOrganizationService.getCurrentUserOrganization());
+        return htsSummary;
+    }
 
 
 }
