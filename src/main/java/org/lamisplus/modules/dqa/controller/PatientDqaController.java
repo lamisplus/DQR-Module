@@ -3,8 +3,10 @@ package org.lamisplus.modules.dqa.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.lamisplus.modules.dqa.domain.*;
+import org.lamisplus.modules.dqa.service.BiometricDQAService;
 import org.lamisplus.modules.dqa.service.CurrentUserOrganizationService;
 import org.lamisplus.modules.dqa.service.DQAService;
+import org.lamisplus.modules.dqa.service.PharmacyDQAService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,10 +24,38 @@ import java.util.concurrent.ExecutionException;
 public class PatientDqaController {
     private final DQAService dqaService;
     private final CurrentUserOrganizationService organizationService;
+    private final PharmacyDQAService pharmacyDQAService;
+    private final BiometricDQAService biometricDQAService;
 
 
+    // pharmacy api
+    @GetMapping(value = "/patient-pharmacy", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<PatientDTOProjection>> getPatientPharmacy(
+            //@RequestParam("facilityId") Long facility,
+            @RequestParam("indicator") String indicator
+    ) throws ExecutionException, InterruptedException {
+        Long facilityId = organizationService.getCurrentUserOrganization();
+        List<PatientDTOProjection> result;
+
+        switch (indicator) {
+            case "pharm0":
+                result = pharmacyDQAService.getNoRegimenLastVisit(facilityId);
+                break;
+            case "pharm1":
+                result = pharmacyDQAService.getNoDrugDuration(facilityId);
+                break;
+            default:
+                // Handle unknown dataType
+                return ResponseEntity.badRequest().build();
+        }
+
+        return ResponseEntity.ok(result);
+    }
+
+
+    //patient Demographic api
     @GetMapping(value = "/patient-demo", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientDTOProjection>> getPatientsWithoutData(
+    public ResponseEntity<List<PatientDTOProjection>> getPatientDemo(
             //@RequestParam("facilityId") Long facility,
             @RequestParam("indicator") String indicator
     ) throws ExecutionException, InterruptedException {
@@ -56,6 +86,36 @@ public class PatientDqaController {
                 break;
             case "patientDemo7":
                 result = dqaService.getPatientWithoutIdentifier(facilityId);
+                break;
+            default:
+                // Handle unknown dataType
+                return ResponseEntity.badRequest().build();
+        }
+
+        return ResponseEntity.ok(result);
+    }
+
+    //Biometric Api's
+    @GetMapping(value = "/biometric-error", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<PatientDTOProjection>> getPatientBiometricData(
+            //@RequestParam("facilityId") Long facility,
+            @RequestParam("indicator") String indicator
+    ) throws ExecutionException, InterruptedException {
+        Long facilityId = organizationService.getCurrentUserOrganization();
+        List<PatientDTOProjection> result;
+
+        switch (indicator) {
+            case "bioDemo0":
+                result = biometricDQAService.getNoBiometricCaptured(facilityId);
+                break;
+            case "bioDemo1":
+                result = biometricDQAService.getNoValidBiometricCaptured(facilityId);
+                break;
+            case "bioDemo2":
+                result = biometricDQAService.getNoRecaptureBiometric(facilityId);
+                break;
+            case "bioDemo3":
+                result = biometricDQAService.getNoValidRecapture(facilityId);
                 break;
             default:
                 // Handle unknown dataType
