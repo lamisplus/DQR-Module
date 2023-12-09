@@ -13,34 +13,47 @@ import java.util.List;
 public interface PrepRepository extends JpaRepository<DQA, Long> {
 
 
-    @Query(value = "SELECT DISTINCT ON (person_uuid)  client_code, date_visit,  prep_offered, prep_accepted, hiv_test_result FROM \n" +
-            "hts_client where hiv_test_result is not null AND hiv_test_result = 'Negative' AND prep_offered = false", nativeQuery = true)
+    @Query(value = "SELECT DISTINCT ON (hc.person_uuid)  hc.client_code AS patientId, hc.client_code AS hospitalNumber, \n" +
+            "hc.extra->>'gender' AS sex, CAST(hc.extra->>'age' AS INTEGER) AS age, CAST(hc.extra->>'date_of_birth' AS DATE) AS dateOfBirth, \n" +
+            "hc.hiv_test_result AS status FROM hts_client hc LEFT JOIN prep_enrollment pe ON pe.person_uuid = hc.person_uuid\n" +
+            "where hc.hiv_test_result is not null AND hc.hiv_test_result = 'Negative' AND hc.prep_offered = false AND hc.facility_id = ?1", nativeQuery = true)
     List<PatientDTOProjection> getOfferedPrep(Long facilityId);
 
 
-    @Query(value = "SELECT DISTINCT ON (person_uuid)  client_code, date_visit,  prep_offered, prep_accepted, hiv_test_result FROM \n" +
-            "hts_client where hiv_test_result is not null AND hiv_test_result = 'Negative' AND prep_offered = false\n" +
-            "AND prep_accepted = false", nativeQuery = true)
+    @Query(value = "SELECT DISTINCT ON (hc.person_uuid)  hc.client_code AS patientId, hc.client_code AS hospitalNumber, \n" +
+            "hc.extra->>'gender' AS sex, CAST(hc.extra->>'age' AS INTEGER) AS age, CAST(hc.extra->>'date_of_birth' AS DATE) AS dateOfBirth, \n" +
+            "hc.hiv_test_result AS status FROM hts_client hc LEFT JOIN prep_enrollment pe ON pe.person_uuid = hc.person_uuid\n" +
+            "where hc.hiv_test_result is not null AND hc.hiv_test_result = 'Negative' AND hc.prep_offered = false \n" +
+            "AND prep_accepted IS NULL\n" +
+            "AND hc.facility_id = ?1\n", nativeQuery = true)
     List<PatientDTOProjection> getAcceptedOffer (Long facilityId);
-    @Query(value = "SELECT DISTINCT ON (hc.person_uuid) hc.person_uuid, hc.client_code, hc.date_visit,  hc.prep_offered, hc.prep_accepted, hc.hiv_test_result, pe.status, pe.unique_id FROM \n" +
-            " hts_client hc LEFT JOIN prep_enrollment pe ON hc.person_uuid = pe.person_uuid where hc.hiv_test_result is not null AND hc.hiv_test_result = 'Negative' AND hc.prep_offered = true\n" +
-            " AND hc.prep_accepted = true AND pe.status is null", nativeQuery = true)
+
+    @Query(value = "SELECT DISTINCT ON (hc.person_uuid)  hc.client_code AS patientId, hc.client_code AS hospitalNumber, \n" +
+            "hc.extra->>'gender' AS sex, CAST(hc.extra->>'age' AS INTEGER) AS age, CAST(hc.extra->>'date_of_birth' AS DATE) AS dateOfBirth, \n" +
+            "hc.hiv_test_result AS status FROM hts_client hc LEFT JOIN prep_enrollment pe ON pe.person_uuid = hc.person_uuid\n" +
+            "where hc.hiv_test_result is not null AND hc.hiv_test_result = 'Negative' AND hc.prep_offered = true\n" +
+            "AND hc.prep_accepted = true AND pe.status is null\n" +
+            "AND hc.facility_id = ?1", nativeQuery = true)
     List<PatientDTOProjection> getPrepInitiated(Long facilityId);
 
-    @Query(value = "SELECT DISTINCT ON (hc.person_uuid) hc.person_uuid, hc.client_code, hc.date_visit,  hc.prep_offered, hc.prep_accepted, hc.hiv_test_result, pc.urinalysis_result FROM \n" +
-            "hts_client hc LEFT JOIN prep_clinic pc ON hc.person_uuid = pc.person_uuid where hc.hiv_test_result is not null AND hc.hiv_test_result = 'Negative' AND hc.prep_offered = true\n" +
-            "AND hc.prep_accepted = true AND pc.urinalysis_result is null OR pc.urinalysis_result = ''", nativeQuery = true)
+    @Query(value = "SELECT DISTINCT ON (hc.person_uuid)  hc.client_code AS patientId, hc.client_code AS hospitalNumber, \n" +
+            "hc.extra->>'gender' AS sex, CAST(hc.extra->>'age' AS INTEGER) AS age, CAST(hc.extra->>'date_of_birth' AS DATE) AS dateOfBirth, \n" +
+            "hc.hiv_test_result AS status FROM hts_client hc LEFT JOIN prep_enrollment pe ON pe.person_uuid = hc.person_uuid\n" +
+            "LEFT JOIN prep_clinic pc ON hc.person_uuid = pc.person_uuid\n" +
+            "where hc.hiv_test_result is not null AND hc.hiv_test_result = 'Negative' AND hc.prep_offered = true\n" +
+            "AND hc.prep_accepted = true AND pc.urinalysis_result is null OR pc.urinalysis_result = ''\n" +
+            "AND hc.facility_id = ?1", nativeQuery = true)
     List<PatientDTOProjection> getPrepInitiatedAndUrinalysis(Long facilityId);
 
 
 
-    @Query(value = "vSELECT DISTINCT ON (hc.person_uuid) hc.person_uuid, hc.client_code, hc.date_visit,  hc.prep_offered, hc.prep_accepted, hc.hiv_test_result,\n" +
-            "pc.encounter_date AS commence_date, pe.date_enrolled,\n" +
-            "pc.urinalysis_result, (TRANSLATE((pc.urinalysis->'testDate')::varchar, '\",[,]', ' ')::VARCHAR(100))::DATE AS test_date FROM \n" +
-            "hts_client hc \n" +
-            "LEFT JOIN prep_enrollment pe ON hc.person_uuid = pe.person_uuid\n" +
-            "LEFT JOIN prep_clinic pc ON hc.person_uuid = pc.person_uuid where hc.hiv_test_result is not null AND hc.hiv_test_result = 'Negative' AND hc.prep_offered = true\n" +
-            "AND hc.prep_accepted = true AND pc.is_commencement is true AND pe.date_enrolled < pc.encounter_date", nativeQuery = true)
+    @Query(value = "SELECT DISTINCT ON (hc.person_uuid)  hc.client_code AS patientId, hc.client_code AS hospitalNumber, \n" +
+            "hc.extra->>'gender' AS sex, CAST(hc.extra->>'age' AS INTEGER) AS age, CAST(hc.extra->>'date_of_birth' AS DATE) AS dateOfBirth, \n" +
+            "hc.hiv_test_result AS status FROM hts_client hc LEFT JOIN prep_enrollment pe ON pe.person_uuid = hc.person_uuid\n" +
+            "LEFT JOIN prep_clinic pc ON hc.person_uuid = pc.person_uuid\n" +
+            "where hc.hiv_test_result is not null AND hc.hiv_test_result = 'Negative' AND hc.prep_offered = true\n" +
+            "AND hc.prep_accepted = true AND pc.is_commencement is true AND pe.date_enrolled < pc.encounter_date\n" +
+            "AND hc.facility_id = ?1", nativeQuery = true)
     List<PatientDTOProjection> getDateRegisterLessThanDateCommenced(Long facilityId);
 
     // summary
@@ -66,7 +79,7 @@ public interface PrepRepository extends JpaRepository<DQA, Long> {
             "\tselect DISTINCT ON (person_uuid) pc.person_uuid, pc.is_commencement, pc.encounter_date from prep_enrollment pe JOIN prep_clinic pc on pe.uuid = pc.prep_enrollment_uuid\n" +
             "\t\twhere is_commencement = true\n" +
             "\t) iscommenced ON pe.person_uuid = iscommenced.person_uuid\n" +
-            "\twhere hc.hiv_test_result is not null AND hc.hiv_test_result = 'Negative' AND pe.facility_id = 1722\n" +
+            "\twhere hc.hiv_test_result is not null AND hc.hiv_test_result = 'Negative' AND pe.facility_id = ?1\n" +
             ")\n" +
             "SELECT \n" +
             "  COUNT(prep_offered) AS pOfferredNumerator,\n" +

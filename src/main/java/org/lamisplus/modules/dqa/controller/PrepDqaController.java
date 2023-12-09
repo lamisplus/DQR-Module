@@ -33,29 +33,26 @@ public class PrepDqaController {
         List<PatientDTOProjection> result;
 
         switch (indicator) {
-            case "validity0":
+            case "prep0":
                 result = prepDQAService.getClientNotOfferedPrep(facilityId);
                 break;
-            case "validity1":
+            case "prep1":
                 result = prepDQAService.getClientNotAcceptedPrep(facilityId);
                 break;
-            case "validity2":
+            case "prep2":
                 result = prepDQAService.getClientNotInitiatedPrep(facilityId);
                 break;
-            case "validity3":
+            case "prep3":
                 result = prepDQAService.getClientWithNoUrinalysis(facilityId);
                 break;
-            case "validity4":
+            case "prep4":
                 result = prepDQAService.getClientWithDateRegisterLessThanDateCommenced(facilityId);
                 break;
-//            case "validity5":
+//            case "prep5":
 //                result = validityService.getPatientNotWithinPeriod(facilityId);
 //                break;
-//            case "validity6":
+//            case "prep6":
 //                result = dqaService.getPatientWithoutAdd(facilityId);
-//                break;
-//            case "validity7":
-//                result = dqaService.getPatientWithoutIdentifier(facilityId);
 //                break;
             default:
                 // Handle unknown dataType

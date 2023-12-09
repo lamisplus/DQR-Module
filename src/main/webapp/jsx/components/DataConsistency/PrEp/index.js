@@ -155,7 +155,7 @@ const useStyles = makeStyles((theme) => ({
     setGetHeaderInfo(headerTitle)
     const patientDemo =patientDemoObj
     axios
-          .get(`${baseUrl}dqr/biometric-error?indicator=${patientDemo}`, {
+          .get(`${baseUrl}dqr/prep-dqa?indicator=${patientDemo}`, {
             headers: { Authorization: `Bearer ${token}` },
           })
           .then((response) => {
@@ -246,7 +246,7 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{prep[0]?.pofferredPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of eligible patients who were offered PrEP", "" )}> View</p>
+                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of eligible patients who were offered PrEP", "prep0" )}> View</p>
                                     </div>
                                 </td>
                             </tr>
@@ -262,7 +262,7 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{prep[0]?.pacceptedPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of eligible patients who accepted PrEP ", "" )}> View</p>
+                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of eligible patients who accepted PrEP ", "prep1" )}> View</p>
                                     </div>
                                 </td>
                             </tr>
@@ -278,7 +278,7 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{prep[0]?.penrollPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patients who accepted PrEP who are initiated on PrEP ", "" )}> View</p>
+                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patients who accepted PrEP who are initiated on PrEP ", "prep2" )}> View</p>
                                     </div>
                                 </td>
                             </tr>
@@ -294,7 +294,7 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{prep[0]?.penrolledPrepUrinaPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patients who were initiated on PrEP and had urinalysis done", "" )}> View</p>
+                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patients who were initiated on PrEP and had urinalysis done", "prep3" )}> View</p>
                                     </div>
                                 </td>
                             </tr>
@@ -310,7 +310,7 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{prep[0]?.purinaGreaterEnrollPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patients with date of current urinalysis > date of enrolment", "" )}> View</p>
+                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patients with date of current urinalysis > date of enrolment", "prep4" )}> View</p>
                                     </div>
                                 </td>
                             </tr>
@@ -342,7 +342,7 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{prep[0]?.commencedPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patients with date of registration Less than date of PrEP commencement", "" )}> View</p>
+                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patients with date of registration Less than date of PrEP commencement", "prep4" )}> View</p>
                                     </div>
                                 </td>
                             </tr>
