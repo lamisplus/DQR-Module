@@ -6,9 +6,9 @@ public interface PrepSummaryDTOProjection {
     Integer getPOfferedDenominator();
     Double getPOfferredPerformance();
 
-    Integer getPAccepetedNumerator();
-    Integer getPAccepetedDenominator();
-    Double getPAccepetedPerformance();
+    Integer getPAcceptedNumerator();
+    Integer getPAcceptedDenominator();
+    Double getPAcceptedPerformance();
 
     Integer getPEnrollNumerator();
     Integer getPEnrollDenominator();

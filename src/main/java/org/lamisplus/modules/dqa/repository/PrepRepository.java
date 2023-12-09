@@ -72,7 +72,7 @@ public interface PrepRepository extends JpaRepository<DQA, Long> {
             "  COUNT(prep_offered) AS pOfferredNumerator,\n" +
             "  COUNT(person_uuid) AS pOfferedDenominator,\n" +
             "  ROUND((CAST(COUNT(prep_offered) AS DECIMAL) / COUNT(person_uuid)) * 100, 2) AS pOfferredPerformance,\n" +
-            "  COUNT(prep_accepted) AS pAccepetedNumerator,\n" +
+            "  COUNT(prep_accepted) AS pAcceptedNumerator,\n" +
             "  COUNT(prep_offered) AS pAcceptedDenominator,\n" +
             "  ROUND((CAST(COUNT(prep_offered) AS DECIMAL) / COUNT(prep_offered)) * 100, 2) AS pAcceptedPerformance,\n" +
             "  COUNT(date_enrolled_prep) AS pEnrollNumerator,\n" +
