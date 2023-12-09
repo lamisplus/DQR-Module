@@ -33,17 +33,6 @@ public interface PrepRepository extends JpaRepository<DQA, Long> {
     List<PatientDTOProjection> getPrepInitiatedAndUrinalysis(Long facilityId);
 
 
-//    @Query(value = "SELECT DISTINCT ON (hc.person_uuid) hc.person_uuid, hc.client_code, hc.date_visit,  hc.prep_offered, hc.prep_accepted, hc.hiv_test_result,\n" +
-//            "pc.encounter_date AS commence_date, pe.date_enrolled,\n" +
-//            "pc.urinalysis_result, (TRANSLATE((pc.urinalysis->'testDate')::varchar, '\",[,]', ' ')::VARCHAR(100))::DATE AS test_date FROM \n" +
-//            "hts_client hc \n" +
-//            "LEFT JOIN prep_enrollment pe ON hc.person_uuid = pe.person_uuid\n" +
-//            "LEFT JOIN prep_clinic pc ON hc.person_uuid = pc.person_uuid where hc.hiv_test_result is not null AND hc.hiv_test_result = 'Negative' AND hc.prep_offered = true\n" +
-//            "AND hc.prep_accepted = true AND pc.is_commencement is true AND pe.date_enrolled < pc.encounter_date", nativeQuery = true)
-//    List<PatientDTOProjection> getCurrentUrinalysisGreaterThanDateEnrolled(Long facilityId);
-
-//    @Query(value = "", nativeQuery = true)
-//    List<PatientDTOProjection> getCurrentUrinalysisGreaterThanHivStatus(Long facilityId);
 
     @Query(value = "vSELECT DISTINCT ON (hc.person_uuid) hc.person_uuid, hc.client_code, hc.date_visit,  hc.prep_offered, hc.prep_accepted, hc.hiv_test_result,\n" +
             "pc.encounter_date AS commence_date, pe.date_enrolled,\n" +
@@ -60,11 +49,11 @@ public interface PrepRepository extends JpaRepository<DQA, Long> {
             "\thc.prep_accepted, hc.prep_offered = hc.prep_accepted AS offAndAccpt,\n" +
             "\t hc.hiv_test_result, pe.status, pe.unique_id, pe.date_enrolled, pe.date_started, \n" +
             "\t(CASE WHEN pe.date_enrolled IS NULL  THEN pe.date_started ELSE pe.date_enrolled END) AS date_enrolled_prep,\n" +
-            "\tpc. urinalysis, (TRANSLATE((pc. urinalysis->'testDate')::varchar, '\",[,]', ' ')::VARCHAR(100))::DATE AS UrinalysisDate,\n" +
-            "\t(CASE WHEN (TRANSLATE((pc. urinalysis->'testDate')::varchar, '\",[,]', ' ')::VARCHAR(100))::DATE > (CASE WHEN pe.date_enrolled IS NULL  THEN pe.date_started ELSE pe.date_enrolled END)\n" +
+            "\tpc. urinalysis, CAST((pc. urinalysis->>'testDate') AS DATE) AS UrinalysisDate,\n" +
+            "\t(CASE WHEN CAST((pc. urinalysis->>'testDate') AS DATE) > (CASE WHEN pe.date_enrolled IS NULL  THEN pe.date_started ELSE pe.date_enrolled END)\n" +
             "\t THEN 1 ELSE NULL END) AS urinaGreaterthanenrollDate,\n" +
             "\thc.date_visit AS status_date,\n" +
-            "\t(CASE WHEN (TRANSLATE((pc. urinalysis->'testDate')::varchar, '\",[,]', ' ')::VARCHAR(100))::DATE > hc.date_visit\n" +
+            "\t(CASE WHEN CAST((pc. urinalysis->>'testDate') AS DATE) > hc.date_visit\n" +
             "\t THEN 1 ELSE NULL END) AS urinaGreaterthanStatusDate,\n" +
             "\tiscommenced.encounter_date,\n" +
             "\t(CASE WHEN (CASE WHEN pe.date_enrolled IS NULL  THEN pe.date_started ELSE pe.date_enrolled END) < iscommenced.encounter_date\n" +
@@ -77,7 +66,7 @@ public interface PrepRepository extends JpaRepository<DQA, Long> {
             "\tselect DISTINCT ON (person_uuid) pc.person_uuid, pc.is_commencement, pc.encounter_date from prep_enrollment pe JOIN prep_clinic pc on pe.uuid = pc.prep_enrollment_uuid\n" +
             "\t\twhere is_commencement = true\n" +
             "\t) iscommenced ON pe.person_uuid = iscommenced.person_uuid\n" +
-            "\twhere hc.hiv_test_result is not null AND hc.hiv_test_result = 'Negative' AND pe.facility_id = ?1\n" +
+            "\twhere hc.hiv_test_result is not null AND hc.hiv_test_result = 'Negative' AND pe.facility_id = 1722\n" +
             ")\n" +
             "SELECT \n" +
             "  COUNT(prep_offered) AS pOfferredNumerator,\n" +
@@ -86,7 +75,7 @@ public interface PrepRepository extends JpaRepository<DQA, Long> {
             "  COUNT(prep_accepted) AS pAccepetedNumerator,\n" +
             "  COUNT(prep_offered) AS pAcceptedDenominator,\n" +
             "  ROUND((CAST(COUNT(prep_offered) AS DECIMAL) / COUNT(prep_offered)) * 100, 2) AS pAcceptedPerformance,\n" +
-            "  COUNT(date_enrolled_prep) AS pEnrollPrepdNumerator,\n" +
+            "  COUNT(date_enrolled_prep) AS pEnrollNumerator,\n" +
             "  COUNT(offAndAccpt) AS pEnrollDenominator,\n" +
             "  ROUND((CAST(COUNT(date_enrolled_prep) AS DECIMAL) / COUNT(offAndAccpt)) * 100, 2) AS pEnrollPerformance,\n" +
             "  COUNT(urinalysis) AS pEnrolledPrepUrinaNumerator,\n" +
@@ -102,7 +91,7 @@ public interface PrepRepository extends JpaRepository<DQA, Long> {
             "  COUNT(encounter_date) AS commencedDenominator,\n" +
             "  ROUND((CAST(COUNT(enrollDateLessThanCommenced) AS DECIMAL) / COUNT(encounter_date)) * 100, 2) AS commencedPerformance\n" +
             "FROM\n" +
-            "\tprepSummary", nativeQuery = true)
+            "\tprepSummary\n", nativeQuery = true)
     List<PrepSummaryDTOProjection> getPrepSummary(Long facilityId);
 
 

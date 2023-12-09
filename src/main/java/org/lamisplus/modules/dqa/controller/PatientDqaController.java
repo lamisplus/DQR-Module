@@ -55,7 +55,7 @@ public class PatientDqaController {
 
     //patient Demographic api
     @GetMapping(value = "/patient-demo", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PatientDTOProjection>> getPatientDemo(
+    public ResponseEntity<List<PatientDTOProjection>> getPatientDemo (
             //@RequestParam("facilityId") Long facility,
             @RequestParam("indicator") String indicator
     ) throws ExecutionException, InterruptedException {

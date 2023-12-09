@@ -22,9 +22,9 @@ public interface HtsSummaryDTOProjection {
     Integer getRecencyDenominator();
     Double getRecencyPerformance();
 
-    Integer getHasIndexNumerator();
-    Integer getHasIndexDenominator();
-    Double getHasIndexPerformance();
+    Integer getElicitedNumerator();
+    Integer getElicitedDenominator();
+    Double getElicitedPerformance();
 
     Integer getSettingsNumerator();
     Integer getSettingsDenominator();

@@ -126,17 +126,16 @@ const useStyles = makeStyles((theme) => ({
 
     const Hts = (props) => {
     const classes = useStyles();
-    const [clinical, setClinicals] = useState({});
+    const [hts, setHts] = useState({});
     const [facilities, setFacilities] = useState([]);
     const [showPatientDetail, setPatientDetail] = useState(false);
     const [getHeaderInfo, setGetHeaderInfo] = useState("");
-    const [clinicPatientsView, setClinicPatientsView] = useState([])
-    const [demographicOption, setDemographicOption] = useState()
+    const [htsPatientsView, setHtsPatientsView] = useState([])
 
 
      useEffect(() => {
       Facilities();
-      loadClinicals();
+      loadHts();
     }, []);
     const Facilities = () => {
     axios
@@ -150,26 +149,14 @@ const useStyles = makeStyles((theme) => ({
         console.log(error);
       });
   };
-//   const Facilities = () => {
-//     axios
-//       .get(`${baseUrl}account`, {
-//         headers: { Authorization: `Bearer ${token}` },
-//       })
-//       .then((response) => {
-//         setFacilities(response.data.currentOrganisationUnitId);
-//       })
-//       .catch((error) => {
-//         console.log(error);
-//       });
-//   };
 
-  const loadClinicals = () => {
+  const loadHts = () => {
     axios
-      .get(`${baseUrl}dqr/clinical-variable-summary?facilityId=${facilities}`, {
+      .get(`${baseUrl}dqr/hts-summary`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
-        setClinicals(response.data);
+        setHts(response.data);
         console.log(response.data)
       })
       .catch((error) => {
@@ -180,13 +167,13 @@ const useStyles = makeStyles((theme) => ({
   const viewDetail =(headerTitle,patientDemoObj)=>{
     setPatientDetail(true)
     setGetHeaderInfo(headerTitle)
-    const clinicDemo =patientDemoObj
+    const htsDemo =patientDemoObj
     axios
-          .get(`${baseUrl}dqr/patient-clinic?indicator=${clinicDemo}`, {
+          .get(`${baseUrl}dqr/patient-clinic?indicator=${htsDemo}`, {
             headers: { Authorization: `Bearer ${token}` },
           })
           .then((response) => {
-            setClinicPatientsView(response.data);
+            setHtsPatientsView(response.data);
             //console.log(response.data[0])
           })
           .catch((error) => {
@@ -199,7 +186,6 @@ const useStyles = makeStyles((theme) => ({
 
     return (
         <>
-           
             <Card className={classes.root}>
                 <CardContent>
                     <h3>Hts</h3>
@@ -236,9 +222,9 @@ const useStyles = makeStyles((theme) => ({
                                 <td>
                                 Proportion of HIV Positive patients (15yrs and above) who had recency test 
                                 </td>
-                                <td>{clinical[0]?.refillMonthNumerator}</td>
-                                <td>{clinical[0]?.refillMonthDenominator}</td>
-                                <td>{clinical[0]?.refillMonthPerformance} %</td>
+                                <td>{hts[0]?.totalPosNumerator}</td>
+                                <td>{hts[0]?.totalPosDenominator}</td>
+                                <td> </td>
                                 <td>
                                 <div>
                                     <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of HIV Positive patients (15yrs and above) who had recency test", "" )}> View</p>
@@ -252,9 +238,9 @@ const useStyles = makeStyles((theme) => ({
                                 <td>
                                 Proportion of HIV Positive patients with recency test (RECENT) done who have documented viral load sample collection date
                                 </td>
-                                <td>{clinical[0]?.startDateNumerator}</td>
-                                <td>{clinical[0]?.startDateDenominator}</td>
-                                <td>{clinical[0]?.startDatePerformance} %</td>
+                                <td>{hts[0]?.withVLNumerator}</td>
+                                <td>{hts[0]?.withVLDenominator}</td>
+                                <td>{hts[0]?.withVLPerformance} %</td>
                                 <td>
                                 <div>
                                     <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of HIV Positive patients with recency test (RECENT) done who have documented viral load sample collection date", "clinic0" )}> View</p>
@@ -268,9 +254,9 @@ const useStyles = makeStyles((theme) => ({
                                 <td>
                                 Proportion of HIV Positive patients with recency test (RECENT) done who have documented viral load confirmation result date 
                                 </td>
-                                <td>{clinical[0]?.confirmDateNumerator}</td>
-                                <td>{clinical[0]?.confirmDateDenominator}</td>
-                                <td>{clinical[0]?.confirmDatePerformance} %</td>
+                                <td>{hts[0]?.withVlResNumerator}</td>
+                                <td>{hts[0]?.withVlResDenominator}</td>
+                                <td>{hts[0]?.withVlResPerformance} %</td>
                                 <td>
                                 <div>
                                     <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of HIV Positive patients with recency test (RECENT) done who have documented viral load confirmation result date", "clinic3" )}> View</p>
@@ -284,9 +270,9 @@ const useStyles = makeStyles((theme) => ({
                                 <td>
                                 Proportion of HIV Positive patients with recency test (RECENT) done whose VL confirmation result date {">"} VL sample collection date
                                 </td>
-                                <td>{clinical[0]?.lastPickNumerator}</td>
-                                <td>{clinical[0]?.lastPickDenominator}</td>
-                                <td>{clinical[0]?.lastPickPerformance} %</td>
+                                <td>{hts[0]?.rsGreaterNumerator}</td>
+                                <td>{hts[0]?.rsGreaterPerformance}</td>
+                                <td>{hts[0]?.rsGreaterPerformance} %</td>
                                 <td>
                                 <div>
                                     <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of HIV Positive patients with recency test (RECENT) done whose VL confirmation result date > VL sample collection date", "patientDemo0" )}> View</p>
@@ -300,9 +286,9 @@ const useStyles = makeStyles((theme) => ({
                                 <td>
                                 Proportion of patients whose date of recency is equal or greater than date of HIV testing
                                 </td>
-                               <td>{clinical[0]?.ageNumerator}</td>
-                               <td>{clinical[0]?.ageDenominator}</td>
-                               <td>{clinical[0]?.agePerformance} %</td>
+                               <td>{hts[0]?.recencyNumerator}</td>
+                               <td>{hts[0]?.recencyDenominator}</td>
+                               <td>{hts[0]?.recencyPerformance} %</td>
                                 <td>
                                 <div>
                                     <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patients whose date of recency is equal or greater than date of HIV testing", "clinic3" )}> View</p>
@@ -314,14 +300,14 @@ const useStyles = makeStyles((theme) => ({
                                     6
                                 </th>
                                 <td>
-                                Proportion of patients whose date of recency is equal or greater than date of HIV testing
+                                Proportion of patients elicited/enumerated who are tested for HIV
                                 </td>
-                                <td>{clinical[0]?.regimenNumerator}</td>
-                                <td>{clinical[0]?.regimenDenominator}</td>
-                                <td>{clinical[0]?.regimenPerformance} %</td>
+                                <td>{hts[0]?.elicitedNumerator}</td>
+                                <td>{hts[0]?.elicitedDenominator}</td>
+                                <td>{hts[0]?.elicitedPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patients whose date of recency is equal or greater than date of HIV testing", "" )}> View</p>
+                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patients elicited/enumerated who are tested for HIV", "" )}> View</p>
                                 </div>
                                 </td>
                             </tr>
@@ -332,9 +318,9 @@ const useStyles = makeStyles((theme) => ({
                                 <td>
                                 Proportion of index patients with documented Testing Setting
                                 </td>
-                                <td>{clinical[0]?.targNumerator}</td>
-                                <td>{clinical[0]?.targDenominator}</td>
-                                <td>{clinical[0]?.targPerformance} %</td>
+                                <td>{hts[0]?.settingsNumerator}</td>
+                                <td>{hts[0]?.settingsDenominator}</td>
+                                <td>{hts[0]?.settingsPerformance} %</td>
                                 <td>
                                 <div>
                                     <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of index patients with documented Testing Setting", "clinic4" )}> View</p>
@@ -348,9 +334,9 @@ const useStyles = makeStyles((theme) => ({
                                 <td>
                                     Proportion of all active patients with documented target group
                                 </td>
-                                <td>{clinical[0]?.entryNumerator}</td>
-                                <td>{clinical[0]?.entryDenominator}</td>
-                                <td>{clinical[0]?.entryPerformance} %</td>
+                                <td>{hts[0]?.targNumerator}</td>
+                                <td>{hts[0]?.targDenominator}</td>
+                                <td>{hts[0]?.targPerformance} %</td>
                                 <td>
                                 <div>
                                     <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with documented target group", "clinic5" )}> View</p>
@@ -361,7 +347,7 @@ const useStyles = makeStyles((theme) => ({
                             </tbody>
                         </Table>
                         </>)}
-            {showPatientDetail &&(<>
+                        {showPatientDetail &&(<>
                       <Button
                         variant="contained"
                         style={{backgroundColor:"#014d88", }}
@@ -387,7 +373,7 @@ const useStyles = makeStyles((theme) => ({
                               { title: "Status", field: "status", filtering: false },
 
                             ]}
-                            data={ clinicPatientsView.map((row) => ({
+                            data={ htsPatientsView.map((row) => ({
                               //Id: manager.id,
                               hospitalNumber: row.hospitalNumber,
                               sex: row.sex,

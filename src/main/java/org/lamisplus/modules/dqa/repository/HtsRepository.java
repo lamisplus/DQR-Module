@@ -25,12 +25,13 @@ public interface HtsRepository extends JpaRepository<DQA, Long> {
             "\t(\n" +
             "select DISTINCT ON (person_uuid) hc.person_uuid, hc.client_code, hc.date_visit,  hc.target_group,  hie.hts_client_uuid, (CASE WHEN hc.index_client = 'true' THEN 1 ELSE null END) hasIndex,\n" +
             "hc.testing_setting,\n" +
-            "TRANSLATE((hc.extra-> 'gender')::varchar, '\",[,]', ' ')::VARCHAR(100) AS gender, (TRANSLATE((hc.extra-> 'date_of_birth')::varchar, '\",[,]', ' ')::VARCHAR(100))::DATE AS date_of_birth,\n" +
-            "CAST (EXTRACT(YEAR from AGE(NOW(), (TRANSLATE((hc.extra-> 'date_of_birth')::varchar, '\",[,]', ' ')::VARCHAR(100))::DATE)) AS INTEGER) AS age, hc.hiv_test_result,\n" +
+            "CAST((hc.extra->>'gender') AS VARCHAR(100)) AS gender, CAST((hc.extra->>'date_of_birth') AS DATE) AS date_of_birth, \n" +
+            "CAST(EXTRACT(YEAR FROM AGE(NOW(), CAST(hc.extra->>'date_of_birth' AS DATE))) AS INTEGER) AS age\n" +
+            ", hc.hiv_test_result,\n" +
             "(CASE WHEN hc.hiv_test_result = 'Positive' THEN 1 ELSE null END) AS posCount,\n" +
-            "(CASE WHEN CAST (EXTRACT(YEAR from AGE(NOW(), (TRANSLATE((hc.extra-> 'date_of_birth')::varchar, '\",[,]', ' ')::VARCHAR(100))::DATE)) AS INTEGER) > 15 THEN 1 ELSE null END) AS adultPos,\n" +
+            "(CASE WHEN CAST(EXTRACT(YEAR FROM AGE(NOW(), CAST(hc.extra->>'date_of_birth' AS DATE))) AS INTEGER) > 15 THEN 1 ELSE null END) AS adultPos,\n" +
             "recency->>'rencencyId' As recency,\n" +
-            "recency->>'rencencyInterpretation' AS RIta,lo.order_date::DATE,\n" +
+            "recency->>'rencencyInterpretation' AS RIta,CAST(lo.order_date AS DATE),\n" +
             "lr.result_reported, CAST(lr.date_result_reported AS DATE) AS resultdate, (CASE   WHEN recency->>'optOutRTRITestDate' IS NOT NULL   AND recency->>'optOutRTRITestDate' <> '' \n" +
             "  THEN CAST(recency->>'optOutRTRITestDate' AS DATE) \n" +
             "  ELSE NULL \n" +
