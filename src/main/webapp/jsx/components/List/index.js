@@ -15,6 +15,7 @@ import Clinicals  from './../DataConsistency/Clinical/index'
 import Biometric  from './../DataConsistency/Biometric/index'
 import PrEP from "../DataConsistency/PrEp";
 import Hts from "../DataConsistency/Hts";
+import TbScreening from "../DataConsistency/TbScreening";
 
 
 
@@ -102,7 +103,7 @@ const DQAList = (props) => {
     const [showNutrition, setShowNutrition] = useState(false);
     const [showGenderBase, setShowGenderBase] = useState(false);
     const [showChronicCondition, setShowChronicCondition] = useState(false);
-    const [showPositiveHealth, setShowPositiveHealth] = useState(false);
+    const [showTbScreening, setShowTbScreening] = useState(false);
     const [showReproductive, setShowReproductive] = useState(false);
     const [showTb, setShowTb] = useState(false);//Tpt
     const [showTpt, setShowTpt] = useState(false);
@@ -138,8 +139,8 @@ const DQAList = (props) => {
     const onClickChronicCondition =() =>{
         setShowChronicCondition(!showChronicCondition)
     }
-    const onClickPositiveHealth =() =>{
-        setShowPositiveHealth(!showPositiveHealth)
+    const onClickTbScreening =() =>{
+        setShowTbScreening(!showTbScreening)
     }
     const onClickReproductive =() =>{
         setShowReproductive(!showReproductive)
@@ -238,6 +239,16 @@ const DQAList = (props) => {
                                 </div>
                                 {showHts && (
                                     <Hts /> 
+                                )}
+                            </div>
+                            <div className="card">
+                                <div className="card-header" style={{backgroundColor:"#014d88",color:'#fff',fontWeight:'bolder',  borderRadius:"0.2rem"}}>
+                                    <h5 className="card-title" style={{color:'#fff'}}>TB</h5>
+                                    {showTbScreening===false  ? (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickTbScreening}><FaPlus /></span></>) :  (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickTbScreening}><FaAngleDown /></span> </>)}
+                                {/* console.log("Here*********") */}
+                                </div>
+                                {showTbScreening && (
+                                    <TbScreening /> 
                                 )}
                             </div>
                             <div className="card">

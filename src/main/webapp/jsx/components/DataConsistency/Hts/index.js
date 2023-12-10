@@ -169,7 +169,7 @@ const useStyles = makeStyles((theme) => ({
     setGetHeaderInfo(headerTitle)
     const htsDemo =patientDemoObj
     axios
-          .get(`${baseUrl}dqr/patient-clinic?indicator=${htsDemo}`, {
+          .get(`${baseUrl}dqr/hts-data=${htsDemo}`, {
             headers: { Authorization: `Bearer ${token}` },
           })
           .then((response) => {
@@ -227,7 +227,7 @@ const useStyles = makeStyles((theme) => ({
                                 <td> </td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of HIV Positive patients (15yrs and above) who had recency test", "" )}> View</p>
+                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of HIV Positive patients (15yrs and above) who had recency test", "hts0" )}> View</p>
                                 </div>
                                 </td>
                             </tr>
@@ -243,7 +243,7 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{hts[0]?.withVLPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of HIV Positive patients with recency test (RECENT) done who have documented viral load sample collection date", "clinic0" )}> View</p>
+                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of HIV Positive patients with recency test (RECENT) done who have documented viral load sample collection date", "hts1" )}> View</p>
                                 </div>
                                 </td>
                             </tr>
@@ -259,7 +259,7 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{hts[0]?.withVlResPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of HIV Positive patients with recency test (RECENT) done who have documented viral load confirmation result date", "clinic3" )}> View</p>
+                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of HIV Positive patients with recency test (RECENT) done who have documented viral load confirmation result date", "hts2" )}> View</p>
                                 </div>            
                                 </td>
                             </tr>
@@ -275,7 +275,7 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{hts[0]?.rsGreaterPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of HIV Positive patients with recency test (RECENT) done whose VL confirmation result date > VL sample collection date", "patientDemo0" )}> View</p>
+                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of HIV Positive patients with recency test (RECENT) done whose VL confirmation result date > VL sample collection date", "hts3" )}> View</p>
                                 </div>  
                                 </td>
                             </tr>
@@ -291,7 +291,7 @@ const useStyles = makeStyles((theme) => ({
                                <td>{hts[0]?.recencyPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patients whose date of recency is equal or greater than date of HIV testing", "clinic3" )}> View</p>
+                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patients whose date of recency is equal or greater than date of HIV testing", "hts4" )}> View</p>
                                 </div>
                                 </td>
                             </tr>
@@ -307,7 +307,7 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{hts[0]?.elicitedPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patients elicited/enumerated who are tested for HIV", "" )}> View</p>
+                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patients elicited/enumerated who are tested for HIV", "hts5" )}> View</p>
                                 </div>
                                 </td>
                             </tr>
@@ -323,7 +323,7 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{hts[0]?.settingsPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of index patients with documented Testing Setting", "clinic4" )}> View</p>
+                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of index patients with documented Testing Setting", "hts6" )}> View</p>
                                 </div>
                                 </td>
                             </tr>
@@ -339,7 +339,7 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{hts[0]?.targPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with documented target group", "clinic5" )}> View</p>
+                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with documented target group", "hts7" )}> View</p>
                                 </div>
                                 </td>
                             </tr>
@@ -347,7 +347,7 @@ const useStyles = makeStyles((theme) => ({
                             </tbody>
                         </Table>
                         </>)}
-                        {showPatientDetail &&(<>
+            {showPatientDetail &&(<>
                       <Button
                         variant="contained"
                         style={{backgroundColor:"#014d88", }}

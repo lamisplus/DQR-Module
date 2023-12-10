@@ -3,10 +3,7 @@ package org.lamisplus.modules.dqa.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.lamisplus.modules.dqa.domain.*;
-import org.lamisplus.modules.dqa.service.BiometricDQAService;
-import org.lamisplus.modules.dqa.service.CurrentUserOrganizationService;
-import org.lamisplus.modules.dqa.service.DQAService;
-import org.lamisplus.modules.dqa.service.PharmacyDQAService;
+import org.lamisplus.modules.dqa.service.*;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +23,8 @@ public class PatientDqaController {
     private final CurrentUserOrganizationService organizationService;
     private final PharmacyDQAService pharmacyDQAService;
     private final BiometricDQAService biometricDQAService;
+    private final HtsDQAService htsDQAService;
+    private final TbDQAService tbDQAService;
 
 
     // pharmacy api
@@ -52,6 +51,47 @@ public class PatientDqaController {
         return ResponseEntity.ok(result);
     }
 
+    // hts api
+    @GetMapping(value = "/hts-data", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<PatientDTOProjection>> getHtsData (
+            //@RequestParam("facilityId") Long facility,
+            @RequestParam("indicator") String indicator
+    ) throws ExecutionException, InterruptedException {
+        Long facilityId = organizationService.getCurrentUserOrganization();
+        List<PatientDTOProjection> result;
+
+        switch (indicator) {
+            case "hts0":
+                result = htsDQAService.getNoRecencyPos(facilityId);
+                break;
+            case "hts1":
+                result = htsDQAService.getRecentNoVlSampleDate(facilityId);
+                break;
+            case "hts2":
+                result = htsDQAService.getRecentNoVlSampleDateNoResult(facilityId);
+                break;
+            case "hts3":
+                result = htsDQAService.getRecentVlGreaterThanReportDate(facilityId);
+                break;
+            case "hts4":
+                result = htsDQAService.getRecentDateLessStatusDate(facilityId);
+                break;
+            case "hts5":
+                result = htsDQAService.getPosNotElicited(facilityId);
+                break;
+            case "hts6":
+                result = htsDQAService.getNoHtsTestSetting(facilityId);
+                break;
+            case "hts7":
+                result = htsDQAService.getHtsNoTargetGroup(facilityId);
+                break;
+            default:
+                // Handle unknown dataType
+                return ResponseEntity.badRequest().build();
+        }
+
+        return ResponseEntity.ok(result);
+    }
 
     //patient Demographic api
     @GetMapping(value = "/patient-demo", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -171,5 +211,11 @@ public class PatientDqaController {
     public ResponseEntity<List<HtsSummaryDTOProjection>> htsSummary () throws ExecutionException, InterruptedException {
         Long facility = organizationService.getCurrentUserOrganization();
         return ResponseEntity.ok(dqaService.getHtsSummary(facility));
+    }
+
+    @GetMapping(value = "/tb-summary", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<TbSummaryDTOProjection>> tbSummary () throws ExecutionException, InterruptedException {
+        Long facility = organizationService.getCurrentUserOrganization();
+        return ResponseEntity.ok(tbDQAService.getTbSummary(facility));
     }
 }
