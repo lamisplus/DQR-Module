@@ -48,12 +48,12 @@ public class PrepDqaController {
             case "prep4":
                 result = prepDQAService.getClientWithDateRegisterLessThanDateCommenced(facilityId);
                 break;
-//            case "prep5":
-//                result = validityService.getPatientNotWithinPeriod(facilityId);
-//                break;
-//            case "prep6":
-//                result = dqaService.getPatientWithoutAdd(facilityId);
-//                break;
+            case "prep5":
+                result = prepDQAService.getClientDateEnrollGreaterThanUrinalysis(facilityId);
+                break;
+            case "prep6":
+                result = prepDQAService.getClientUrinalysisGreaterThanStatusDate(facilityId);
+                break;
             default:
                 // Handle unknown dataType
                 return ResponseEntity.badRequest().build();

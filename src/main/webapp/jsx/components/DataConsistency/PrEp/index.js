@@ -310,7 +310,7 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{prep[0]?.purinaGreaterEnrollPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patients with date of current urinalysis > date of enrolment", "prep4" )}> View</p>
+                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patients with date of current urinalysis > date of enrolment", "prep5" )}> View</p>
                                     </div>
                                 </td>
                             </tr>
@@ -326,7 +326,7 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{prep[0]?.purinaGreaterStatusDatePerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patients with date of current urinalysis > date of HIV status", "" )}> View</p>
+                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patients with date of current urinalysis > date of HIV status", "prep6" )}> View</p>
                                     </div>
                                 </td>
                             </tr>

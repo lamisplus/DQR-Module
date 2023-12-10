@@ -44,6 +44,16 @@ public class PrepDQAService {
         return patientWithDateRegLessThanCommencedDate;
     }
 
+    public List<PatientDTOProjection> getClientUrinalysisGreaterThanStatusDate (Long facilityId) {
+        List<PatientDTOProjection> prepUrinalysisGreater = prepRepository.getUrinalysisGreaterThanStatusDate(currentUserOrganizationService.getCurrentUserOrganization());
+        return prepUrinalysisGreater;
+    }
+
+    public List<PatientDTOProjection> getClientDateEnrollGreaterThanUrinalysis (Long facilityId) {
+        List<PatientDTOProjection> patientpatientUrinalysisGreaterThanDateEnroll = prepRepository.getUrinalysisGreaterThanDateEnroll(currentUserOrganizationService.getCurrentUserOrganization());
+        return patientpatientUrinalysisGreaterThanDateEnroll;
+    }
+
 
 
     // summary

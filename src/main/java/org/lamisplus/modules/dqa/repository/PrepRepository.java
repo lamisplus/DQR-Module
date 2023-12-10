@@ -56,6 +56,51 @@ public interface PrepRepository extends JpaRepository<DQA, Long> {
             "AND hc.facility_id = ?1", nativeQuery = true)
     List<PatientDTOProjection> getDateRegisterLessThanDateCommenced(Long facilityId);
 
+    @Query(value = "SELECT DISTINCT ON (hc.person_uuid)\n" +
+            "       hc.client_code AS patientId,\n" +
+            "       hc.client_code AS hospitalNumber,\n" +
+            "       hc.extra->>'gender' AS sex,\n" +
+            "       CAST(hc.extra->>'age' AS INTEGER) AS age,\n" +
+            "       CAST(hc.extra->>'date_of_birth' AS DATE) AS dateOfBirth,\n" +
+            "       hc.hiv_test_result AS status\n" +
+            "FROM hts_client hc\n" +
+            "LEFT JOIN prep_enrollment pe ON pe.person_uuid = hc.person_uuid\n" +
+            "LEFT JOIN prep_clinic pc ON hc.person_uuid = pc.person_uuid\n" +
+            "WHERE hc.hiv_test_result IS NOT NULL\n" +
+            "  AND hc.hiv_test_result = 'Negative'\n" +
+            "  AND hc.prep_offered = TRUE\n" +
+            "  AND hc.prep_accepted = TRUE\n" +
+            "  AND (pc.urinalysis_result IS NOT NULL OR pc.urinalysis_result = '')\n" +
+            "  AND hc.facility_id = ?1\n" +
+            "GROUP BY hc.person_uuid, pc.urinalysis, hc.client_code, pc.urinalysis_result, hc.hiv_test_result, hc.extra, pe.date_enrolled\n" +
+            "HAVING pe.date_enrolled > CAST(MAX(pc.urinalysis->> 'testDate') AS DATE);\n", nativeQuery = true)
+    List<PatientDTOProjection> getUrinalysisGreaterThanDateEnroll(Long facilityId);
+
+
+    @Query(value = "SELECT DISTINCT ON (hc.person_uuid)\n" +
+            "       hc.client_code AS patientId,\n" +
+            "       hc.client_code AS hospitalNumber,\n" +
+            "       hc.extra->>'gender' AS sex,\n" +
+            "       CAST(hc.extra->>'age' AS INTEGER) AS age,\n" +
+            "       CAST(hc.extra->>'date_of_birth' AS DATE) AS dateOfBirth,\n" +
+            "       hc.hiv_test_result AS status\n" +
+            "FROM hts_client hc\n" +
+            "LEFT JOIN prep_enrollment pe ON pe.person_uuid = hc.person_uuid\n" +
+            "LEFT JOIN prep_clinic pc ON hc.person_uuid = pc.person_uuid\n" +
+            "WHERE hc.hiv_test_result IS NOT NULL\n" +
+            "  AND hc.hiv_test_result = 'Negative'\n" +
+            "  AND hc.prep_offered = TRUE\n" +
+            "  AND hc.prep_accepted = TRUE\n" +
+            "  AND (pc.urinalysis_result IS NOT NULL OR pc.urinalysis_result = '')\n" +
+            "  AND hc.facility_id = ?1\n" +
+            "  AND hc.archived != 1\n" +
+            "  AND pc.archived != 1\n" +
+            "  AND pe.archived != 1\n" +
+            "GROUP BY hc.person_uuid, pc.urinalysis, hc.client_code, pc.urinalysis_result, hc.hiv_test_result,\n" +
+            "hc.extra, pe.date_enrolled, pc.encounter_date\n" +
+            "HAVING pc.encounter_date > CAST(MAX(pc.urinalysis->> 'testDate') AS DATE)", nativeQuery = true)
+    List<PatientDTOProjection> getUrinalysisGreaterThanStatusDate(Long facilityId);
+
     // summary
     @Query(value = "WITH prepSummary AS (\n" +
             "\tSELECT DISTINCT ON (person_uuid) hc.person_uuid, hc.client_code, hc.date_visit,  (CASE WHEN hc.prep_offered = true  THEN 1 ELSE null END) AS prep_offered, \n" +
