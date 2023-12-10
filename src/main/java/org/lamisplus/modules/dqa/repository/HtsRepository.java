@@ -1,6 +1,7 @@
 package org.lamisplus.modules.dqa.repository;
 
 import org.lamisplus.modules.dqa.domain.HtsSummaryDTOProjection;
+import org.lamisplus.modules.dqa.domain.PatientDTOProjection;
 import org.lamisplus.modules.dqa.domain.entity.DQA;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -10,6 +11,38 @@ import java.util.List;
 
 @Repository
 public interface HtsRepository extends JpaRepository<DQA, Long> {
+
+
+    @Query(value = "", nativeQuery = true)
+    List<PatientDTOProjection> getPatientsWithoutSex(Long facilityId);
+//
+//    @Query(value = "", nativeQuery = true)
+//    List<PatientDTOProjection> getPatientsWithoutSex(Long facilityId);
+//
+//    @Query(value = "", nativeQuery = true)
+//    List<PatientDTOProjection> getPatientsWithoutSex(Long facilityId);
+//
+//    @Query(value = "", nativeQuery = true)
+//    List<PatientDTOProjection> getPatientsWithoutSex(Long facilityId);
+//
+//    @Query(value = "", nativeQuery = true)
+//    List<PatientDTOProjection> getPatientsWithoutSex(Long facilityId);
+//
+//
+//    @Query(value = "", nativeQuery = true)
+//    List<PatientDTOProjection> getPatientsWithoutSex(Long facilityId);
+//
+//    @Query(value = "", nativeQuery = true)
+//    List<PatientDTOProjection> getPatientsWithoutSex(Long facilityId);
+//
+//    @Query(value = "", nativeQuery = true)
+//    List<PatientDTOProjection> getPatientsWithoutSex(Long facilityId);
+//
+//    @Query(value = "", nativeQuery = true)
+//    List<PatientDTOProjection> getPatientsWithoutSex(Long facilityId);
+//
+//    @Query(value = "", nativeQuery = true)
+//    List<PatientDTOProjection> getPatientsWithoutSex(Long facilityId);
 
     @Query(value = "WITH htsSummary AS (\n" +
             "\tSELECT person_uuid, client_code, date_visit, target_group, hts_client_uuid, hasindex, testing_setting, gender,date_of_birth, age, hiv_test_result, poscount, adultPos,\n" +
