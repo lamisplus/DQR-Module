@@ -18,6 +18,7 @@ import Hts from "../DataConsistency/Hts";
 import TbScreening from "../DataConsistency/TbScreening";
 import Laboratory from "../DataConsistency/Laboratory";
 import ValidityReport from "../DataValidity/ValidityReport";
+import EAC from "../DataConsistency/Eac";
 
 
 
@@ -107,7 +108,7 @@ const DQAList = (props) => {
     const [showChronicCondition, setShowChronicCondition] = useState(false);
     const [showTbScreening, setShowTbScreening] = useState(false);
     const [showReproductive, setShowReproductive] = useState(false);
-    const [showTb, setShowTb] = useState(false);//Tpt
+    const [showEac, setShowEac] = useState(false);//Tpt
     const [showTpt, setShowTpt] = useState(false);
     const [showLaboratory, setShowLaboratory] = useState(false);
     const [showValidityReport, setShowValidityReport] = useState(false);
@@ -155,8 +156,8 @@ const DQAList = (props) => {
     const onClickReproductive =() =>{
         setShowReproductive(!showReproductive)
     }
-    const onClickTpt =() =>{
-        setShowTpt(!showTpt)
+    const onClickEac =() =>{
+        setShowEac(!showEac)
     }
 
     return (
@@ -231,9 +232,12 @@ const DQAList = (props) => {
                             <div className="card">
                                 <div className="card-header" style={{backgroundColor:"#014d88",color:'#fff',fontWeight:'bolder',  borderRadius:"0.2rem"}}>
                                     <h5 className="card-title" style={{color:'#fff'}}>EAC</h5>
-                                    {showNutrition===false  ? (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickNutrition}><FaPlus /></span></>) :  (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickNutrition}><FaAngleDown /></span> </>)}
+                                    {showEac===false  ? (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickEac}><FaPlus /></span></>) :  (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickEac}><FaAngleDown /></span> </>)}
                                     
                                 </div>
+                                {showEac && (
+                                    <EAC /> 
+                                )}
 
                             </div>
                             <div className="card">
