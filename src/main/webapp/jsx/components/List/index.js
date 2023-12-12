@@ -17,6 +17,7 @@ import PrEP from "../DataConsistency/PrEp";
 import Hts from "../DataConsistency/Hts";
 import TbScreening from "../DataConsistency/TbScreening";
 import Laboratory from "../DataConsistency/Laboratory";
+import ValidityReport from "../DataValidity/ValidityReport";
 
 
 
@@ -109,12 +110,16 @@ const DQAList = (props) => {
     const [showTb, setShowTb] = useState(false);//Tpt
     const [showTpt, setShowTpt] = useState(false);
     const [showLaboratory, setShowLaboratory] = useState(false);
+    const [showValidityReport, setShowValidityReport] = useState(false);
 
     const onClickDemographics =() =>{
         setShowDemographic(!showDemographics)
     }
     const onClickLaboratory =() =>{
         setShowLaboratory(!showLaboratory)
+    }
+    const onClickValidityReport =() =>{
+        setShowValidityReport(!showValidityReport)
     }
     const onClickClinical =() =>{
         setShowClinical(!showClinical)
@@ -272,8 +277,11 @@ const DQAList = (props) => {
                             <div className="card">
                                 <div className="card-header" style={{backgroundColor:"#014d88",color:'#fff',fontWeight:'bolder',  borderRadius:"0.2rem"}}>
                                     <h5 className="card-title" style={{color:'#fff'}}>Data Validation Report</h5>
-                                    {showNutrition===false  ? (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickNutrition}><FaPlus /></span></>) :  (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickNutrition}><FaAngleDown /></span> </>)}
+                                    {showValidityReport===false  ? (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickValidityReport}><FaPlus /></span></>) :  (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickValidityReport}><FaAngleDown /></span> </>)}
                                 </div>
+                                {showValidityReport && (
+                                  <ValidityReport />
+                                 )}
 
                             </div>
                             <br />
