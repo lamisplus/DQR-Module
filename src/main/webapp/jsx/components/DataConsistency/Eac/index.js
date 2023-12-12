@@ -152,7 +152,7 @@ const EAC = (props) => {
 
   const loadEac = () => {
     axios
-      .get(`${baseUrl}dqr/clinical-variable-summary?facilityId=${facilities}`, {
+      .get(`${baseUrl}dqr/eac-summary`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
@@ -224,9 +224,9 @@ const EAC = (props) => {
                                 <td>
                                     Proportion of eligible patients with documented EAC commencement date
                                 </td>
-                                <td></td>
-                                <td></td>
-                                <td> %</td>
+                                <td>{eac[0]?.eacCommencedNumerator}</td>
+                                <td>{eac[0]?.eacCommencedDenominator}</td>
+                                <td>{eac[0]?.eacCommencedPerformance} %</td>
                                 <td>
                                 <div>
                                     <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of eligible patients with documented EAC commencement date", "" )}> View</p>
@@ -240,17 +240,13 @@ const EAC = (props) => {
                                 <td>
                                     Proportion of patient with completed EAC session with VL sample collection date documented 
                                 </td>
+                                <td>{eac[0]?.eacComDateNumerator}</td>
+                                <td>{eac[0]?.eacComDateDenominator}</td>
+                                <td>{eac[0]?.eacComDatePerformance} %</td>
                                 <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
+                                <div>
+                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patient with completed EAC session with VL sample collection date documented", "" )}> View</p>
+                                </div>
                                 </td>
                             </tr>
                             <tr>
@@ -260,18 +256,15 @@ const EAC = (props) => {
                                 <td>
                                     Proportion of patient who completed EAC with documented VL result for post EAC
                                 </td>
+                                <td>{eac[0]?.postEacNumerator}</td>
+                                <td>{eac[0]?.postEacDenominator}</td>
+                                <td>{eac[0]?.postEacPerformance} %</td>
                                 <td>
-                                    
+                                <div>
+                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patient who completed EAC with documented VL result for post EAC", "" )}> View</p>
+                                </div>
                                 </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
+                            
                             </tr>
                             
 

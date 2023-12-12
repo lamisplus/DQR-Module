@@ -28,6 +28,8 @@ public class PatientDqaController {
     private final TbDQAService tbDQAService;
     private final LaboratoryDQAService laboratoryDQAService;
     private final DataValidityService validityService;
+    private final EacDQAService eacDQAService;
+
 
     // data validity api
     @GetMapping(value = "/patient-validity", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -272,6 +274,13 @@ public class PatientDqaController {
     public ResponseEntity<List<ValiditySummaryDTOProjection>> validitySummary () throws ExecutionException, InterruptedException {
         Long facility = organizationService.getCurrentUserOrganization();
         return ResponseEntity.ok(validityService.getValidityDataSummary(facility));
+    }
+
+    //eac summary
+    @GetMapping(value = "/eac-summary", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<EacDTOProjection>> eacSummary () throws ExecutionException, InterruptedException {
+        Long facility = organizationService.getCurrentUserOrganization();
+        return ResponseEntity.ok(eacDQAService.getEacSummary(facility));
     }
 
 }
