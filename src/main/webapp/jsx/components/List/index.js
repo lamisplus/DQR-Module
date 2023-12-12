@@ -16,6 +16,7 @@ import Biometric  from './../DataConsistency/Biometric/index'
 import PrEP from "../DataConsistency/PrEp";
 import Hts from "../DataConsistency/Hts";
 import TbScreening from "../DataConsistency/TbScreening";
+import Laboratory from "../DataConsistency/Laboratory";
 
 
 
@@ -107,9 +108,13 @@ const DQAList = (props) => {
     const [showReproductive, setShowReproductive] = useState(false);
     const [showTb, setShowTb] = useState(false);//Tpt
     const [showTpt, setShowTpt] = useState(false);
+    const [showLaboratory, setShowLaboratory] = useState(false);
 
     const onClickDemographics =() =>{
         setShowDemographic(!showDemographics)
+    }
+    const onClickLaboratory =() =>{
+        setShowLaboratory(!showLaboratory)
     }
     const onClickClinical =() =>{
         setShowClinical(!showClinical)
@@ -209,8 +214,11 @@ const DQAList = (props) => {
                             <div className="card">
                                 <div className="card-header" style={{backgroundColor:"#014d88",color:'#fff',fontWeight:'bolder',  borderRadius:"0.2rem"}}>
                                     <h5 className="card-title" style={{color:'#fff'}}>Laboratory</h5>
-                                    {showTpt===false  ? (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickTpt}><FaPlus /></span></>) :  (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickTpt}><FaAngleDown /></span> </>)}
+                                    {showLaboratory===false  ? (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickLaboratory}><FaPlus /></span></>) :  (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickLaboratory}><FaAngleDown /></span> </>)}
                                 </div>
+                                {showLaboratory && (
+                                    <Laboratory /> 
+                                )}
 
                             </div>
                             {/* End TPT MONITORING */}

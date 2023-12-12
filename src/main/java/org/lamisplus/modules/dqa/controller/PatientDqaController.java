@@ -25,6 +25,7 @@ public class PatientDqaController {
     private final BiometricDQAService biometricDQAService;
     private final HtsDQAService htsDQAService;
     private final TbDQAService tbDQAService;
+    private final LaboratoryDQAService laboratoryDQAService;
 
 
     // pharmacy api
@@ -213,9 +214,17 @@ public class PatientDqaController {
         return ResponseEntity.ok(dqaService.getHtsSummary(facility));
     }
 
+    //tb summary api
     @GetMapping(value = "/tb-summary", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<TbSummaryDTOProjection>> tbSummary () throws ExecutionException, InterruptedException {
         Long facility = organizationService.getCurrentUserOrganization();
         return ResponseEntity.ok(tbDQAService.getTbSummary(facility));
+    }
+
+    //vl summary api
+    @GetMapping(value = "/laboratory-summary", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<LaboratoryDTOProjection>> labSummary () throws ExecutionException, InterruptedException {
+        Long facility = organizationService.getCurrentUserOrganization();
+        return ResponseEntity.ok(laboratoryDQAService.getLabsummary(facility));
     }
 }
