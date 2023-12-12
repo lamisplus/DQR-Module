@@ -3,6 +3,7 @@ package org.lamisplus.modules.dqa.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.lamisplus.modules.dqa.domain.*;
+import org.lamisplus.modules.dqa.domain.entity.ValiditySummaryDTOProjection;
 import org.lamisplus.modules.dqa.service.*;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -266,5 +267,11 @@ public class PatientDqaController {
         return ResponseEntity.ok(laboratoryDQAService.getLabsummary(facility));
     }
 
+    // data validity Summary
+    @GetMapping(value = "/validity-summary", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<ValiditySummaryDTOProjection>> validitySummary () throws ExecutionException, InterruptedException {
+        Long facility = organizationService.getCurrentUserOrganization();
+        return ResponseEntity.ok(validityService.getValidityDataSummary(facility));
+    }
 
 }

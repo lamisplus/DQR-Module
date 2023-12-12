@@ -3,6 +3,7 @@ package org.lamisplus.modules.dqa.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.lamisplus.modules.dqa.domain.PatientDTOProjection;
+import org.lamisplus.modules.dqa.domain.entity.ValiditySummaryDTOProjection;
 import org.lamisplus.modules.dqa.repository.DataValidityRepository;
 import org.springframework.stereotype.Service;
 
@@ -53,4 +54,11 @@ public class DataValidityService {
         List<PatientDTOProjection> cWithoutVlRange = validityRepository.getPatientsWithViralLoadDateLessThan1985(currentUserOrganizationService.getCurrentUserOrganization());
         return cWithoutVlRange;
     }
+
+    public List<ValiditySummaryDTOProjection> getValidityDataSummary (Long facilityId) {
+        List<ValiditySummaryDTOProjection> validitySummary = validityRepository.getPatientValiditySummary(currentUserOrganizationService.getCurrentUserOrganization());
+        return validitySummary;
+    }
+
+
 }
