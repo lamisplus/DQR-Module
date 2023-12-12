@@ -119,23 +119,23 @@ const useStyles = makeStyles((theme) => ({
 
   const ValidityReportDQA = (props) => {
   const classes = useStyles();
-  const [demographics, setDemographic] = useState({});
+  const [validity, setValidity] = useState({});
   const [showPatientDetail, setPatientDetail] = useState(false);
   const [getHeaderInfo, setGetHeaderInfo] = useState("");
-  const [demographicsPatientsView, setDemographicsPatientsView] = useState([])
+  const [validityPatientsView, setValidityPatientsView] = useState([])
 
     useEffect(() => {
-      loadDemography();
+      loadValidity();
     }, []);
 
     
-  const loadDemography = () => {
+  const loadValidity = () => {
     axios
-      .get(`${baseUrl}dqr/patient-demo-summary`, {
+      .get(`${baseUrl}dqr/validity-summary`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
-        setDemographic(response.data);
+        setValidity(response.data);
         console.log(response.data)
       })
       .catch((error) => {
@@ -146,13 +146,13 @@ const useStyles = makeStyles((theme) => ({
   const viewDetail =(headerTitle,patientDemoObj)=>{
   setPatientDetail(true)
   setGetHeaderInfo(headerTitle)
-  const patientDemo =patientDemoObj
+  const validityDemo =patientDemoObj
   axios
-        .get(`${baseUrl}dqr/patient-validity?indicator=${patientDemo}`, {
+        .get(`${baseUrl}dqr/patient-validity?indicator=${validityDemo}`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((response) => {
-          setDemographicsPatientsView(response.data);
+          setValidityPatientsView(response.data);
           //console.log(response.data[0])
         })
         .catch((error) => {
@@ -167,7 +167,7 @@ const useStyles = makeStyles((theme) => ({
     <>
       <Card className={classes.root}>
         <CardContent>
-          <h3>Demographics Variables</h3>
+          <h3>Data Validation Report</h3>
           <div className="col-xl-12 col-lg-12">
           {!showPatientDetail &&(<>
             <Table bordered>
@@ -187,9 +187,9 @@ const useStyles = makeStyles((theme) => ({
                   <td>
                       Proportion of all active patients with Date of birth after 1920
                   </td>
-                  <td>{demographics[0]?.dobNumerator}</td>
-                  <td>{demographics[0]?.dobDenominator}</td>
-                  <td>{demographics[0]?.dobPerformance} %</td>
+                  <td>{validity[0]?.normalDobNumerator}</td>
+                  <td>{validity[0]?.normalDobDenominator}</td>
+                  <td>{validity[0]?.normalDobPerformance} %</td>
                   <td>
                   <div>
 
@@ -203,9 +203,9 @@ const useStyles = makeStyles((theme) => ({
                   <td>
                       Proportion of all active patients with Age at ART initiation (from ages of 0-90 years)
                   </td>
-                  <td>{demographics[0]?.ageNumerator}</td>
-                   <td>{demographics[0]?.ageDenominator}</td>
-                   <td>{demographics[0]?.agePerformance} %</td>
+                  <td>{validity[0]?.ageInitiatedNumerator}</td>
+                   <td>{validity[0]?.ageInitiatedDenominator}</td>
+                   <td>{validity[0]?.ageInitiatedPerformance} %</td>
                   <td>
                   <div>
 
@@ -219,9 +219,9 @@ const useStyles = makeStyles((theme) => ({
                   <td>
                       Proportion of patient with ART start date (from 1985 to current calendar year)
                   </td>
-                  <td>{demographics[0]?.pidNumerator}</td>
-                  <td>{demographics[0]?.pidDenominator}</td>
-                  <td>{demographics[0]?.pidPerformance} %</td>
+                  <td>{validity[0]?.startDateNumerator}</td>
+                  <td>{validity[0]?.startDateDenominator}</td>
+                  <td>{validity[0]?.startDatePerformance} %</td>
                   <td>
                   <div>
 
@@ -233,9 +233,9 @@ const useStyles = makeStyles((theme) => ({
                 <tr>
                   <th scope="row">4</th>
                   <td>Proportion of eligible patient with First confirmed HIV test date (from 1985 to current calendar year)</td>
-                  <td>{demographics[0]?.sexNumerator}</td>
-                  <td>{demographics[0]?.sexDenominator}</td>
-                  <td>{demographics[0]?.sexPerformance} %</td>
+                  <td>{validity[0]?.hivDateNumerator}</td>
+                  <td>{validity[0]?.hivDateDenominator}</td>
+                  <td>{validity[0]?.hivDatePerformance} %</td>
                   <td><div>
 
                     <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of eligible patient with First confirmed HIV test date (from 1985 to current calendar year)", "validity3" )}> View</p>
@@ -248,9 +248,9 @@ const useStyles = makeStyles((theme) => ({
                   <td>
                       Proportion of patient with Date of viral load result (from 1985 to current calendar year)
                   </td>
-                  <td>{demographics[0]?.eduNumerator}</td>
-                  <td>{demographics[0]?.eduDenominator}</td>
-                  <td>{demographics[0]?.eduPerformance} %</td>
+                  <td>{validity[0]?.vlDateNumerator}</td>
+                  <td>{validity[0]?.vlDateDenominator}</td>
+                  <td>{validity[0]?.vlDatePerformance} %</td>
                   <td>
                     <div>
                       <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patient with Date of viral load result (from 1985 to current calendar year)", "validity6" )}> View</p>
@@ -262,9 +262,9 @@ const useStyles = makeStyles((theme) => ({
                   <td>
                       Proportion of all patients with valid Biometric fingerprint captured
                   </td>
-                  <td>{demographics[0]?.maritalNumerator}</td>
-                  <td>{demographics[0]?.maritalDenominator}</td>
-                  <td>{demographics[0]?.maritalPerformance} %</td>
+                  <td>{validity[0]?.bioNumerator}</td>
+                  <td>{validity[0]?.bioDenominator}</td>
+                  <td>{validity[0]?.bioPerformance} %</td>
                   <td>
                   <div>
                       <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all patients with valid Biometric fingerprint captured", "validity4" )}> View</p>
@@ -274,14 +274,14 @@ const useStyles = makeStyles((theme) => ({
                 <tr>
                   <th scope="row">7</th>
                   <td>
-                  Proportion of patients with Days of ARV refill (between 14 - 180 days)
+                      Proportion of patients with Days of ARV refill (between 14 - 180 days)
                   </td>
-                  <td>{demographics[0]?.employNumerator}</td>
-                  <td>{demographics[0]?.employDenominator}</td>
-                  <td>{demographics[0]?.employPerformance} %</td>
+                  <td>{validity[0]?.regimenNumerator}</td>
+                  <td>{validity[0]?.regimenDenominator}</td>
+                  <td>{validity[0]?.regimenPerformance} %</td>
                   <td>
                   <div>
-                      <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with documented occupational status", "validity4" )}> View</p>
+                      <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patients with Days of ARV refill (between 14 - 180 days)", "validity4" )}> View</p>
                     </div>
                   </td>
                 </tr>
@@ -315,7 +315,7 @@ const useStyles = makeStyles((theme) => ({
                               { title: "Status", field: "status", filtering: false },
 
                             ]}
-                            data={ demographicsPatientsView.map((row) => ({
+                            data={ validityPatientsView.map((row) => ({
                               //Id: manager.id,
                               hospitalNumber: row.hospitalNumber,
                               sex: row.sex,
