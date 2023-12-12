@@ -106,4 +106,39 @@ public interface DataValidityRepository extends JpaRepository<DQA, Long> {
             "  ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getPatientsWithArvRefillPeriodBetweennFourteenAndOneHundredAndEight (Long facilityId);
 
+    @Query(value = " SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex, \n" +
+            "  p.date_of_birth AS dateOfBirth, vl.dateOfLastViralLoad\n" +
+            "  FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "  LEFT JOIN (\n" +
+            "\t\tSELECT DISTINCT ON(lo.patient_uuid) lo.patient_uuid as person_uuid, ll.lab_test_name as test,\n" +
+            "\t\tbac_viral_load.display AS viralLoadType, ls.date_sample_collected as dateSampleCollected,\n" +
+            "-- \t\tCASE WHEN lr.result_reported ~ E'^\\\\d+(\\\\.\\\\d+)?$' THEN CAST(lr.result_reported AS DECIMAL)\n" +
+            "--            ELSE NULL END AS lastViralLoad, \n" +
+            "\t\t\tlr.result_reported AS lastViralLoad,\n" +
+            "\t\t\tlr.date_sample_received_at_pcr_lab AS pcrDate,\n" +
+            "\t\t\tlr.date_result_reported as dateOfLastViralLoad\n" +
+            "\t\tFROM laboratory_order lo\n" +
+            "\t\tLEFT JOIN ( SELECT patient_uuid, MAX(order_date) AS MAXDATE FROM laboratory_order lo\n" +
+            "\t\tGROUP BY patient_uuid ORDER BY MAXDATE ASC ) AS current_lo\n" +
+            "\t\tON current_lo.patient_uuid=lo.patient_uuid AND current_lo.MAXDATE=lo.order_date\n" +
+            "\t\tLEFT JOIN laboratory_test lt ON lt.lab_order_id=lo.id AND lt.patient_uuid = lo.patient_uuid\n" +
+            "\t\tLEFT JOIN base_application_codeset bac_viral_load ON bac_viral_load.id=lt.viral_load_indication\n" +
+            "\t\tLEFT JOIN laboratory_labtest ll ON ll.id=lt.lab_test_id\n" +
+            "\t\tINNER JOIN hiv_enrollment h ON h.person_uuid=current_lo.patient_uuid\n" +
+            "\t\tLEFT JOIN laboratory_sample ls ON ls.test_id=lt.id AND ls.patient_uuid = lo.patient_uuid\n" +
+            "\t\tLEFT JOIN laboratory_result lr ON lr.test_id=lt.id AND lr.patient_uuid = lo.patient_uuid\n" +
+            "\t\tWHERE  lo.archived=0\n" +
+            "\t\t) vl ON e.person_uuid = vl.person_uuid\n" +
+            "  LEFT JOIN\n" +
+            "  (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date, hac.pregnancy_status  FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "  GROUP BY hac.person_uuid, hac.visit_date, hac.pregnancy_status)ca ON p.uuid = ca.person_uuid\n" +
+            "  LEFT JOIN (SELECT person_uuid, max(visit_date) as lastPS from hiv_art_clinical where archived=0 \n" +
+            "  group by person_uuid, visit_date ORDER BY lastPS DESC LIMIT 1) lasPreg ON p.uuid = lasPreg.person_uuid\n" +
+            "  LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
+            "  WHERE p.archived=0 AND p.facility_id= 1722 AND EXTRACT(YEAR FROM vl.dateOfLastViralLoad) < 1985\n" +
+            "  GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ca.visit_date, ca.pregnancy_status, vl.dateOfLastViralLoad\n" +
+            "  ORDER BY p.id DESC", nativeQuery = true)
+    List<PatientDTOProjection> getPatientsWithViralLoadDateLessThan1985 (Long facilityId);
+
+
 }

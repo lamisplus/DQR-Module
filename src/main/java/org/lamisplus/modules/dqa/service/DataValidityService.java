@@ -48,4 +48,9 @@ public class DataValidityService {
         List<PatientDTOProjection> cWithoutRange = validityRepository.getPatientsWithArvRefillPeriodBetweennFourteenAndOneHundredAndEight(currentUserOrganizationService.getCurrentUserOrganization());
         return cWithoutRange;
     }
+
+    public List<PatientDTOProjection> getViralLodDateRange (Long facilityId) {
+        List<PatientDTOProjection> cWithoutVlRange = validityRepository.getPatientsWithViralLoadDateLessThan1985(currentUserOrganizationService.getCurrentUserOrganization());
+        return cWithoutVlRange;
+    }
 }

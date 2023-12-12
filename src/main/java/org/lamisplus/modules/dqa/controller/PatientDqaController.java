@@ -26,7 +26,45 @@ public class PatientDqaController {
     private final HtsDQAService htsDQAService;
     private final TbDQAService tbDQAService;
     private final LaboratoryDQAService laboratoryDQAService;
+    private final DataValidityService validityService;
 
+    // data validity api
+    @GetMapping(value = "/patient-validity", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<PatientDTOProjection>> getPatientValidityData(
+            @RequestParam("indicator") String indicator
+    ) throws ExecutionException, InterruptedException {
+        Long facilityId = organizationService.getCurrentUserOrganization();
+        List<PatientDTOProjection> result;
+
+        switch (indicator) {
+            case "validity0":
+                result = validityService.getPatientWithDobLessThanNineteenTwenty(facilityId);
+                break;
+            case "validity1":
+                result = validityService.getPatientWithAgeBetweenZeroAndNinety(facilityId);
+                break;
+            case "validity2":
+                result = validityService.getPatientWithArtStartDateLessThanNinetyEightyFive(facilityId);
+                break;
+            case "validity3":
+                result = validityService.getPatientWithHivConfirmDateLessThanNinetyEightyFive(facilityId);
+                break;
+            case "validity4":
+                result = validityService.getPatientWithoutValidBiometric(facilityId);
+                break;
+            case "validity5":
+                result = validityService.getPatientNotWithinPeriod(facilityId);
+                break;
+            case "validity6":
+                result = validityService.getViralLodDateRange(facilityId);
+                break;
+            default:
+                // Handle unknown dataType
+                return ResponseEntity.badRequest().build();
+        }
+
+        return ResponseEntity.ok(result);
+    }
 
     // pharmacy api
     @GetMapping(value = "/patient-pharmacy", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -227,4 +265,6 @@ public class PatientDqaController {
         Long facility = organizationService.getCurrentUserOrganization();
         return ResponseEntity.ok(laboratoryDQAService.getLabsummary(facility));
     }
+
+
 }

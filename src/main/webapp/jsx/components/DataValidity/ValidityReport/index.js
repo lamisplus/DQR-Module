@@ -148,7 +148,7 @@ const useStyles = makeStyles((theme) => ({
   setGetHeaderInfo(headerTitle)
   const patientDemo =patientDemoObj
   axios
-        .get(`${baseUrl}dqr/patient-demo?indicator=${patientDemo}`, {
+        .get(`${baseUrl}dqr/patient-validity?indicator=${patientDemo}`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((response) => {
@@ -193,7 +193,7 @@ const useStyles = makeStyles((theme) => ({
                   <td>
                   <div>
 
-                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Date of Birth (DOB)", "patientDemo0" )}> View</p>
+                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Date of Birth (DOB)", "validity0" )}> View</p>
 
                     </div>
                   </td>
@@ -209,7 +209,7 @@ const useStyles = makeStyles((theme) => ({
                   <td>
                   <div>
 
-                  <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Current Age", "patientDemo1" )}> View</p>
+                  <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Age at ART initiation (from ages of 0-90 years)", "validity1" )}> View</p>
 
                   </div>
                   </td>
@@ -225,7 +225,7 @@ const useStyles = makeStyles((theme) => ({
                   <td>
                   <div>
 
-                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Patient Identifier", "patientDemo2" )}> View</p>
+                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patient with ART start date (from 1985 to current calendar year)", "validity2" )}> View</p>
 
                     </div>
                   </td>
@@ -238,7 +238,7 @@ const useStyles = makeStyles((theme) => ({
                   <td>{demographics[0]?.sexPerformance} %</td>
                   <td><div>
 
-                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Sex", "patientDemo3" )}> View</p>
+                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of eligible patient with First confirmed HIV test date (from 1985 to current calendar year)", "validity3" )}> View</p>
 
                   </div>
                   </td>
@@ -253,7 +253,7 @@ const useStyles = makeStyles((theme) => ({
                   <td>{demographics[0]?.eduPerformance} %</td>
                   <td>
                     <div>
-                      <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with a documented educational Status", "patientDemo4" )}> View</p>
+                      <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patient with Date of viral load result (from 1985 to current calendar year)", "validity6" )}> View</p>
                     </div>
                   </td>
                 </tr>
@@ -267,7 +267,7 @@ const useStyles = makeStyles((theme) => ({
                   <td>{demographics[0]?.maritalPerformance} %</td>
                   <td>
                   <div>
-                      <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with a documented marital", "patientDemo5" )}> View</p>
+                      <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all patients with valid Biometric fingerprint captured", "validity4" )}> View</p>
                     </div>
                   </td>
                 </tr>
@@ -281,7 +281,7 @@ const useStyles = makeStyles((theme) => ({
                   <td>{demographics[0]?.employPerformance} %</td>
                   <td>
                   <div>
-                      <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with documented occupational status", "patientDemo6" )}> View</p>
+                      <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with documented occupational status", "validity4" )}> View</p>
                     </div>
                   </td>
                 </tr>
