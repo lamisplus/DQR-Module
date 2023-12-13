@@ -26,5 +26,21 @@ public interface TbSummaryDTOProjection {
     Integer getTptstartDenominator();
     Double getTptstartPerformance();
 
+    Integer getIptEliStartNumerator();
+    Integer getIptEliStartDenominator();
+    Double getIptEliStartPerformance();
+
+    Integer getIpt6monthComplNumerator();
+    Integer getIpt6monthComplDenominator();
+    Double getIpt6monthComplPerformance();
+
+    Integer getIptComplStatususNumerator();
+    Integer getIptComplStatususDenominator();
+    Double getIptComplStatususPerformance();
+
+    Integer getIptTypeStatusNumerator();
+    Integer getIptTypeStatusDenominator();
+    Double getIptTypeStatusPerformance();
+
 
 }
