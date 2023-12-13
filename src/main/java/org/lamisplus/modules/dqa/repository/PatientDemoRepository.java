@@ -113,7 +113,7 @@ public interface PatientDemoRepository extends JpaRepository<DQA, Long> {
             "  (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "  GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
             "  LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "  WHERE p.archived=0 AND p.facility_id= 1722 AND e.unique_id IS NULL\n" +
+            "  WHERE p.archived=0 AND p.facility_id= ?1 AND e.unique_id IS NULL\n" +
             "  GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth\n" +
             "  ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getPatientWithoutIdentifier (Long facilityId);

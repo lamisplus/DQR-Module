@@ -13,7 +13,6 @@ import java.util.List;
 public interface DataValidityRepository extends JpaRepository<DQA, Long> {
 
 
-    // Remember to implement for Laboratory DQA on this Repository
     @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex\n" +
             ",p.date_of_birth AS dateOfBirth\n" +
             "  FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
@@ -136,7 +135,7 @@ public interface DataValidityRepository extends JpaRepository<DQA, Long> {
             "  LEFT JOIN (SELECT person_uuid, max(visit_date) as lastPS from hiv_art_clinical where archived=0 \n" +
             "  group by person_uuid, visit_date ORDER BY lastPS DESC LIMIT 1) lasPreg ON p.uuid = lasPreg.person_uuid\n" +
             "  LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "  WHERE p.archived=0 AND p.facility_id= 1722 AND EXTRACT(YEAR FROM vl.dateOfLastViralLoad) < 1985\n" +
+            "  WHERE p.archived=0 AND p.facility_id= ?1 AND EXTRACT(YEAR FROM vl.dateOfLastViralLoad) < 1985\n" +
             "  GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ca.visit_date, ca.pregnancy_status, vl.dateOfLastViralLoad\n" +
             "  ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getPatientsWithViralLoadDateLessThan1985 (Long facilityId);
@@ -193,7 +192,7 @@ public interface DataValidityRepository extends JpaRepository<DQA, Long> {
             "\t\t\t\t    EXTRACT(YEAR FROM lr.date_result_reported) BETWEEN 1985 AND EXTRACT(YEAR FROM NOW())\n" +
             ") vl ON e.person_uuid = vl.person_uuid\n" +
             "  LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "  WHERE p.archived=0 AND p.facility_id= 1722 \n" +
+            "  WHERE p.archived=0 AND p.facility_id= ?1 \n" +
             "  GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ca.visit_date, ca.pregnancy_status, b.biometric_fingers_captured, b.biometric_valid_captured,\n" +
             "  pharm.refill_period, vl.dateOfLastViralLoad, e.date_confirmed_hiv\n" +
             "  ORDER BY p.id DESC   \n" +

@@ -62,7 +62,7 @@ public interface LaboratoryRepository extends JpaRepository<DQA, Long> {
             "\t  \twhere archived !=1\n" +
             "\t\tGROUP BY refill_period, person_uuid ORDER BY person_uuid DESC ) fi ORDER BY\n" +
             "    \tperson_uuid DESC ) pharm ON e.person_uuid = pharm.person_uuid\n" +
-            "        WHERE p.archived=0 AND p.facility_id= 1722 \n" +
+            "        WHERE p.archived=0 AND p.facility_id= ?1 \n" +
             "        GROUP BY e.id, ca.commenced, p.id, p.hospital_number, p.date_of_birth, vl.dateSampleCollected, \n" +
             "\t\tvl.lastViralLoad, vl.dateOfLastViralLoad, pharm.visit_date, vl.pcrDate, vl.viralLoadType, cd4.cd4date\n" +
             "        ORDER BY p.id DESC )\n" +

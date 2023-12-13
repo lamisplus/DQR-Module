@@ -68,7 +68,7 @@ public interface EacRepository extends JpaRepository<DQA, Long> {
             " GROUP BY person_uuid, eac_session_date ORDER BY  person_uuid, eac_session_date ASC ) eac ON e.person_uuid = eac.person_uuid \n" +
             "  LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
             "  LEFT JOIN hiv_eac ha ON e.person_uuid = ha.person_uuid\n" +
-            "  WHERE p.archived=0 AND p.facility_id= 1722 \n" +
+            "  WHERE p.archived=0 AND p.facility_id= ?1 \n" +
             "  GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ca.visit_date, p.facility_id, \n" +
             "  pharm.visit_date, ha.status, vl.clastViralLoad, eac.eac_commenced, vl.dateSampleCollected,\n" +
             "  eac1.status, eac1.last_viral_load, eac1.date_of_last_viral_load, eac1.visit_date\n" +

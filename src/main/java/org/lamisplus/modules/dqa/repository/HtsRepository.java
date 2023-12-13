@@ -217,7 +217,7 @@ public interface HtsRepository extends JpaRepository<DQA, Long> {
             "LEFT JOIN laboratory_order lo ON lo.patient_uuid = hc.person_uuid\n" +
             "LEFT JOIN laboratory_result lr ON lr.patient_uuid = hc.person_uuid\n" +
             "\n" +
-            "\twhere hc.facility_id = 1722 ) pro\n" +
+            "\twhere hc.facility_id = ?1 ) pro\n" +
             ")\n" +
             "SELECT \n" +
             "  COUNT(adPosRec) AS totalPosNumerator,\n" +
