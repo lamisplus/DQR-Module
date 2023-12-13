@@ -123,14 +123,14 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-    const Clinical = (props) => {
+const Clinical = (props) => {
     const classes = useStyles();
     const [clinical, setClinicals] = useState({});
     const [facilities, setFacilities] = useState([]);
     const [showPatientDetail, setPatientDetail] = useState(false);
     const [getHeaderInfo, setGetHeaderInfo] = useState("");
     const [clinicPatientsView, setClinicPatientsView] = useState([])
-    const [demographicOption, setDemographicOption] = useState()
+
 
 
      useEffect(() => {

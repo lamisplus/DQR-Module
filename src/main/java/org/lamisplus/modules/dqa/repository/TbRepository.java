@@ -171,7 +171,7 @@ public interface TbRepository extends JpaRepository<DQA, Long> {
             "    LEFT JOIN base_application_codeset pc ON pc.id = e.status_at_registration_id\n" +
             "    WHERE\n" +
             "        p.archived = 0\n" +
-            "--         AND p.facility_id = 1722\n" +
+            "        AND p.facility_id = ?1\n" +
             "    GROUP BY\n" +
             "        e.id,\n" +
             "        ca.commenced,\n" +

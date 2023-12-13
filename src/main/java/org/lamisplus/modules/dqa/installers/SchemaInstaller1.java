@@ -10,6 +10,6 @@
 //        version = 1)
 //public class SchemaInstaller1 extends AcrossLiquibaseInstaller {
 //    public SchemaInstaller1() {
-//        super("classpath:installers/hepatitis/schema/schema-1.xml");
+//        super("classpath:installers/dqa/schema/schema-1.xml");
 //    }
 //}

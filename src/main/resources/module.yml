@@ -1,19 +1,19 @@
 basePackage: org.lamisplus.modules.dqa
-name: DQAModule
+name: DQRModule
 store: true
 menus:
-  - icon: fa fa-virus
+  - icon: fa fa-list
     disabled: false
-    name: DQA
-    state: DQA
-    url: /across/resources/static/dqa/index.html
-umdLocation: /across/resources/static/dqa/index.html
+    name: DQR
+    state: DQR
+    url: /across/resources/static/dqr/index.html
+umdLocation: /across/resources/static/dqr/index.html
 webModules:
-  - breadcrumb: DQA
-    name: DQAModule
-    path: DQA
+  - breadcrumb: DQR
+    name: DQRModule
+    path: DQR
     position: 99
 permissions:
-  - name: create_dqa
-    description: create dqa
-    moduleName: DQAModule
+  - name: create_dqr
+    description: create dqr
+    moduleName: DQRModule

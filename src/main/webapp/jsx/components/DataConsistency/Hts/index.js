@@ -347,7 +347,7 @@ const useStyles = makeStyles((theme) => ({
                             </tbody>
                         </Table>
                         </>)}
-            {showPatientDetail &&(<>
+                        {showPatientDetail &&(<>
                       <Button
                         variant="contained"
                         style={{backgroundColor:"#014d88", }}

@@ -245,7 +245,7 @@ const TbScreening = (props) => {
                                 <td>{tbScreening[0]?.docAndCompletedPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with ART Start Date", "clinic0" )}> View</p>
+                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with ART Start Date", "" )}> View</p>
                                 </div>
                                 </td>
                             </tr>
@@ -261,7 +261,7 @@ const TbScreening = (props) => {
                                 <td>{tbScreening[0]?.tbstatusPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with First HIV confirmed test Date", "clinic3" )}> View</p>
+                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with First HIV confirmed test Date", "" )}> View</p>
                                 </div>            
                                 </td>
                             </tr>
@@ -277,7 +277,7 @@ const TbScreening = (props) => {
                                 <td>{tbScreening[0]?.preSamplePerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with documented drug pickup date", "patientDemo0" )}> View</p>
+                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with documented drug pickup date", "" )}> View</p>
                                 </div>  
                                 </td>
                             </tr>
@@ -293,7 +293,7 @@ const TbScreening = (props) => {
                                <td>{tbScreening[0]?.preSampleTypePerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Age at ART Initiation", "clinic3" )}> View</p>
+                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Age at ART Initiation", "" )}> View</p>
                                 </div>
                                 </td>
                             </tr>
@@ -304,9 +304,9 @@ const TbScreening = (props) => {
                                 <td>
                                     Proportion of TB patients with documented TB treatment outcome
                                 </td>
-                                <td>{tbScreening[0]?.tptstartNumerator}</td>
-                                <td>{tbScreening[0]?.tptstartDenominator}</td>
-                                <td>{tbScreening[0]?.tptstartPerformance} %</td>
+                                <td>{tbScreening[0]?.ipt6monthComplNumerator}</td>
+                                <td>{tbScreening[0]?.ipt6monthComplDenominator}</td>
+                                <td>{tbScreening[0]?.ipt6monthComplPerformance} %</td>
                                 <td>
                                 <div>
                                     <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Last Drug Regimen", "" )}> View</p>
@@ -320,12 +320,12 @@ const TbScreening = (props) => {
                                 <td>
                                     Proportion of patients on TPT with documented TPT start date
                                 </td>
-                                <td></td>
-                                <td></td>
-                                <td> %</td>
+                                <td>{tbScreening[0]?.ipt6monthComplNumerator}</td>
+                                <td>{tbScreening[0]?.ipt6monthComplDenominator}</td>
+                                <td>{tbScreening[0]?.ipt6monthComplPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with documented target group", "clinic4" )}> View</p>
+                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patients on TPT with documented TPT start date", "" )}> View</p>
                                 </div>
                                 </td>
                             </tr>
@@ -336,12 +336,12 @@ const TbScreening = (props) => {
                                 <td>
                                     Proportion of patients on TPT with documented TPT completion date
                                 </td>
-                                <td></td>
-                                <td></td>
-                                <td> %</td>
+                                <td>{tbScreening[0]?.tptstartNumerator}</td>
+                                <td>{tbScreening[0]?.tptstartDenominator}</td>
+                                <td>{tbScreening[0]?.tptstartPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with a documented care entry point", "clinic5" )}> View</p>
+                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patients on TPT with documented TPT completion date", "" )}> View</p>
                                 </div>
                                 </td>
                             </tr>
@@ -350,17 +350,16 @@ const TbScreening = (props) => {
                            9
                        </th>
                                <td>
-                               Proportion of patients on TPT with documented TPT completion status
+                                    Proportion of patients on TPT with documented TPT completion status
                                </td>
-                               <td></td>
-                               <td></td>
-                               <td> %</td>
-                               <td>
-                               <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Last Drug Regimen Code", "" )}> View</p>
+                               <td>{tbScreening[0]?.iptComplStatususNumerator}</td>
+                                <td>{tbScreening[0]?.iptComplStatususDenominator}</td>
+                                <td>{tbScreening[0]?.iptComplStatususPerformance} %</td>
+                                <td>
+                                <div>
+                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patients on TPT with documented TPT completion status", "" )}> View</p>
                                 </div>
-
-                               </td>
+                                </td>
                         </tr>
                         <tr>
                                 <th scope="row">
@@ -369,14 +368,13 @@ const TbScreening = (props) => {
                                 <td>
                                     Proportion of patients on TPT with documented TPT type
                                 </td>
-                                <td></td>
-                                <td></td>
-                                <td> %</td>
+                                <td>{tbScreening[0]?.iptTypeStatusNumerator}</td>
+                                <td>{tbScreening[0]?.iptTypeStatusDenominator}</td>
+                                <td>{tbScreening[0]?.iptTypeStatusPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail(" Proportion of all active patients that had documented last Clinic visit date", "clinic6" )}> View</p>
+                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patients on TPT with documented TPT type", "" )}> View</p>
                                 </div>
-
                                 </td>
                             </tr>
                             </tbody>
