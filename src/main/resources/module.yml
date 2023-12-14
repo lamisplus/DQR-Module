@@ -1,4 +1,4 @@
-basePackage: org.lamisplus.modules.dqa
+basePackage: org.lamisplus.modules.dqr
 name: DQRModule
 store: true
 menus:
@@ -6,8 +6,8 @@ menus:
     disabled: false
     name: DQR
     state: DQR
-    url: /across/resources/static/dqa/index.html
-umdLocation: /across/resources/static/dqa/index.html
+    url: /across/resources/static/dqr/index.html
+umdLocation: /across/resources/static/dqr/index.html
 webModules:
   - breadcrumb: DQR
     name: DQRModule
