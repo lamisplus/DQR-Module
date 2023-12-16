@@ -1,14 +1,10 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import MaterialTable from 'material-table';
 import { token, url as baseUrl } from "../../../../api";
-import { Form, Table } from "reactstrap";
+import {  Table } from "reactstrap";
 import { makeStyles } from "@material-ui/core/styles";
 import { Card, CardContent } from "@material-ui/core";
-import "semantic-ui-css/semantic.min.css";
-import { Dropdown, Button as Buuton2, Menu, Icon } from "semantic-ui-react";
-
-import "react-toastify/dist/ReactToastify.css";
-import "react-widgets/dist/css/react-widgets.css";
 import "semantic-ui-css/semantic.min.css";
 import {  Button, } from "semantic-ui-react";
 
@@ -129,7 +125,7 @@ const useStyles = makeStyles((theme) => ({
     const [clinicals, setClinical] = useState({});
     const [showPatientDetail, setPatientDetail] = useState(false);
     const [getHeaderInfo, setGetHeaderInfo] = useState("");
-    const [demographicsPatientsView, setDemographicsPatientsView] = useState([])
+    const [clinicalsPatientsView, setClinicalsPatientsView] = useState([])
 
     useEffect(() => {
         loadClinical();
@@ -154,11 +150,11 @@ const useStyles = makeStyles((theme) => ({
     setGetHeaderInfo(headerTitle)
     const patientDemo =patientDemoObj
     axios
-          .get(`${baseUrl}dqr/patient-demo?indicator=${patientDemo}`, {
+          .get(`${baseUrl}dqr/patient-consistency?indicator=${patientDemo}`, {
             headers: { Authorization: `Bearer ${token}` },
           })
           .then((response) => {
-            setDemographicsPatientsView(response.data);
+            setClinicalsPatientsView(response.data);
             //console.log(response.data[0])
           })
           .catch((error) => {
@@ -289,12 +285,12 @@ const useStyles = makeStyles((theme) => ({
                                 <td>
                                     Proportion of all active patients with an ART start date on or before the current calendar date
                                 </td>
-                               <td>{clinicals[0]?.artDateLessTodayDenominator}</td>
                                <td>{clinicals[0]?.artDateLessTodayNumerator}</td>
+                               <td>{clinicals[0]?.artDateLessTodayDenominator}</td>
                                <td>{clinicals[0]?.artDateLessTodayPerformance} %</td>
                                 <td>
                                     <div>
-                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with an ART start date on or before the current calendar date", "" )}> View</p>
+                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with an ART start date on or before the current calendar date", "DataCon5" )}> View</p>
                                     </div>
                                 </td>
                             </tr>
@@ -310,7 +306,7 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{clinicals[0]?.artEqClinicPerformance} %</td>
                                 <td>
                                     <div>
-                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with an ART start date on or before last clinic visit date", "" )}> View</p>
+                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with an ART start date on or before last clinic visit date", "DataCon6" )}> View</p>
                                     </div>
                                 </td>
                             </tr>
@@ -326,7 +322,7 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{clinicals[0]?.artEqLastPickupPerformance} %</td>
                                 <td>
                                     <div>
-                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with an ART start date on or before last drug pickup date", "" )}> View</p>
+                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with an ART start date on or before last drug pickup date", "DataCon7" )}> View</p>
                                     </div>
                                 </td>
                             </tr>
@@ -342,7 +338,7 @@ const useStyles = makeStyles((theme) => ({
                               <td>{clinicals[0]?.lgreaterConfPerformance} %</td>
                               <td>
                                     <div>
-                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with last drug pickup date on or after first confirmed HIV date", "" )}> View</p>
+                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with last drug pickup date on or after first confirmed HIV date", "DataCon8" )}> View</p>
                                     </div>
                               </td>
                               </tr>
@@ -358,31 +354,14 @@ const useStyles = makeStyles((theme) => ({
                              <td>{clinicals[0]?.artGreaterTransPerformance} %</td>
                              <td>
                                     <div>
-                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with ART start date before transfer-in date", "" )}> View</p>
+                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with ART start date before transfer-in date", "DataCon9" )}> View</p>
                                     </div>
                              </td>
                              </tr>
 
-                            <tr>
-                            <th scope="row">
-                                11
-                            </th>
-                            <td>
-                                Proportion of all active patients with Last clinic visit date on or after first confirmed HIV date
-                            </td>
-                            <td>{clinicals[0]?.lgreaterConfNumerator}</td>
-                            <td>{clinicals[0]?.lgreaterConfDenominator}</td>
-                            <td>{clinicals[0]?.lgreaterConfPerformance} %</td>
-                            <td>
-                                <div>
-                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Last clinic visit date on or after first confirmed HIV date", "" )}> View</p>
-                                </div>
-                            </td>
-                            </tr>
-
                                 <tr>
                                 <th scope="row">
-                                    12
+                                    11
                                 </th>
                                 <td>
                                     Proportion of all active patients with Last drug pickup date after date of birth
@@ -392,13 +371,13 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{clinicals[0]?.lstPickGreaterDObPerformance} %</td>
                                 <td>
                                     <div>
-                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Last drug pickup date after date of birth", "" )}> View</p>
+                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Last drug pickup date after date of birth", "DataCon10" )}> View</p>
                                     </div>
                                 </td>
                             </tr>
                             <tr>
                             <th scope="row">
-                                13
+                                12
                             </th>
                             <td>
                                 Proportion of all active patients Newly initiated on ART (TX_NEW) in the quarter but has previous quarter drug pickup date
@@ -414,7 +393,7 @@ const useStyles = makeStyles((theme) => ({
                             </tr>
                             <tr>
                             <th scope="row">
-                                14
+                                13
                             </th>
                             <td>
                                 Proportion of all active patients with Last drug pickup date on or after transferred in date
@@ -424,13 +403,13 @@ const useStyles = makeStyles((theme) => ({
                             <td>{clinicals[0]?.ldrugPickHighPerformance} %</td>
                             <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Last drug pickup date on or after transferred in date", "" )}> View</p>
+                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Last drug pickup date on or after transferred in date", "DataCon11" )}> View</p>
                                 </div>
                             </td>
                             </tr>
                             <tr>
                              <th scope="row">
-                                 15
+                                 14
                              </th>
                              <td>
                                  Proportion of all active patients with Last drug pickup date on or before current calendar date
@@ -440,13 +419,13 @@ const useStyles = makeStyles((theme) => ({
                              <td>{clinicals[0]?.clinicPickLessTodayPerformance} %</td>
                              <td>
                                     <div>
-                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Last drug pickup date on or before current calendar date", "" )}> View</p>
+                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Last drug pickup date on or before current calendar date", "DataCon12" )}> View</p>
                                     </div>
                              </td>
                              </tr>
 <tr>
                              <th scope="row">
-                                 16
+                                 15
                              </th>
                              <td>
                                  Proportion of all active patients with Last clinic visit date on or before current calendar date
@@ -456,13 +435,13 @@ const useStyles = makeStyles((theme) => ({
                              <td>{clinicals[0]?.clinicPickLessTodayPerformance} %</td>
                              <td>
                                      <div>
-                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Last clinic visit date on or before current calendar date", "" )}> View</p>
+                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Last clinic visit date on or before current calendar date", "DataCon13" )}> View</p>
                                     </div>
                              </td>
                              </tr>
 <tr>
                              <th scope="row">
-                                 17
+                                 16
                              </th>
                              <td>
                                  Proportion of all active patients with Date of VL result after the date of VL sample collection
@@ -478,7 +457,7 @@ const useStyles = makeStyles((theme) => ({
                              </tr>
 <tr>
                              <th scope="row">
-                                 18
+                                 17
                              </th>
                              <td>
                                  Proportion of new patients (TX_NEW) with CD4 count
@@ -521,7 +500,7 @@ const useStyles = makeStyles((theme) => ({
                               { title: "Status", field: "status", filtering: false },
 
                             ]}
-                            data={ demographicsPatientsView.map((row) => ({
+                            data={ clinicalsPatientsView.map((row) => ({
                               //Id: manager.id,
                               hospitalNumber: row.hospitalNumber,
                               sex: row.sex,

@@ -78,6 +78,232 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "    ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getPeadiatricWeightLastVisit (Long facilityId);
 
+    @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex, \n" +
+            "CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) AS age, \n" +
+            "       p.date_of_birth AS dateOfBirth\n" +
+            "      FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "      LEFT JOIN\n" +
+            "      (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "      GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
+            "      LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
+            "      WHERE p.archived=0 AND p.facility_id= ?1 AND e.date_started > NOW()\n" +
+            "      GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth\n" +
+            "      ORDER BY p.id DESC", nativeQuery = true)
+    List<PatientDTOProjection> getPatientStartDateGreaterThanToday (Long facilityId);
+
+
+    @Query(value = "SELECT\n" +
+            "  e.unique_id AS patientId,\n" +
+            "  p.hospital_number AS hospitalNumber,\n" +
+            "  INITCAP(p.sex) AS sex,\n" +
+            "  CAST(EXTRACT(YEAR FROM AGE(NOW(), p.date_of_birth)) AS INTEGER) AS age,\n" +
+            "  p.date_of_birth AS dateOfBirth\n" +
+            "FROM\n" +
+            "  patient_person p\n" +
+            "INNER JOIN\n" +
+            "  hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "LEFT JOIN\n" +
+            "  hiv_art_clinical hac ON hac.person_uuid = e.person_uuid\n" +
+            "LEFT JOIN\n" +
+            "  base_application_codeset pc ON pc.id = e.status_at_registration_id\n" +
+            "WHERE\n" +
+            "  p.archived = 0 AND p.facility_id = ?1\n" +
+            "GROUP BY\n" +
+            "  e.unique_id, p.hospital_number, p.sex, p.date_of_birth, e.person_uuid, p.id, e.date_started\n" +
+            "HAVING\n" +
+            " e.date_started > MAX(hac.visit_date)\n" +
+            "ORDER BY\n" +
+            "  p.id DESC;", nativeQuery = true)
+    List<PatientDTOProjection> getPatientClinicDateGreaterThanToday (Long facilityId);
+
+
+    @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex\n" +
+            "    , CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) AS age, \n" +
+            "       p.date_of_birth AS dateOfBirth\n" +
+            "      FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "      LEFT JOIN\n" +
+            "      (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "      GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
+            "\t  LEFT JOIN \n" +
+            "   (SELECT DISTINCT ON (person_uuid)\n" +
+            "     person_uuid, visit_date, refill_period, regimen\n" +
+            " FROM ( select person_uuid, refill_period, MAX(visit_date) AS visit_date, extra->'regimens'->0->>'name' AS regimen from hiv_art_pharmacy\n" +
+            " GROUP BY refill_period, person_uuid, extra ORDER BY person_uuid DESC ) fi\n" +
+            "\tORDER BY\n" +
+            "     person_uuid DESC ) pharm ON pharm.person_uuid = p.uuid\n" +
+            "      LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
+            "      WHERE p.archived=0 AND p.facility_id= ?1 AND e.date_started > pharm.visit_date\n" +
+            "      GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, pharm.visit_date\n" +
+            "      ORDER BY p.id DESC", nativeQuery = true)
+    List<PatientDTOProjection> getPatientArtDateGreaterThanClinicDay (Long facilityId);
+
+
+    @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex\n" +
+            "    , CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) AS age, \n" +
+            "       p.date_of_birth AS dateOfBirth\n" +
+            "      FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "      LEFT JOIN\n" +
+            "      (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "      GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
+            "\t  LEFT JOIN \n" +
+            "   (SELECT DISTINCT ON (person_uuid)\n" +
+            "     person_uuid, visit_date, refill_period, regimen\n" +
+            " FROM ( select person_uuid, refill_period, MAX(visit_date) AS visit_date, extra->'regimens'->0->>'name' AS regimen from hiv_art_pharmacy\n" +
+            " GROUP BY refill_period, person_uuid, extra ORDER BY person_uuid DESC ) fi\n" +
+            "\tORDER BY\n" +
+            "     person_uuid DESC ) pharm ON pharm.person_uuid = p.uuid\n" +
+            "      LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
+            "      WHERE p.archived=0 AND p.facility_id= ?1 AND e.date_confirmed_hiv > pharm.visit_date\n" +
+            "      GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, pharm.visit_date\n" +
+            "      ORDER BY p.id DESC", nativeQuery = true)
+    List<PatientDTOProjection> getPatientLastPickUpGreaterThanConfirmDate (Long facilityId);
+
+
+    @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex\n" +
+            "      , CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) AS age,\n" +
+            "         p.date_of_birth AS dateOfBirth\n" +
+            "        FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "        LEFT JOIN\n" +
+            "        (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "        GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
+            "\t\tLEFT JOIN\n" +
+            "\t\t(SELECT DISTINCT (person_id)\n" +
+            "\t\tperson_id, MAX(status_date) AS status_date, hiv_status FROM hiv_status_tracker where hiv_status = 'ART_TRANSFER_IN'\n" +
+            "\t\tGROUP BY person_id, hiv_status ) transfer ON p.uuid = transfer.person_id\n" +
+            "        LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
+            "        WHERE p.archived=0 AND p.facility_id= ?1 AND transfer.status_date < e.date_started\n" +
+            "        GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, transfer.status_date\n" +
+            "        ORDER BY p.id DESC", nativeQuery = true)
+    List<PatientDTOProjection> getPatientStartDateGreaterThanTransferIn (Long facilityId);
+
+
+    @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex\n" +
+            "    , CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) AS age, \n" +
+            "       p.date_of_birth AS dateOfBirth\n" +
+            "      FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "      LEFT JOIN\n" +
+            "      (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "      GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
+            "\t  LEFT JOIN \n" +
+            "   (SELECT DISTINCT ON (person_uuid)\n" +
+            "     person_uuid, visit_date, refill_period, regimen\n" +
+            " FROM ( select person_uuid, refill_period, MAX(visit_date) AS visit_date, extra->'regimens'->0->>'name' AS regimen from hiv_art_pharmacy\n" +
+            " GROUP BY refill_period, person_uuid, extra ORDER BY person_uuid DESC ) fi\n" +
+            "\tORDER BY\n" +
+            "     person_uuid DESC ) pharm ON pharm.person_uuid = p.uuid\n" +
+            "      LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
+            "      WHERE p.archived=0 AND p.facility_id= ?1 AND p.date_of_birth > pharm.visit_date\n" +
+            "      GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, pharm.visit_date\n" +
+            "      ORDER BY p.id DESC", nativeQuery = true)
+    List<PatientDTOProjection> getPatientDobGreaterThanLastPick (Long facilityId);
+
+
+    @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex\n" +
+            "    , CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) AS age, \n" +
+            "       p.date_of_birth AS dateOfBirth, pharm.visit_date, transfer.status_date\n" +
+            "      FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "      LEFT JOIN\n" +
+            "      (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "      GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
+            "\t  LEFT JOIN\n" +
+            "\t(SELECT DISTINCT (person_id)\n" +
+            "\tperson_id, MAX(status_date) AS status_date, hiv_status FROM hiv_status_tracker where hiv_status = 'ART_TRANSFER_IN'\n" +
+            "\tGROUP BY person_id, hiv_status ) transfer ON p.uuid = transfer.person_id\n" +
+            "\t  LEFT JOIN \n" +
+            "   (SELECT DISTINCT ON (person_uuid)\n" +
+            "     person_uuid, visit_date, refill_period, regimen\n" +
+            " FROM ( select person_uuid, refill_period, MAX(visit_date) AS visit_date, extra->'regimens'->0->>'name' AS regimen from hiv_art_pharmacy\n" +
+            " GROUP BY refill_period, person_uuid, extra ORDER BY person_uuid DESC ) fi\n" +
+            "\tORDER BY\n" +
+            "     person_uuid DESC ) pharm ON pharm.person_uuid = p.uuid\n" +
+            "      LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
+            "      WHERE p.archived=0 AND p.facility_id= ?1 AND pharm.visit_date < transfer.status_date\n" +
+            "      GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, pharm.visit_date, transfer.status_date\n" +
+            "      ORDER BY p.id DESC", nativeQuery = true)
+    List<PatientDTOProjection> getPatientLastPickUpGreaterThanTransferInDate (Long facilityId);
+
+
+    @Query(value = "SELECT\n" +
+            "  e.unique_id AS patientId,\n" +
+            "  p.hospital_number AS hospitalNumber,\n" +
+            "  INITCAP(p.sex) AS sex,\n" +
+            "  CAST(EXTRACT(YEAR FROM AGE(NOW(), p.date_of_birth)) AS INTEGER) AS age,\n" +
+            "  p.date_of_birth AS dateOfBirth\n" +
+            "FROM\n" +
+            "  patient_person p\n" +
+            "INNER JOIN\n" +
+            "  hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "LEFT JOIN\n" +
+            "  hiv_art_clinical hac ON hac.person_uuid = e.person_uuid AND hac.archived = 0 AND hac.is_commencement IS TRUE\n" +
+            "LEFT JOIN (\n" +
+            "  SELECT\n" +
+            "    person_uuid,\n" +
+            "    MAX(visit_date) AS visit_date,\n" +
+            "    MAX(refill_period) AS refill_period,\n" +
+            "    MAX(extra->'regimens'->0->>'name') AS regimen\n" +
+            "  FROM\n" +
+            "    hiv_art_pharmacy\n" +
+            "  WHERE\n" +
+            "    archived = 0\n" +
+            "  GROUP BY\n" +
+            "    person_uuid\n" +
+            ") pharm ON pharm.person_uuid = p.uuid\n" +
+            "LEFT JOIN\n" +
+            "  base_application_codeset pc ON pc.id = e.status_at_registration_id\n" +
+            "WHERE\n" +
+            "  p.archived = 0\n" +
+            "  AND p.facility_id = ?1\n" +
+            "  AND COALESCE(pharm.visit_date, NOW()) > NOW()\n" +
+            "GROUP BY\n" +
+            "  e.unique_id, p.hospital_number, p.sex, p.date_of_birth, p.id\n" +
+            "ORDER BY\n" +
+            "  p.id DESC;", nativeQuery = true)
+    List<PatientDTOProjection> getPatientLastPickUpGreaterThanToday (Long facilityId);
+
+
+    @Query(value = "SELECT\n" +
+            "  e.unique_id AS patientId,\n" +
+            "  p.hospital_number AS hospitalNumber,\n" +
+            "  INITCAP(p.sex) AS sex,\n" +
+            "  CAST(EXTRACT(YEAR FROM AGE(NOW(), p.date_of_birth)) AS INTEGER) AS age,\n" +
+            "  p.date_of_birth AS dateOfBirth, p.uuid\n" +
+            "FROM\n" +
+            "  patient_person p\n" +
+            "INNER JOIN\n" +
+            "  hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "LEFT JOIN\n" +
+            "  hiv_art_clinical hac ON hac.person_uuid = e.person_uuid AND hac.archived = 0 AND hac.is_commencement IS TRUE\n" +
+            "LEFT JOIN (\n" +
+            "  SELECT\n" +
+            "    person_uuid,\n" +
+            "    MAX(visit_date) AS visit_date,\n" +
+            "    MAX(refill_period) AS refill_period,\n" +
+            "    MAX(extra->'regimens'->0->>'name') AS regimen\n" +
+            "  FROM\n" +
+            "    hiv_art_pharmacy\n" +
+            "  WHERE\n" +
+            "    archived = 0\n" +
+            "  GROUP BY\n" +
+            "    person_uuid\n" +
+            ") pharm ON pharm.person_uuid = p.uuid\n" +
+            "LEFT JOIN\n" +
+            "  base_application_codeset pc ON pc.id = e.status_at_registration_id\n" +
+            "WHERE\n" +
+            "  p.archived = 0\n" +
+            "  AND p.facility_id = ?1\n" +
+            "  AND pharm.visit_date > NOW()\n" +
+            "GROUP BY\n" +
+            "  e.unique_id, p.hospital_number, p.sex, p.date_of_birth, p.id\n" +
+            "ORDER BY\n" +
+            "  p.id DESC;", nativeQuery = true)
+    List<PatientDTOProjection> getPatientLastClinicGreaterThanToday (Long facilityId);
+
+
+//    @Query(value = "", nativeQuery = true)
+//    List<PatientDTOProjection> getPatientLastClinicGreaterThanToday (Long facilityId);
+
+
+
     @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex, p.date_of_birth AS dateOfBirth\n" +
             "            FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
             "            LEFT JOIN\n" +

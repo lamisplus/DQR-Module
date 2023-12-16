@@ -48,14 +48,35 @@ public class DataConsistencyDqaController {
             case "dataCon4":
                 result = consistencyService.getPatientPregStatusLastVisit(facilityId);
                 break;
-//            case "DataCon5":
-//                result = dqaService.getPatientWithoutOccu(facilityId);
-//                break;
-//            case "DataCon6":
-//                result = dqaService.getPatientWithoutAdd(facilityId);
-//                break;
-//            case "DataCon7":
-//                result = dqaService.getPatientWithoutIdentifier(facilityId);
+            case "DataCon5":
+                result = consistencyService.getPatientStartDateGreaterThanToday(facilityId);
+                break;
+            case "DataCon6":
+                result = consistencyService.getPatientClinicDateGreaterThanToday(facilityId);
+                break;
+            case "DataCon7":
+                result = consistencyService.getArtDateGreaterThanClinicDay(facilityId);
+                break;
+            case "DataCon8":
+                result = consistencyService.getLastPickUpGreaterThanHivConfirmDate(facilityId);
+                break;
+            case "DataCon9":
+                result = consistencyService.getArtStartGreaterThanTransferInDate(facilityId);
+                break;
+            case "DataCon10":
+                result = consistencyService.getDobGreaterThanLastPickUp(facilityId);
+                break;
+            case "DataCon11":
+                result = consistencyService.getLastPickUpGreaterThanTransferIn(facilityId);
+                break;
+            case "DataCon12":
+                result = consistencyService.getLastPickUpGreaterThanToday(facilityId);
+                break;
+            case "DataCon13":
+                result = consistencyService.getLastClinicGreaterThanToday(facilityId);
+                break;
+//            case "DataCon14":
+//                result = consistencyService.getArtDateGreaterThanClinicDay(facilityId);
 //                break;
             default:
                 // Handle unknown dataType
@@ -64,32 +85,5 @@ public class DataConsistencyDqaController {
 
         return ResponseEntity.ok(result);
     }
-
-//    @GetMapping(value = "/no-target-group", produces = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<List<PatientDTOProjection>> patientNoTargetGroup (@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-//        return ResponseEntity.ok(consistencyService.getPWithoutTargGroup(facility));
-//    }
-//
-//    @GetMapping(value = "/no-care-entry", produces = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<List<PatientDTOProjection>> patientNoCareEntryPoint (@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-//        return ResponseEntity.ok(consistencyService.getPWithoutCareEntryPoint(facility));
-//    }
-//
-//    @GetMapping(value = "/client-abnormal-weight", produces = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<List<PatientDTOProjection>> patientAbnormalWeight (@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-//        return ResponseEntity.ok(consistencyService.getAbnormalWeight(facility));
-//    }
-//
-//    @GetMapping(value = "/peadiatric-abnormal-weight", produces = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<List<PatientDTOProjection>> patientPeadiatricAbnormalWeight (@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-//        return ResponseEntity.ok(consistencyService.getChildrenAbnormalWeight(facility));
-//    }
-//
-//    @GetMapping(value = "/last-pregnant-status", produces = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<List<PatientDTOProjection>> patientPregnantStatusLastVisit (@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
-//        return ResponseEntity.ok(consistencyService.getPatientPregStatusLastVisit(facility));
-//    }
-
-
 
 }
