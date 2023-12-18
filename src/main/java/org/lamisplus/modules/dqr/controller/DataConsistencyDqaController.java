@@ -75,9 +75,9 @@ public class DataConsistencyDqaController {
             case "DataCon13":
                 result = consistencyService.getLastClinicGreaterThanToday(facilityId);
                 break;
-//            case "DataCon14":
-//                result = consistencyService.getArtDateGreaterThanClinicDay(facilityId);
-//                break;
+            case "DataCon14":
+                result = consistencyService.getLastSampleDateGreaterThanResultDate(facilityId);
+                break;
             default:
                 // Handle unknown dataType
                 return ResponseEntity.badRequest().build();

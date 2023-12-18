@@ -299,8 +299,37 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
     List<PatientDTOProjection> getPatientLastClinicGreaterThanToday (Long facilityId);
 
 
-//    @Query(value = "", nativeQuery = true)
-//    List<PatientDTOProjection> getPatientLastClinicGreaterThanToday (Long facilityId);
+    @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex\n" +
+            "      , CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) AS age,\n" +
+            "         p.date_of_birth AS dateOfBirth\n" +
+            "        FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "        LEFT JOIN\n" +
+            "        (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "        GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
+            "\t\tLEFT JOIN (\n" +
+            "\t\tSELECT DISTINCT ON(lo.patient_uuid) lo.patient_uuid as person_uuid, ls.date_sample_collected as dateSampleCollected,\n" +
+            "\t\t-- \t\tCASE WHEN lr.result_reported ~ E'^\\\\d+(\\\\.\\\\d+)?$' THEN CAST(lr.result_reported AS DECIMAL)\n" +
+            "\t\t--            ELSE NULL END AS lastViralLoad, \n" +
+            "\t\t\tlr.result_reported AS lastViralLoad,\n" +
+            "\t\t\tlr.date_result_reported as dateOfLastViralLoad\n" +
+            "\t\tFROM laboratory_order lo\n" +
+            "\t\tLEFT JOIN ( SELECT patient_uuid, MAX(order_date) AS MAXDATE FROM laboratory_order lo\n" +
+            "\t\tGROUP BY patient_uuid ORDER BY MAXDATE ASC ) AS current_lo\n" +
+            "\t\tON current_lo.patient_uuid=lo.patient_uuid AND current_lo.MAXDATE=lo.order_date\n" +
+            "\t\tLEFT JOIN laboratory_test lt ON lt.lab_order_id=lo.id AND lt.patient_uuid = lo.patient_uuid\n" +
+            "\t\tLEFT JOIN base_application_codeset bac_viral_load ON bac_viral_load.id=lt.viral_load_indication\n" +
+            "\t\tLEFT JOIN laboratory_labtest ll ON ll.id=lt.lab_test_id\n" +
+            "\t\tINNER JOIN hiv_enrollment h ON h.person_uuid=current_lo.patient_uuid\n" +
+            "\t\tLEFT JOIN laboratory_sample ls ON ls.test_id=lt.id AND ls.patient_uuid = lo.patient_uuid\n" +
+            "\t\tLEFT JOIN laboratory_result lr ON lr.test_id=lt.id AND lr.patient_uuid = lo.patient_uuid\n" +
+            "\t\tWHERE  lo.archived=0 AND\n" +
+            "\t\t\tlr.date_result_reported IS NOT NULL\n" +
+            "\t\t) vl ON e.person_uuid = vl.person_uuid\n" +
+            "\t    LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
+            "        WHERE p.archived=0 AND p.facility_id= ?1 AND vl.dateSampleCollected > vl.dateOfLastViralLoad\n" +
+            "        GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth\n" +
+            "        ORDER BY p.id DESC", nativeQuery = true)
+    List<PatientDTOProjection> getPatientVlSampleDateGreaterThanResultDate (Long facilityId);
 
 
 
@@ -328,7 +357,9 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "\t(CASE WHEN pharm.visit_date >= transfer.status_date THEN 1 ELSE null END)  AS DrugPickHigherThanTrans,\n" +
             "\t(CASE WHEN pharm.visit_date <= CAST(now() AS DATE) THEN 1 ELSE null END)  AS DrugPickLessToday,\n" +
             "\t(CASE WHEN lasClinic.lastvisit <= CAST(now() AS DATE) THEN 1 ELSE null END)  AS clinicPickLessToday,\n" +
-            "\t(CASE WHEN e.date_started <= CAST(now() AS DATE) THEN 1 ELSE null END)  AS artDateLessToday\n" +
+            "\t(CASE WHEN e.date_started <= CAST(now() AS DATE) THEN 1 ELSE null END)  AS artDateLessToday,\n" +
+            "\t(CASE WHEN lasClinic.lastvisit > transfer.status_date  THEN 1 ELSE null END)  AS clinicGreaterThanTrans,\n" +
+            "\t(CASE WHEN vl.dateOfLastViralLoad > vl.dateSampleCollected THEN 1 ELSE NULL END) AS vlSample\n" +
             "  FROM patient_person p\n" +
             "  INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
             "  LEFT JOIN\n" +
@@ -373,6 +404,25 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "\t(SELECT DISTINCT (person_id)\n" +
             "person_id, MAX(status_date) AS status_date, hiv_status FROM hiv_status_tracker where hiv_status = 'ART_TRANSFER_IN'\n" +
             "GROUP BY person_id, hiv_status ) transfer ON p.uuid = transfer.person_id\n" +
+            "LEFT JOIN (\n" +
+            "\t\tSELECT DISTINCT ON(lo.patient_uuid) lo.patient_uuid as person_uuid, ls.date_sample_collected as dateSampleCollected,\n" +
+            "\t\t-- \t\tCASE WHEN lr.result_reported ~ E'^\\\\d+(\\\\.\\\\d+)?$' THEN CAST(lr.result_reported AS DECIMAL)\n" +
+            "\t\t--            ELSE NULL END AS lastViralLoad, \n" +
+            "\t\t\tlr.result_reported AS lastViralLoad,\n" +
+            "\t\t\tlr.date_result_reported as dateOfLastViralLoad\n" +
+            "\t\tFROM laboratory_order lo\n" +
+            "\t\tLEFT JOIN ( SELECT patient_uuid, MAX(order_date) AS MAXDATE FROM laboratory_order lo\n" +
+            "\t\tGROUP BY patient_uuid ORDER BY MAXDATE ASC ) AS current_lo\n" +
+            "\t\tON current_lo.patient_uuid=lo.patient_uuid AND current_lo.MAXDATE=lo.order_date\n" +
+            "\t\tLEFT JOIN laboratory_test lt ON lt.lab_order_id=lo.id AND lt.patient_uuid = lo.patient_uuid\n" +
+            "\t\tLEFT JOIN base_application_codeset bac_viral_load ON bac_viral_load.id=lt.viral_load_indication\n" +
+            "\t\tLEFT JOIN laboratory_labtest ll ON ll.id=lt.lab_test_id\n" +
+            "\t\tINNER JOIN hiv_enrollment h ON h.person_uuid=current_lo.patient_uuid\n" +
+            "\t\tLEFT JOIN laboratory_sample ls ON ls.test_id=lt.id AND ls.patient_uuid = lo.patient_uuid\n" +
+            "\t\tLEFT JOIN laboratory_result lr ON lr.test_id=lt.id AND lr.patient_uuid = lo.patient_uuid\n" +
+            "\t\tWHERE  lo.archived=0 AND\n" +
+            "\t\t\tlr.date_result_reported IS NOT NULL\n" +
+            "\t\t) vl ON e.person_uuid = vl.person_uuid\n" +
             "\tLEFT JOIN \n" +
             "   (SELECT DISTINCT ON (person_uuid)\n" +
             "     person_uuid, visit_date, refill_period, regimen\n" +
@@ -386,7 +436,7 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "  WHERE p.archived=0 AND p.facility_id= ?1\n" +
             "  GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ca.visit_date, tri.body_weight, p.facility_id, tri.visit_date,\n" +
             "\tpeadtri.body_weight, e.target_group_id, e.entry_point_id, lasPreg.pregnancy_status, e.date_confirmed_hiv, \n" +
-            "\ttransfer.hiv_status, transfer.status_date,lasclinic.lastvisit, pharm.visit_date\n" +
+            "\ttransfer.hiv_status, transfer.status_date,lasclinic.lastvisit, pharm.visit_date, vl.dateOfLastViralLoad,vl.dateSampleCollected\n" +
             "  ORDER BY p.id DESC )\n" +
             "  SELECT \n" +
             "  COUNT(target_group) AS targNumerator,\n" +
@@ -413,7 +463,7 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "  COUNT(lGreaterConf) AS lGreaterConfNumerator,\n" +
             "  COUNT(hospitalNumber) AS lGreaterConfDenominator,\n" +
             "  ROUND((CAST(COUNT(lGreaterConf) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS lGreaterConfPerformance,\n" +
-            "  COUNT(ArtGreaterTrans) AS ArtGreaterTransNumerator,\n" +
+            "  COUNT(ArtGreaterTrans) AS artGreaterTransNumerator,\n" +
             "  COUNT(hiv_status) AS ArtGreaterTransDenominator,\n" +
             "  ROUND((CAST(COUNT(ArtGreaterTrans) AS DECIMAL) / COUNT(hiv_status)) * 100, 2) AS ArtGreaterTransPerformance,\n" +
             "  COUNT(lstPickGreaterDOb) AS lstPickGreaterDObNumerator,\n" +
@@ -430,12 +480,12 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "  ROUND((CAST(COUNT(clinicPickLessToday) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS clinicPickLessTodayPerformance,\n" +
             "  COUNT(artDateLessToday) AS artDateLessTodayNumerator,\n" +
             "  COUNT(hospitalNumber) AS artDateLessTodayDenominator,\n" +
-            "  ROUND((CAST(COUNT(artDateLessToday) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS artDateLessTodayPerformance\n" +
+            "  ROUND((CAST(COUNT(artDateLessToday) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS artDateLessTodayPerformance,\n" +
+            "  COUNT(vlSample) AS vlNumerator,\n" +
+            "  COUNT(hospitalNumber) AS vlDenominator,\n" +
+            "  ROUND((CAST(COUNT(vlSample) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS vlPerformance\n" +
             "  FROM\n" +
-            "   \tdataConsistence\n" +
-            "  \n" +
-            "  \n" +
-            "\t", nativeQuery = true)
+            "   \tdataConsistence", nativeQuery = true)
     List<ClinicalConsistencyDTOProjection> getClinicalConsistencySummary (Long facilityId);
 
 

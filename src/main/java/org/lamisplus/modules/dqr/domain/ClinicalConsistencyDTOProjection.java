@@ -58,4 +58,8 @@ public interface ClinicalConsistencyDTOProjection {
     Integer getArtDateLessTodayDenominator();
     Double getArtDateLessTodayPerformance();
 
+    Integer getVlNumerator();
+    Integer getVlDenominator();
+    Double getVlPerformance();
+
 }

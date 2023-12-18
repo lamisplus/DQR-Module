@@ -91,6 +91,11 @@ public class DataConsistencyService {
         return lClinicGreaterThanToday;
     }
 
+    public List<PatientDTOProjection> getLastSampleDateGreaterThanResultDate (Long facilityId) {
+        List<PatientDTOProjection> vlSampleDateGreaterThanResultDate = consistencyRepository.getPatientVlSampleDateGreaterThanResultDate(currentUserOrganizationService.getCurrentUserOrganization());
+        return vlSampleDateGreaterThanResultDate;
+    }
+
 
 
 

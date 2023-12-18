@@ -3,6 +3,7 @@ package org.lamisplus.modules.dqr.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.lamisplus.modules.dqr.domain.LaboratoryDTOProjection;
+import org.lamisplus.modules.dqr.domain.PatientDTOProjection;
 import org.lamisplus.modules.dqr.repository.LaboratoryRepository;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +22,7 @@ public class LaboratoryDQAService {
         log.info("Size of the list {} ", labSummary.size());
         return  labSummary;
     }
+
 
 
 }

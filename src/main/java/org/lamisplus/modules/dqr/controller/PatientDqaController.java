@@ -31,6 +31,33 @@ public class PatientDqaController {
     private final EacDQAService eacDQAService;
 
 
+    @GetMapping(value = "/patient-eac", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<PatientDTOProjection>> getPatientEac (
+            //@RequestParam("facilityId") Long facility,
+            @RequestParam("indicator") String indicator
+    ) throws ExecutionException, InterruptedException {
+        Long facilityId = organizationService.getCurrentUserOrganization();
+        List<PatientDTOProjection> result;
+
+        switch (indicator) {
+            case "eac0":
+                result = eacDQAService.getPatientEacEligibleNotCommenced(facilityId);
+                break;
+            case "eac1":
+                result = eacDQAService.getPatientEacNotCompleted(facilityId);
+                break;
+            case "eac2":
+                result = eacDQAService.getPatientNoPostEacVl(facilityId);
+                break;
+            default:
+                // Handle unknown dataType
+                return ResponseEntity.badRequest().build();
+        }
+
+        return ResponseEntity.ok(result);
+    }
+
+
     // data validity api
     @GetMapping(value = "/patient-validity", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<PatientDTOProjection>> getPatientValidityData(

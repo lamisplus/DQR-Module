@@ -446,12 +446,12 @@ const useStyles = makeStyles((theme) => ({
                              <td>
                                  Proportion of all active patients with Date of VL result after the date of VL sample collection
                              </td>
-                             <td></td>
-                             <td></td>
-                             <td> %</td>
+                             <td>{clinicals[0]?.vlNumerator}</td>
+                             <td>{clinicals[0]?.vlDenominator}</td>
+                             <td>{clinicals[0]?.vlPerformance} %</td>
                              <td>
                                 <div>
-                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Date of VL result after the date of VL sample collection", "" )}> View</p>
+                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Date of VL result after the date of VL sample collection", "DataCon14" )}> View</p>
                                 </div>
                              </td>
                              </tr>

@@ -1,6 +1,7 @@
 package org.lamisplus.modules.dqr.repository;
 
 import org.lamisplus.modules.dqr.domain.LaboratoryDTOProjection;
+import org.lamisplus.modules.dqr.domain.PatientDTOProjection;
 import org.lamisplus.modules.dqr.domain.entity.DQA;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
