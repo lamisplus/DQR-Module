@@ -192,9 +192,9 @@ const useStyles = makeStyles((theme) => ({
                   <td>{validity[0]?.normalDobPerformance} %</td>
                   <td>
                   <div>
-
-                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Date of Birth (DOB)", "validity0" )}> View</p>
-
+                  <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                        onClick={() => viewDetail("Proportion of all active patients with Date of Birth (DOB)", "validity0" )}
+                        >View</Button>
                     </div>
                   </td>
                 </tr>
@@ -208,9 +208,9 @@ const useStyles = makeStyles((theme) => ({
                    <td>{validity[0]?.ageInitiatedPerformance} %</td>
                   <td>
                   <div>
-
-                  <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Age at ART initiation (from ages of 0-90 years)", "validity1" )}> View</p>
-
+                  <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                        onClick={() => viewDetail("Proportion of all active patients with Age at ART initiation (from ages of 0-90 years)", "validity1" )}
+                        >View</Button>
                   </div>
                   </td>
                 </tr>
@@ -224,9 +224,9 @@ const useStyles = makeStyles((theme) => ({
                   <td>{validity[0]?.startDatePerformance} %</td>
                   <td>
                   <div>
-
-                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patient with ART start date (from 1985 to current calendar year)", "validity2" )}> View</p>
-
+                  <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                        onClick={() => viewDetail("Proportion of patient with ART start date (from 1985 to current calendar year)", "validity2" )}
+                        >View</Button>
                     </div>
                   </td>
                 </tr>
@@ -236,10 +236,11 @@ const useStyles = makeStyles((theme) => ({
                   <td>{validity[0]?.hivDateNumerator}</td>
                   <td>{validity[0]?.hivDateDenominator}</td>
                   <td>{validity[0]?.hivDatePerformance} %</td>
-                  <td><div>
-
-                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of eligible patient with First confirmed HIV test date (from 1985 to current calendar year)", "validity3" )}> View</p>
-
+                  <td>
+                    <div>
+                  <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                        onClick={() => viewDetail("Proportion of eligible patient with First confirmed HIV test date (from 1985 to current calendar year)", "validity3" )}
+                        >View</Button>
                   </div>
                   </td>
                 </tr>
@@ -253,7 +254,9 @@ const useStyles = makeStyles((theme) => ({
                   <td>{validity[0]?.vlDatePerformance} %</td>
                   <td>
                     <div>
-                      <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patient with Date of viral load result (from 1985 to current calendar year)", "validity6" )}> View</p>
+                    <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                        onClick={() => viewDetail("Proportion of patient with Date of viral load result (from 1985 to current calendar year)", "validity6" )}
+                        >View</Button>
                     </div>
                   </td>
                 </tr>
@@ -267,7 +270,9 @@ const useStyles = makeStyles((theme) => ({
                   <td>{validity[0]?.bioPerformance} %</td>
                   <td>
                   <div>
-                      <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all patients with valid Biometric fingerprint captured", "validity4" )}> View</p>
+                  <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                      onClick={() => viewDetail("Proportion of all patients with valid Biometric fingerprint captured", "validity4" )}
+                        >View</Button>
                     </div>
                   </td>
                 </tr>
@@ -281,7 +286,9 @@ const useStyles = makeStyles((theme) => ({
                   <td>{validity[0]?.regimenPerformance} %</td>
                   <td>
                   <div>
-                      <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patients with Days of ARV refill (between 14 - 180 days)", "validity4" )}> View</p>
+                  <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                      onClick={() => viewDetail("Proportion of patients with Days of ARV refill (between 14 - 180 days)", "validity4" )}
+                        >View</Button>
                     </div>
                   </td>
                 </tr>

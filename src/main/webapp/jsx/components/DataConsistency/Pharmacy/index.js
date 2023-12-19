@@ -245,7 +245,9 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{pharmacy[0]?.refillPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with a documented ART regimen duration in the last refill visit", "pharm0" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of all active patients with a documented ART regimen duration in the last refill visit", "pharm0" )}
+                                    >View</Button>
                                     </div>
                                 </td>
                             </tr>
@@ -261,7 +263,9 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{pharmacy[0]?.regimenPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with documented ART regimen in the last drug refill visit", "pharm0" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of all active patients with documented ART regimen in the last drug refill visit", "pharm0" )}
+                                    >View</Button>
                                     </div>                                    
                                 </td>
                             </tr>

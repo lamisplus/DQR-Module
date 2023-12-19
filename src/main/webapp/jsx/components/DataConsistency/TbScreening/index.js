@@ -248,7 +248,9 @@ const TbScreening = (props) => {
                                 <td>{tbScreening[0]?.docAndCompletedPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients screened for TB with documented TB screening outcome", "tb1" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of all active patients screened for TB with documented TB screening outcome", "tb1" )}
+                                    >View</Button>
                                 </div>
                                 </td>
                             </tr>
@@ -264,7 +266,9 @@ const TbScreening = (props) => {
                                 <td>{tbScreening[0]?.tbstatusPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with documented TB status as at last visit", "tb2" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of all active patients with documented TB status as at last visit", "tb2" )}
+                                     >View</Button>
                                 </div>            
                                 </td>
                             </tr>
@@ -280,7 +284,9 @@ const TbScreening = (props) => {
                                 <td>{tbScreening[0]?.preSamplePerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all presumptive TB patients who have documented date of sample collection", "tb3" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of all active patients with documented TB status as at last visit", "tb2" )}
+                                    >View</Button>
                                 </div>  
                                 </td>
                             </tr>
@@ -296,7 +302,9 @@ const TbScreening = (props) => {
                                <td>{tbScreening[0]?.preSampleTypePerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of presumptive TB patients whose samples were collected with documented samples test type", "tb4" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of presumptive TB patients whose samples were collected with documented samples test type", "tb4" )}
+                                    >View</Button>
                                 </div>
                                 </td>
                             </tr>
@@ -312,7 +320,9 @@ const TbScreening = (props) => {
                                 <td>{tbScreening[0]?.ipt6monthComplPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of TB patients with documented TB treatment outcome", "tb5" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                 onClick={() => viewDetail("Proportion of TB patients with documented TB treatment outcome", "tb5" )} 
+                                    >View</Button>
                                 </div>
                                 </td>
                             </tr>
@@ -328,7 +338,9 @@ const TbScreening = (props) => {
                                 <td>{tbScreening[0]?.ipt6monthComplPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patients on TPT with documented TPT start date", "tb6" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                 onClick={() => viewDetail("Proportion of patients on TPT with documented TPT start date", "tb6" )}
+                                    >View</Button>
                                 </div>
                                 </td>
                             </tr>
@@ -344,7 +356,9 @@ const TbScreening = (props) => {
                                 <td>{tbScreening[0]?.tptstartPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patients on TPT with documented TPT completion date", "tb7" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                 onClick={() => viewDetail("Proportion of patients on TPT with documented TPT completion date", "tb7" )}
+                                    >View</Button>
                                 </div>
                                 </td>
                             </tr>
@@ -360,7 +374,9 @@ const TbScreening = (props) => {
                                 <td>{tbScreening[0]?.iptComplStatususPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patients on TPT with documented TPT completion status", "tb8" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                 onClick={() => viewDetail("Proportion of patients on TPT with documented TPT completion status", "tb8" )}
+                                    >View</Button>
                                 </div>
                                 </td>
                         </tr>
@@ -376,7 +392,9 @@ const TbScreening = (props) => {
                                 <td>{tbScreening[0]?.iptTypeStatusPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patients on TPT with documented TPT type", "tb9" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                 onClick={() => viewDetail("Proportion of patients on TPT with documented TPT type", "tb9" )}
+                                    >View</Button>
                                 </div>
                                 </td>
                             </tr>

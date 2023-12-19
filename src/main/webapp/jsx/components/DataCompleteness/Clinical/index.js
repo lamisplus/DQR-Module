@@ -240,7 +240,9 @@ const Clinical = (props) => {
                                 <td>{clinical[0]?.refillMonthPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with documented month of ARV refill", "" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of all active patients with documented month of ARV refill", "" )}
+                                    >View</Button>
                                 </div>
                                 </td>
                             </tr>
@@ -256,7 +258,9 @@ const Clinical = (props) => {
                                 <td>{clinical[0]?.startDatePerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with ART Start Date", "clinic0" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of all active patients with ART Start Date", "clinic0" )}
+                                    >View</Button>
                                 </div>
                                 </td>
                             </tr>
@@ -272,7 +276,9 @@ const Clinical = (props) => {
                                 <td>{clinical[0]?.confirmDatePerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with First HIV confirmed test Date", "clinic3" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of all active patients with First HIV confirmed test Date", "clinic3" )}
+                                    >View</Button>
                                 </div>            
                                 </td>
                             </tr>
@@ -288,7 +294,9 @@ const Clinical = (props) => {
                                 <td>{clinical[0]?.lastPickPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with documented drug pickup date", "patientDemo0" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of all active patients with documented drug pickup date", "patientDemo0" )}
+                                    >View</Button>
                                 </div>  
                                 </td>
                             </tr>
@@ -304,7 +312,9 @@ const Clinical = (props) => {
                                <td>{clinical[0]?.agePerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Age at ART Initiation", "clinic3" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of all active patients with Age at ART Initiation", "clinic3" )}
+                                    >View</Button>
                                 </div>
                                 </td>
                             </tr>
@@ -320,7 +330,9 @@ const Clinical = (props) => {
                                 <td>{clinical[0]?.regimenPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Last Drug Regimen", "" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of all active patients with Last Drug Regimen", "" )}
+                                    >View</Button>
                                 </div>
                                 </td>
                             </tr>
@@ -336,7 +348,9 @@ const Clinical = (props) => {
                                 <td>{clinical[0]?.targPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with documented target group", "clinic4" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of all active patients with documented target group", "clinic4" )}
+                                    >View</Button>
                                 </div>
                                 </td>
                             </tr>
@@ -352,11 +366,13 @@ const Clinical = (props) => {
                                 <td>{clinical[0]?.entryPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with a documented care entry point", "clinic5" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of all active patients with a documented care entry point", "clinic5" )}
+                                    >View</Button>
                                 </div>
                                 </td>
                             </tr>
-                            <tr>
+                            {/* <tr>
                        <th scope="row">
                            9
                        </th>
@@ -372,7 +388,7 @@ const Clinical = (props) => {
                                 </div>
 
                                </td>
-                        </tr>
+                        </tr> */}
                         <tr>
                                 <th scope="row">
                                     10
@@ -385,7 +401,9 @@ const Clinical = (props) => {
                                 <td>{clinical[0]?.lastVisitPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail(" Proportion of all active patients that had documented last Clinic visit date", "clinic6" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail(" Proportion of all active patients that had documented last Clinic visit date", "clinic6" )}
+                                    >View</Button>
                                 </div>
 
                                 </td>
@@ -402,7 +420,9 @@ const Clinical = (props) => {
                                 <td>{clinical[0]?.weightPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with documented weight", "clinic7" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of all active patients with documented weight", "clinic7" )}
+                                    >View</Button>
                                 </div>
 
                                 </td>
@@ -419,7 +439,9 @@ const Clinical = (props) => {
                                <td>{clinical[0]?.pregPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active female > 12 age with Pregnancy status at last visit", "clinic8" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of all active female > 12 age with Pregnancy status at last visit", "clinic8" )}
+                                    >View</Button>
                                 </div>
 
                                 </td>
@@ -436,7 +458,9 @@ const Clinical = (props) => {
                                 <td>{clinical[0]?.diagnosePerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with documented dates of HIV diagnosis", "clinic9" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of all active patients with documented dates of HIV diagnosis", "clinic9" )}
+                                    >View</Button>
                                 </div>
 
                                 </td>
@@ -453,7 +477,9 @@ const Clinical = (props) => {
                                 <td>{clinical[0]?.enrolledDatePerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with documented HIV enrolment date", "clinic10" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of all active patients with documented HIV enrolment date", "clinic10" )}
+                                    >View</Button>
                                 </div>
 
                                 </td>
@@ -470,7 +496,9 @@ const Clinical = (props) => {
                                <td>{clinical[0]?.commencedPerformance} %</td>
                                <td>
                                <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with documented ART Commencement date", "clinic11" )}> View</p>
+                               <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of all active patients with documented ART Commencement date", "clinic11" )}
+                                    >View</Button>
                                 </div>
 
                                </td>
