@@ -168,7 +168,7 @@ const useStyles = makeStyles((theme) => ({
       setGetHeaderInfo(headerTitle)
       const labDemo =patientDemoObj
       axios
-            .get(`${baseUrl}dqr/patient-clinic?indicator=${labDemo}`, {
+            .get(`${baseUrl}dqr/patient-laboratory?indicator=${labDemo}`, {
               headers: { Authorization: `Bearer ${token}` },
             })
             .then((response) => {
@@ -227,7 +227,7 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{laboratory[0]?.eligibleVlPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of (active) eligible patients with documented viral load results done in the last one year", "" )}> View</p>
+                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of (active) eligible patients with documented viral load results done in the last one year", "lab0" )}> View</p>
                                 </div>
                                 </td>
                             </tr>
@@ -243,7 +243,7 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{laboratory[0]?.hadVlPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of (active) eligible patients with viral load result that had documented collection date", "" )}> View</p>
+                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of (active) eligible patients with viral load result that had documented collection date", "lab1" )}> View</p>
                                 </div>
                                 </td>
                             </tr>
@@ -259,7 +259,7 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{laboratory[0]?.hadPcrDatePerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of (active) eligible patients with viral load results with a documented date sample was received at the PCR Lab", "" )}> View</p>
+                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of (active) eligible patients with viral load results with a documented date sample was received at the PCR Lab", "lab2" )}> View</p>
                                 </div>
                                 </td>
                             </tr>
@@ -275,7 +275,7 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{laboratory[0]?.hadIndicatorPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of (active) eligible patients whose samples were collected with Viral load indication documented", "" )}> View</p>
+                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of (active) eligible patients whose samples were collected with Viral load indication documented", "lab3" )}> View</p>
                                 </div>
                                 </td>
                             </tr>
@@ -291,7 +291,7 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{laboratory[0]?.vlDateGsDatePerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of (active) eligible patients whose samples were collected with Viral load indication documented", "" )}> View</p>
+                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of (active) eligible patients whose samples were collected with Viral load indication documented", "lab4" )}> View</p>
                                 </div>
                                 </td>
                             </tr>
@@ -307,7 +307,7 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{laboratory[0]?.treatmentCd4Performance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of (active) eligible patients with date of last CD4 in the last one year", "" )}> View</p>
+                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of (active) eligible patients with date of last CD4 in the last one year", "lab5" )}> View</p>
                                 </div>
                                 </td>
                             </tr>
@@ -323,7 +323,7 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{laboratory[0]?.cd4WithinYearPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of (active) eligible patients with CD4 result documented in the last one year", "" )}> View</p>
+                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of (active) eligible patients with CD4 result documented in the last one year", "lab6" )}> View</p>
                                 </div>
                                 </td>
                             </tr>

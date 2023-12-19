@@ -31,6 +31,45 @@ public class PatientDqaController {
     private final EacDQAService eacDQAService;
 
 
+
+    //Laboratory Api's
+    @GetMapping(value = "/patient-laboratory", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<PatientDTOProjection>> getPatientLaboratoryData (
+            @RequestParam("indicator") String indicator
+    ) throws ExecutionException, InterruptedException {
+        Long facilityId = organizationService.getCurrentUserOrganization();
+        List<PatientDTOProjection> result;
+
+        switch (indicator) {
+            case "lab0":
+                result = laboratoryDQAService.getEligibleNoVlResult(facilityId);
+                break;
+            case "lab1":
+                result = laboratoryDQAService.getActiveNoVlResult(facilityId);
+                break;
+            case "lab2":
+                result = laboratoryDQAService.getNoPcrDate(facilityId);
+                break;
+            case "lab3":
+                result = laboratoryDQAService.getNoVlIndicator(facilityId);
+                break;
+            case "lab4":
+                result = laboratoryDQAService.getVlSampleDateHigherThanResultDate(facilityId);
+                break;
+            case "lab5":
+                result = laboratoryDQAService.getNoCd4WithinOneYear(facilityId);
+                break;
+            case "lab6":
+                result = laboratoryDQAService.getNoInCd4WithinOneYear(facilityId);
+                break;
+            default:
+                // Handle unknown dataType
+                return ResponseEntity.badRequest().build();
+        }
+
+        return ResponseEntity.ok(result);
+    }
+    //Eac Api
     @GetMapping(value = "/patient-eac", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<PatientDTOProjection>> getPatientEac (
             //@RequestParam("facilityId") Long facility,
