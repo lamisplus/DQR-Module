@@ -1,51 +1,9 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import MaterialTable from 'material-table';
-import { token, url as baseUrl } from "../../../../api";
 import {  Table } from "reactstrap";
 import { makeStyles } from "@material-ui/core/styles";
 import { Card, CardContent } from "@material-ui/core";
 import "semantic-ui-css/semantic.min.css";
-import {  Button, } from "semantic-ui-react";
 
-import { forwardRef } from 'react';
-import "react-toastify/dist/ReactToastify.css";
-import "react-widgets/dist/css/react-widgets.css";
-import AddBox from '@material-ui/icons/AddBox';
-import ArrowUpward from '@material-ui/icons/ArrowUpward';
-import Check from '@material-ui/icons/Check';
-import ChevronLeft from '@material-ui/icons/ChevronLeft';
-import ChevronRight from '@material-ui/icons/ChevronRight';
-import Clear from '@material-ui/icons/Clear';
-import DeleteOutline from '@material-ui/icons/DeleteOutline';
-import Edit from '@material-ui/icons/Edit';
-import FilterList from '@material-ui/icons/FilterList';
-import FirstPage from '@material-ui/icons/FirstPage';
-import LastPage from '@material-ui/icons/LastPage';
-import Remove from '@material-ui/icons/Remove';
-import SaveAlt from '@material-ui/icons/SaveAlt';
-import Search from '@material-ui/icons/Search';
-import ViewColumn from '@material-ui/icons/ViewColumn';
-
-const tableIcons = {
-  Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
-  Check: forwardRef((props, ref) => <Check {...props} ref={ref} />),
-  Clear: forwardRef((props, ref) => <Clear {...props} ref={ref} />),
-  Delete: forwardRef((props, ref) => <DeleteOutline {...props} ref={ref} />),
-  DetailPanel: forwardRef((props, ref) => <ChevronRight {...props} ref={ref} />),
-  Edit: forwardRef((props, ref) => <Edit {...props} ref={ref} />),
-  Export: forwardRef((props, ref) => <SaveAlt {...props} ref={ref} />),
-  Filter: forwardRef((props, ref) => <FilterList {...props} ref={ref} />),
-  FirstPage: forwardRef((props, ref) => <FirstPage {...props} ref={ref} />),
-  LastPage: forwardRef((props, ref) => <LastPage {...props} ref={ref} />),
-  NextPage: forwardRef((props, ref) => <ChevronRight {...props} ref={ref} />),
-  PreviousPage: forwardRef((props, ref) => <ChevronLeft {...props} ref={ref} />),
-  ResetSearch: forwardRef((props, ref) => <Clear {...props} ref={ref} />),
-  Search: forwardRef((props, ref) => <Search {...props} ref={ref} />),
-  SortArrow: forwardRef((props, ref) => <ArrowUpward {...props} ref={ref} />),
-  ThirdStateCheck: forwardRef((props, ref) => <Remove {...props} ref={ref} />),
-  ViewColumn: forwardRef((props, ref) => <ViewColumn {...props} ref={ref} />)
-  };
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -117,139 +75,61 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-  const ValidityReportDQA = (props) => {
+  const LegendDQA = (props) => {
   const classes = useStyles();
-  const [validity, setValidity] = useState({});
-  const [showPatientDetail, setPatientDetail] = useState(false);
-  const [getHeaderInfo, setGetHeaderInfo] = useState("");
-  const [validityPatientsView, setValidityPatientsView] = useState([])
-
-    useEffect(() => {
-      loadValidity();
-    }, []);
-
-    
-  const loadValidity = () => {
-    axios
-      .get(`${baseUrl}dqr/validity-summary`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setValidity(response.data);
-        console.log(response.data)
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
-
-  const viewDetail =(headerTitle,patientDemoObj)=>{
-  setPatientDetail(true)
-  setGetHeaderInfo(headerTitle)
-  const validityDemo =patientDemoObj
-  axios
-        .get(`${baseUrl}dqr/patient-validity?indicator=${validityDemo}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((response) => {
-          setValidityPatientsView(response.data);
-          //console.log(response.data[0])
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-  }
-  const BackToList=()=> {
-    setPatientDetail(false)
-  }
 
   return (
     <>
       <Card className={classes.root}>
         <CardContent>
-          <h3>Data Validation Report</h3>
+          <h3> Legend </h3>
           <div className="col-xl-12 col-lg-12">
-          {!showPatientDetail &&(<>
             <Table bordered>
               <tbody>
                 <tr>
-                  <th scope="row">1</th>
                   <td> 95% and Above Score </td>
-                  <td>Green</td>
+                  <td>
+                  <div>
+                                <span style={{ backgroundColor: "rgb(0,255,100)", color: "white",
+                                  border: "2px solid", margin: "2px", padding: "8px", fontWeight: "bold"
+                              }}
+                                    > Very Good </span>
+                                </div>
+                    </td>
                 </tr>
                 <tr>
-                  <th scope="row">2</th>
                   <td>
                     90% - 94% Score
                   </td>
-                  <td>Yellow</td>
+                  <td>
+                  <div>
+                    <span style={{ backgroundColor: "rgb(255,255,0)", color: "white",
+                     border: "2px solid", margin: "2px", padding: "8px", fontWeight: "bold",
+                     boxSizing: "border-box"
+                     }}
+                     > Good </span>
+                     </div>
+                     </td>
                 </tr>
                 <tr>
-                  <th scope="row">3</th>
                   <td>
                       89% and Below Score
                   </td>
-                  <td> Red </td>
+                  <td>
+                  <div>
+                    <span style={{ backgroundColor: "rgb(255,0,100)", color: "white",
+                     border: "2px solid", margin: "2px", padding: "8px", fontWeight: "bold",
+                     boxSizing: "border-box"
+                     }}
+                     > Poor </span>
+                     </div>
+                     </td>
                   
                 </tr>
                 
                 
               </tbody>
-            </Table>
-            </>)}
-            {showPatientDetail &&(<>
-                      <Button
-                        variant="contained"
-                        style={{backgroundColor:"#014d88", }}
-                        className=" float-right mr-1"
-                        //startIcon={<FaUserPlus />}
-                        onClick={BackToList}
-                        >
-                        <span style={{ textTransform: "capitalize", color:"#fff" }}> {"<<"} Back </span>
-                        </Button>
-                        <br/>
-                        <br/> 
-                        <MaterialTable
-                            icons={tableIcons}
-                            title={getHeaderInfo}
-                            columns={[
-
-                              {
-                                title: "Hospital Number",
-                                field: "hospitalNumber",
-                              },
-                              { title: "Sex ", field: "sex", filtering: false },
-                              { title: "Date Of Birth", field: "dob", filtering: false },
-                              { title: "Status", field: "status", filtering: false },
-
-                            ]}
-                            data={ validityPatientsView.map((row) => ({
-                              //Id: manager.id,
-                              hospitalNumber: row.hospitalNumber,
-                              sex: row.sex,
-                              dob: row.dateOfBirth,
-                              status:row.status
-
-                            }))}
-
-                            options={{
-                              headerStyle: {
-                                backgroundColor: "#014d88",
-                                color: "#fff",
-                              },
-                              searchFieldStyle: {
-                                width : '200%',
-                                margingLeft: '250px',
-                              },
-                              filtering: false,
-                              exportButton: true,
-                              searchFieldAlignment: 'left',
-                              pageSizeOptions:[10,20,100],
-                              pageSize:10,
-                              debounceInterval: 400
-                            }}
-                        />
-            </>)}
+            </Table>           
           </div>
         </CardContent>
       </Card>
@@ -257,4 +137,4 @@ const useStyles = makeStyles((theme) => ({
   );
 };
 
-export default ValidityReportDQA;
+export default LegendDQA;

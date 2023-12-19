@@ -113,7 +113,7 @@ const DQAList = (props) => {
     const [showTpt, setShowTpt] = useState(false);
     const [showLaboratory, setShowLaboratory] = useState(false);
     const [showValidityReport, setShowValidityReport] = useState(false);
-    const [showLegend, setShowLegend] = useState(false);
+    const [showLegend, setShowLegend] = useState(true);
     
 
     const onClickDemographics =() =>{
@@ -298,7 +298,7 @@ const DQAList = (props) => {
                             <div className="card">
                                 <div className="card-header" style={{backgroundColor:"#014d88",color:'#fff',fontWeight:'bolder',  borderRadius:"0.2rem"}}>
                                     <h5 className="card-title" style={{color:'#fff'}}>Legend</h5>
-                                    {showLegend===true  }
+                                    {/* {showLegend===true  ? (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickLegend}><FaPlus /></span></>) :  (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickLegend}><FaAngleDown /></span> </>)} */}
                                 </div>
                                 {showLegend && (
                                     <Legenda /> 
