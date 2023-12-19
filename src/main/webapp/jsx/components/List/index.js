@@ -19,6 +19,7 @@ import TbScreening from "../DataConsistency/TbScreening";
 import Laboratory from "../DataConsistency/Laboratory";
 import ValidityReport from "../DataValidity/ValidityReport";
 import EAC from "../DataConsistency/Eac";
+import Legenda from '../Legenda/ShowLegend/index'
 
 
 
@@ -112,9 +113,14 @@ const DQAList = (props) => {
     const [showTpt, setShowTpt] = useState(false);
     const [showLaboratory, setShowLaboratory] = useState(false);
     const [showValidityReport, setShowValidityReport] = useState(false);
+    const [showLegend, setShowLegend] = useState(false);
+    
 
     const onClickDemographics =() =>{
         setShowDemographic(!showDemographics)
+    }
+    const onClickLegend =() =>{
+        setShowLegend(!showLegend)
     }
     const onClickLaboratory =() =>{
         setShowLaboratory(!showLaboratory)
@@ -286,6 +292,17 @@ const DQAList = (props) => {
                                 {showValidityReport && (
                                   <ValidityReport />
                                  )}
+
+                            </div>
+                            <h2>Legend</h2>
+                            <div className="card">
+                                <div className="card-header" style={{backgroundColor:"#014d88",color:'#fff',fontWeight:'bolder',  borderRadius:"0.2rem"}}>
+                                    <h5 className="card-title" style={{color:'#fff'}}>Legend</h5>
+                                    {showLegend===true  }
+                                </div>
+                                {showLegend && (
+                                    <Legenda /> 
+                                )}
 
                             </div>
                             <br />

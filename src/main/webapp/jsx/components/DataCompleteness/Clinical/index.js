@@ -241,7 +241,7 @@ const Clinical = (props) => {
                                 <td>
                                 <div>
                                 <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
-                                    onClick={() => viewDetail("Proportion of all active patients with documented month of ARV refill", "" )}
+                                    onClick={() => viewDetail("Proportion of all active patients with documented month of ARV refill", "clinic12" )}
                                     >View</Button>
                                 </div>
                                 </td>
