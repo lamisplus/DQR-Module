@@ -319,7 +319,6 @@ public class PatientDqaController {
         return ResponseEntity.ok(result);
     }
 
-
     //this section/code block below endpoints for summaries
 
     @GetMapping(value = "/patient-demo-summary", produces = MediaType.APPLICATION_JSON_VALUE)

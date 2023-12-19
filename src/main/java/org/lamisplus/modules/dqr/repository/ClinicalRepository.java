@@ -201,4 +201,25 @@ public interface ClinicalRepository extends JpaRepository<DQA, Long> {
     List<PatientDTOProjection> getClientWithNoLastVisitDate (Long facilityId);
 
 
+    @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex\n" +
+            "  ,p.date_of_birth AS dateOfBirth\n" +
+            "    FROM patient_person p\n" +
+            "    INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "    LEFT JOIN\n" +
+            "    (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date, hac.pregnancy_status  FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "    GROUP BY hac.person_uuid, hac.visit_date, hac.pregnancy_status)ca ON p.uuid = ca.person_uuid\n" +
+            "    LEFT JOIN\n" +
+            "    (SELECT DISTINCT ON (person_uuid)\n" +
+            "      person_uuid, visit_date, refill_period\n" +
+            "  FROM ( select person_uuid, refill_period, MAX(visit_date) AS visit_date from hiv_art_pharmacy\n" +
+            "  GROUP BY refill_period, person_uuid ORDER BY person_uuid DESC ) fi ORDER BY\n" +
+            "      person_uuid DESC ) pharm ON pharm.person_uuid = p.uuid\n" +
+            "    LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
+            "    WHERE p.archived=0 AND p.facility_id= ? AND pharm.refill_period IS NULL\n" +
+            "    GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ca.visit_date, pharm.refill_period, p.facility_id, pharm.visit_date\n" +
+            "    ORDER BY p.id DESC", nativeQuery = true)
+    List<PatientDTOProjection> getClientWithNoMonthRefill (Long facilityId);
+
+
+
 }
