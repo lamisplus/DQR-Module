@@ -359,7 +359,9 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "\t(CASE WHEN lasClinic.lastvisit <= CAST(now() AS DATE) THEN 1 ELSE null END)  AS clinicPickLessToday,\n" +
             "\t(CASE WHEN e.date_started <= CAST(now() AS DATE) THEN 1 ELSE null END)  AS artDateLessToday,\n" +
             "\t(CASE WHEN lasClinic.lastvisit > transfer.status_date  THEN 1 ELSE null END)  AS clinicGreaterThanTrans,\n" +
-            "\t(CASE WHEN vl.dateOfLastViralLoad > vl.dateSampleCollected THEN 1 ELSE NULL END) AS vlSample\n" +
+            "\t(CASE WHEN vl.dateOfLastViralLoad > vl.dateSampleCollected THEN 1 ELSE NULL END) AS vlSample,\n" +
+            "CASE WHEN SEX = 'Female' AND CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) > 12 THEN 1 ELSE NULL END AS activeFemaleAdult,\n" +
+            "\tCASE WHEN SEX = 'Female' AND CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) > 12 AND ca.pregnancy_status IS NOT NULL THEN 1 ELSE NULL END AS activeFemalePregStatus \n" +
             "  FROM patient_person p\n" +
             "  INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
             "  LEFT JOIN\n" +
@@ -436,7 +438,7 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "  WHERE p.archived=0 AND p.facility_id= ?1\n" +
             "  GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ca.visit_date, tri.body_weight, p.facility_id, tri.visit_date,\n" +
             "\tpeadtri.body_weight, e.target_group_id, e.entry_point_id, lasPreg.pregnancy_status, e.date_confirmed_hiv, \n" +
-            "\ttransfer.hiv_status, transfer.status_date,lasclinic.lastvisit, pharm.visit_date, vl.dateOfLastViralLoad,vl.dateSampleCollected\n" +
+            "\ttransfer.hiv_status, transfer.status_date,lasclinic.lastvisit, pharm.visit_date, vl.dateOfLastViralLoad,vl.dateSampleCollected, ca.pregnancy_status\n" +
             "  ORDER BY p.id DESC )\n" +
             "  SELECT \n" +
             "  COUNT(target_group) AS targNumerator,\n" +
@@ -451,9 +453,9 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "  COUNT(peadweight) AS peadWeightNumerator,\n" +
             "  COUNT(hospitalNumber) AS peadWeightDenominator,\n" +
             "  ROUND((CAST(COUNT(peadweight) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS peadWeightPerformance,\n" +
-            "  COUNT(pregnancy_status) AS pregNumerator,\n" +
-            "  COUNT(hospitalNumber) AS pregDenominator,\n" +
-            "  ROUND((CAST(COUNT(pregnancy_status) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS pregPerformance,\n" +
+            "  COUNT(activeFemalePregStatus) AS pregNumerator,\n" +
+            "  COUNT(activeFemaleAdult) AS pregDenominator,\n" +
+            "  ROUND((CAST(COUNT(activeFemalePregStatus) AS DECIMAL) / COUNT(activeFemaleAdult)) * 100, 2) AS pregPerformance,\n" +
             "  COUNT(ArtEqClinicD) AS artEqClinicNumerator,\n" +
             "  COUNT(hospitalNumber) AS artEqClinicDenominator,\n" +
             "  ROUND((CAST(COUNT(ArtEqClinicD) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS artEqClinicPerformance,\n" +
