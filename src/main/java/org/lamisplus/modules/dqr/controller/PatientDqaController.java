@@ -30,6 +30,51 @@ public class PatientDqaController {
     private final DataValidityService validityService;
     private final EacDQAService eacDQAService;
 
+    @GetMapping(value = "/patient-tb", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<PatientDTOProjection>> getPatientTbData (
+            @RequestParam("indicator") String indicator
+    ) throws ExecutionException, InterruptedException {
+        Long facilityId = organizationService.getCurrentUserOrganization();
+        List<PatientDTOProjection> result;
+
+        switch (indicator) {
+            case "tb0":
+                result = tbDQAService.getNoDocumentedTbScreening(facilityId);
+                break;
+            case "tb1":
+                result = tbDQAService.getNoTbScreeningOutCome(facilityId);
+                break;
+            case "tb2":
+                result = tbDQAService.getNoTbStatusLastVisit(facilityId);
+                break;
+            case "tb3":
+                result = tbDQAService.getNoTbSamplePresumptive(facilityId);
+                break;
+            case "tb4":
+                result = tbDQAService.getNoTbSampleTypePresumptive(facilityId);
+                break;
+            case "tb5":
+                result = tbDQAService.getOnTbWithoutOutcome(facilityId);
+                break;
+            case "tb6":
+                result = tbDQAService.getEligibleForIptNoDateStarted(facilityId);
+                break;
+            case "tb7":
+                result = tbDQAService.getEligibleForIptNoDateCompletion(facilityId);
+                break;
+            case "tb8":
+                result = tbDQAService.getEligibleForIptNoDateCompletedStatus(facilityId);
+                break;
+            case "tb9":
+                result = tbDQAService.getCompletedIptType(facilityId);
+                break;
+            default:
+                // Handle unknown dataType
+                return ResponseEntity.badRequest().build();
+        }
+
+        return ResponseEntity.ok(result);
+    }
 
 
     //Laboratory Api's
@@ -69,6 +114,7 @@ public class PatientDqaController {
 
         return ResponseEntity.ok(result);
     }
+
     //Eac Api
     @GetMapping(value = "/patient-eac", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<PatientDTOProjection>> getPatientEac (
