@@ -15,36 +15,144 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
 
 
     @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex,\n" +
-            "      p.date_of_birth AS dateOfBirth\n" +
+            "      p.date_of_birth AS dateOfBirth, ph.status\n" +
             "     FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
             "     LEFT JOIN\n" +
             "     (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "     GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
+            "LEFT JOIN (\n" +
+            "SELECT DISTINCT ON (p1.person_uuid)\n" +
+            "p1.person_uuid,\n" +
+            "p1.visit_date AS last_visit_date,\n" +
+            "p1.next_appointment AS last_next_appointment,\n" +
+            "r.duration,\n" +
+            "CASE\n" +
+            "WHEN t.hiv_status = 'KNOWN_DEATH' THEN 'Dead'\n" +
+            "WHEN t.hiv_status IN ('ART_TRANSFER_OUT', 'ART Transfer Out') THEN 'Transferred Out'\n" +
+            "WHEN AGE(NOW(), (p1.visit_date + r.duration * INTERVAL '1 DAY')) <= INTERVAL '28 DAYS' THEN 'Active'\n" +
+            "WHEN AGE(NOW(), (p1.visit_date + r.duration * INTERVAL '1 DAY')) > INTERVAL '28 DAYS' THEN 'IIT'\n" +
+            "END AS status\n" +
+            "FROM (\n" +
+            "SELECT \n" +
+            "person_uuid,\n" +
+            "MAX(visit_date) AS max_visit_date\n" +
+            "FROM hiv_art_pharmacy\n" +
+            "GROUP BY person_uuid\n" +
+            ") AS max_dates\n" +
+            "JOIN hiv_art_pharmacy p1 ON max_dates.person_uuid = p1.person_uuid AND max_dates.max_visit_date = p1.visit_date\n" +
+            "CROSS JOIN LATERAL (\n" +
+            "SELECT\n" +
+            "reg->>'regimenName' AS regimenName,\n" +
+            "CAST ((reg->>'duration') AS INTEGER) AS duration\n" +
+            "FROM jsonb_array_elements(p1.extra->'regimens') AS reg\n" +
+            " ) AS r\n" +
+            "JOIN (\n" +
+            "SELECT\n" +
+            "person_id,\n" +
+            "hiv_status,\n" +
+            "ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC) AS rn\n" +
+            "FROM hiv_status_tracker\n" +
+            " ) AS t ON p1.person_uuid = t.person_id AND t.rn = 1\n" +
+            " JOIN hiv_regimen hr ON r.regimenName = hr.description\n" +
+            "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
+            ") ph ON p.uuid = ph.person_uuid" +
             "     LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
             "     WHERE p.archived=0 AND p.facility_id= ?1 AND e.target_group_id is null\n" +
-            "     GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth\n" +
+            "     GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status\n" +
             "     ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getPatientsWithoutTargetGroup(Long facilityId);
 
 
-    @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex, p.date_of_birth AS dateOfBirth\n" +
+    @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex, p.date_of_birth AS dateOfBirth, ph.status\n" +
             "      FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
             "      LEFT JOIN\n" +
             "      (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "      GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
+            "LEFT JOIN (\n" +
+            "SELECT DISTINCT ON (p1.person_uuid)\n" +
+            "p1.person_uuid,\n" +
+            "p1.visit_date AS last_visit_date,\n" +
+            "p1.next_appointment AS last_next_appointment,\n" +
+            "r.duration,\n" +
+            "CASE\n" +
+            "WHEN t.hiv_status = 'KNOWN_DEATH' THEN 'Dead'\n" +
+            "WHEN t.hiv_status IN ('ART_TRANSFER_OUT', 'ART Transfer Out') THEN 'Transferred Out'\n" +
+            "WHEN AGE(NOW(), (p1.visit_date + r.duration * INTERVAL '1 DAY')) <= INTERVAL '28 DAYS' THEN 'Active'\n" +
+            "WHEN AGE(NOW(), (p1.visit_date + r.duration * INTERVAL '1 DAY')) > INTERVAL '28 DAYS' THEN 'IIT'\n" +
+            "END AS status\n" +
+            "FROM (\n" +
+            "SELECT \n" +
+            "person_uuid,\n" +
+            "MAX(visit_date) AS max_visit_date\n" +
+            "FROM hiv_art_pharmacy\n" +
+            "GROUP BY person_uuid\n" +
+            ") AS max_dates\n" +
+            "JOIN hiv_art_pharmacy p1 ON max_dates.person_uuid = p1.person_uuid AND max_dates.max_visit_date = p1.visit_date\n" +
+            "CROSS JOIN LATERAL (\n" +
+            "SELECT\n" +
+            "reg->>'regimenName' AS regimenName,\n" +
+            "CAST ((reg->>'duration') AS INTEGER) AS duration\n" +
+            "FROM jsonb_array_elements(p1.extra->'regimens') AS reg\n" +
+            " ) AS r\n" +
+            "JOIN (\n" +
+            "SELECT\n" +
+            "person_id,\n" +
+            "hiv_status,\n" +
+            "ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC) AS rn\n" +
+            "FROM hiv_status_tracker\n" +
+            " ) AS t ON p1.person_uuid = t.person_id AND t.rn = 1\n" +
+            " JOIN hiv_regimen hr ON r.regimenName = hr.description\n" +
+            "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
+            ") ph ON p.uuid = ph.person_uuid"+
             "      LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
             "      WHERE p.archived=0 AND p.facility_id= ?1 AND e.entry_point_id is null\n" +
-            "      GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth\n" +
+            "      GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status\n" +
             "      ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getPatientsWithoutCareEntryPoint(Long facilityId);
 
 
-    @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex,p.date_of_birth AS dateOfBirth\n" +
+    @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex,p.date_of_birth AS dateOfBirth, ph.status\n" +
             "    FROM patient_person p\n" +
             "    INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
             "    LEFT JOIN\n" +
             "    (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date, hac.pregnancy_status  FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "    GROUP BY hac.person_uuid, hac.visit_date, hac.pregnancy_status)ca ON p.uuid = ca.person_uuid\n" +
+            "LEFT JOIN (\n" +
+            "SELECT DISTINCT ON (p1.person_uuid)\n" +
+            "p1.person_uuid,\n" +
+            "p1.visit_date AS last_visit_date,\n" +
+            "p1.next_appointment AS last_next_appointment,\n" +
+            "r.duration,\n" +
+            "CASE\n" +
+            "WHEN t.hiv_status = 'KNOWN_DEATH' THEN 'Dead'\n" +
+            "WHEN t.hiv_status IN ('ART_TRANSFER_OUT', 'ART Transfer Out') THEN 'Transferred Out'\n" +
+            "WHEN AGE(NOW(), (p1.visit_date + r.duration * INTERVAL '1 DAY')) <= INTERVAL '28 DAYS' THEN 'Active'\n" +
+            "WHEN AGE(NOW(), (p1.visit_date + r.duration * INTERVAL '1 DAY')) > INTERVAL '28 DAYS' THEN 'IIT'\n" +
+            "END AS status\n" +
+            "FROM (\n" +
+            "SELECT \n" +
+            "person_uuid,\n" +
+            "MAX(visit_date) AS max_visit_date\n" +
+            "FROM hiv_art_pharmacy\n" +
+            "GROUP BY person_uuid\n" +
+            ") AS max_dates\n" +
+            "JOIN hiv_art_pharmacy p1 ON max_dates.person_uuid = p1.person_uuid AND max_dates.max_visit_date = p1.visit_date\n" +
+            "CROSS JOIN LATERAL (\n" +
+            "SELECT\n" +
+            "reg->>'regimenName' AS regimenName,\n" +
+            "CAST ((reg->>'duration') AS INTEGER) AS duration\n" +
+            "FROM jsonb_array_elements(p1.extra->'regimens') AS reg\n" +
+            " ) AS r\n" +
+            "JOIN (\n" +
+            "SELECT\n" +
+            "person_id,\n" +
+            "hiv_status,\n" +
+            "ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC) AS rn\n" +
+            "FROM hiv_status_tracker\n" +
+            " ) AS t ON p1.person_uuid = t.person_id AND t.rn = 1\n" +
+            " JOIN hiv_regimen hr ON r.regimenName = hr.description\n" +
+            "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
+            ") ph ON p.uuid = ph.person_uuid"+
             "    LEFT JOIN\n" +
             "    (SELECT DISTINCT ON (person_uuid)\n" +
             "      person_uuid, visit_date, body_weight\n" +
@@ -54,16 +162,52 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "      person_uuid DESC ) tri ON tri.person_uuid = p.uuid\n" +
             "    LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
             "    WHERE p.archived=0 AND p.facility_id= ?1 AND tri.body_weight > 121\n" +
-            "    GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ca.visit_date, tri.body_weight, p.facility_id, tri.visit_date\n" +
+            "    GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status, ca.visit_date, tri.body_weight, p.facility_id, tri.visit_date\n" +
             "    ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getPatientsWithAbornormalWeightLastVisit (Long facilityId);
 
-    @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex, p.date_of_birth AS dateOfBirth\n" +
+    @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex, p.date_of_birth AS dateOfBirth, ph.status\n" +
             "    FROM patient_person p\n" +
             "    INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
             "    LEFT JOIN\n" +
             "    (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date, hac.pregnancy_status  FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "    GROUP BY hac.person_uuid, hac.visit_date, hac.pregnancy_status)ca ON p.uuid = ca.person_uuid\n" +
+            "LEFT JOIN (\n" +
+            "SELECT DISTINCT ON (p1.person_uuid)\n" +
+            "p1.person_uuid,\n" +
+            "p1.visit_date AS last_visit_date,\n" +
+            "p1.next_appointment AS last_next_appointment,\n" +
+            "r.duration,\n" +
+            "CASE\n" +
+            "WHEN t.hiv_status = 'KNOWN_DEATH' THEN 'Dead'\n" +
+            "WHEN t.hiv_status IN ('ART_TRANSFER_OUT', 'ART Transfer Out') THEN 'Transferred Out'\n" +
+            "WHEN AGE(NOW(), (p1.visit_date + r.duration * INTERVAL '1 DAY')) <= INTERVAL '28 DAYS' THEN 'Active'\n" +
+            "WHEN AGE(NOW(), (p1.visit_date + r.duration * INTERVAL '1 DAY')) > INTERVAL '28 DAYS' THEN 'IIT'\n" +
+            "END AS status\n" +
+            "FROM (\n" +
+            "SELECT \n" +
+            "person_uuid,\n" +
+            "MAX(visit_date) AS max_visit_date\n" +
+            "FROM hiv_art_pharmacy\n" +
+            "GROUP BY person_uuid\n" +
+            ") AS max_dates\n" +
+            "JOIN hiv_art_pharmacy p1 ON max_dates.person_uuid = p1.person_uuid AND max_dates.max_visit_date = p1.visit_date\n" +
+            "CROSS JOIN LATERAL (\n" +
+            "SELECT\n" +
+            "reg->>'regimenName' AS regimenName,\n" +
+            "CAST ((reg->>'duration') AS INTEGER) AS duration\n" +
+            "FROM jsonb_array_elements(p1.extra->'regimens') AS reg\n" +
+            " ) AS r\n" +
+            "JOIN (\n" +
+            "SELECT\n" +
+            "person_id,\n" +
+            "hiv_status,\n" +
+            "ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC) AS rn\n" +
+            "FROM hiv_status_tracker\n" +
+            " ) AS t ON p1.person_uuid = t.person_id AND t.rn = 1\n" +
+            " JOIN hiv_regimen hr ON r.regimenName = hr.description\n" +
+            "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
+            ") ph ON p.uuid = ph.person_uuid" +
             "    LEFT JOIN\n" +
             "    (SELECT DISTINCT ON (person_uuid)\n" +
             "      person_uuid, captu, body_weight\n" +
@@ -74,20 +218,56 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "      person_uuid DESC ) tri ON tri.person_uuid = p.uuid\n" +
             "    LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
             "    WHERE p.archived=0 AND p.facility_id= ?1 AND CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) BETWEEN 0 AND 14 AND tri.body_weight > 61\n" +
-            "    GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ca.visit_date, tri.body_weight, p.facility_id, tri.captu, p.uuid\n" +
+            "    GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status, ca.visit_date, tri.body_weight, p.facility_id, tri.captu, p.uuid\n" +
             "    ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getPeadiatricWeightLastVisit (Long facilityId);
 
     @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex, \n" +
             "CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) AS age, \n" +
-            "       p.date_of_birth AS dateOfBirth\n" +
+            "       p.date_of_birth AS dateOfBirth, ph.status\n" +
             "      FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
             "      LEFT JOIN\n" +
             "      (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "      GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
+            "LEFT JOIN (\n" +
+            "SELECT DISTINCT ON (p1.person_uuid)\n" +
+            "p1.person_uuid,\n" +
+            "p1.visit_date AS last_visit_date,\n" +
+            "p1.next_appointment AS last_next_appointment,\n" +
+            "r.duration,\n" +
+            "CASE\n" +
+            "WHEN t.hiv_status = 'KNOWN_DEATH' THEN 'Dead'\n" +
+            "WHEN t.hiv_status IN ('ART_TRANSFER_OUT', 'ART Transfer Out') THEN 'Transferred Out'\n" +
+            "WHEN AGE(NOW(), (p1.visit_date + r.duration * INTERVAL '1 DAY')) <= INTERVAL '28 DAYS' THEN 'Active'\n" +
+            "WHEN AGE(NOW(), (p1.visit_date + r.duration * INTERVAL '1 DAY')) > INTERVAL '28 DAYS' THEN 'IIT'\n" +
+            "END AS status\n" +
+            "FROM (\n" +
+            "SELECT \n" +
+            "person_uuid,\n" +
+            "MAX(visit_date) AS max_visit_date\n" +
+            "FROM hiv_art_pharmacy\n" +
+            "GROUP BY person_uuid\n" +
+            ") AS max_dates\n" +
+            "JOIN hiv_art_pharmacy p1 ON max_dates.person_uuid = p1.person_uuid AND max_dates.max_visit_date = p1.visit_date\n" +
+            "CROSS JOIN LATERAL (\n" +
+            "SELECT\n" +
+            "reg->>'regimenName' AS regimenName,\n" +
+            "CAST ((reg->>'duration') AS INTEGER) AS duration\n" +
+            "FROM jsonb_array_elements(p1.extra->'regimens') AS reg\n" +
+            " ) AS r\n" +
+            "JOIN (\n" +
+            "SELECT\n" +
+            "person_id,\n" +
+            "hiv_status,\n" +
+            "ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC) AS rn\n" +
+            "FROM hiv_status_tracker\n" +
+            " ) AS t ON p1.person_uuid = t.person_id AND t.rn = 1\n" +
+            " JOIN hiv_regimen hr ON r.regimenName = hr.description\n" +
+            "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
+            ") ph ON p.uuid = ph.person_uuid"+
             "      LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
             "      WHERE p.archived=0 AND p.facility_id= ?1 AND e.date_started > NOW()\n" +
-            "      GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth\n" +
+            "      GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status\n" +
             "      ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getPatientStartDateGreaterThanToday (Long facilityId);
 
@@ -97,11 +277,47 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "  p.hospital_number AS hospitalNumber,\n" +
             "  INITCAP(p.sex) AS sex,\n" +
             "  CAST(EXTRACT(YEAR FROM AGE(NOW(), p.date_of_birth)) AS INTEGER) AS age,\n" +
-            "  p.date_of_birth AS dateOfBirth\n" +
+            "  p.date_of_birth AS dateOfBirth, ph.status\n" +
             "FROM\n" +
             "  patient_person p\n" +
             "INNER JOIN\n" +
             "  hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "LEFT JOIN (\n" +
+            "SELECT DISTINCT ON (p1.person_uuid)\n" +
+            "p1.person_uuid,\n" +
+            "p1.visit_date AS last_visit_date,\n" +
+            "p1.next_appointment AS last_next_appointment,\n" +
+            "r.duration,\n" +
+            "CASE\n" +
+            "WHEN t.hiv_status = 'KNOWN_DEATH' THEN 'Dead'\n" +
+            "WHEN t.hiv_status IN ('ART_TRANSFER_OUT', 'ART Transfer Out') THEN 'Transferred Out'\n" +
+            "WHEN AGE(NOW(), (p1.visit_date + r.duration * INTERVAL '1 DAY')) <= INTERVAL '28 DAYS' THEN 'Active'\n" +
+            "WHEN AGE(NOW(), (p1.visit_date + r.duration * INTERVAL '1 DAY')) > INTERVAL '28 DAYS' THEN 'IIT'\n" +
+            "END AS status\n" +
+            "FROM (\n" +
+            "SELECT \n" +
+            "person_uuid,\n" +
+            "MAX(visit_date) AS max_visit_date\n" +
+            "FROM hiv_art_pharmacy\n" +
+            "GROUP BY person_uuid\n" +
+            ") AS max_dates\n" +
+            "JOIN hiv_art_pharmacy p1 ON max_dates.person_uuid = p1.person_uuid AND max_dates.max_visit_date = p1.visit_date\n" +
+            "CROSS JOIN LATERAL (\n" +
+            "SELECT\n" +
+            "reg->>'regimenName' AS regimenName,\n" +
+            "CAST ((reg->>'duration') AS INTEGER) AS duration\n" +
+            "FROM jsonb_array_elements(p1.extra->'regimens') AS reg\n" +
+            " ) AS r\n" +
+            "JOIN (\n" +
+            "SELECT\n" +
+            "person_id,\n" +
+            "hiv_status,\n" +
+            "ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC) AS rn\n" +
+            "FROM hiv_status_tracker\n" +
+            " ) AS t ON p1.person_uuid = t.person_id AND t.rn = 1\n" +
+            " JOIN hiv_regimen hr ON r.regimenName = hr.description\n" +
+            "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
+            ") ph ON p.uuid = ph.person_uuid"+
             "LEFT JOIN\n" +
             "  hiv_art_clinical hac ON hac.person_uuid = e.person_uuid\n" +
             "LEFT JOIN\n" +
@@ -109,7 +325,7 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "WHERE\n" +
             "  p.archived = 0 AND p.facility_id = ?1\n" +
             "GROUP BY\n" +
-            "  e.unique_id, p.hospital_number, p.sex, p.date_of_birth, e.person_uuid, p.id, e.date_started\n" +
+            "  e.unique_id, p.hospital_number, p.sex, p.date_of_birth, ph.status, e.person_uuid, p.id, e.date_started\n" +
             "HAVING\n" +
             " e.date_started > MAX(hac.visit_date)\n" +
             "ORDER BY\n" +
@@ -119,11 +335,47 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
 
     @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex\n" +
             "    , CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) AS age, \n" +
-            "       p.date_of_birth AS dateOfBirth\n" +
+            "       p.date_of_birth AS dateOfBirth, ph.status\n" +
             "      FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
             "      LEFT JOIN\n" +
             "      (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "      GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
+            "LEFT JOIN (\n" +
+            "SELECT DISTINCT ON (p1.person_uuid)\n" +
+            "p1.person_uuid,\n" +
+            "p1.visit_date AS last_visit_date,\n" +
+            "p1.next_appointment AS last_next_appointment,\n" +
+            "r.duration,\n" +
+            "CASE\n" +
+            "WHEN t.hiv_status = 'KNOWN_DEATH' THEN 'Dead'\n" +
+            "WHEN t.hiv_status IN ('ART_TRANSFER_OUT', 'ART Transfer Out') THEN 'Transferred Out'\n" +
+            "WHEN AGE(NOW(), (p1.visit_date + r.duration * INTERVAL '1 DAY')) <= INTERVAL '28 DAYS' THEN 'Active'\n" +
+            "WHEN AGE(NOW(), (p1.visit_date + r.duration * INTERVAL '1 DAY')) > INTERVAL '28 DAYS' THEN 'IIT'\n" +
+            "END AS status\n" +
+            "FROM (\n" +
+            "SELECT \n" +
+            "person_uuid,\n" +
+            "MAX(visit_date) AS max_visit_date\n" +
+            "FROM hiv_art_pharmacy\n" +
+            "GROUP BY person_uuid\n" +
+            ") AS max_dates\n" +
+            "JOIN hiv_art_pharmacy p1 ON max_dates.person_uuid = p1.person_uuid AND max_dates.max_visit_date = p1.visit_date\n" +
+            "CROSS JOIN LATERAL (\n" +
+            "SELECT\n" +
+            "reg->>'regimenName' AS regimenName,\n" +
+            "CAST ((reg->>'duration') AS INTEGER) AS duration\n" +
+            "FROM jsonb_array_elements(p1.extra->'regimens') AS reg\n" +
+            " ) AS r\n" +
+            "JOIN (\n" +
+            "SELECT\n" +
+            "person_id,\n" +
+            "hiv_status,\n" +
+            "ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC) AS rn\n" +
+            "FROM hiv_status_tracker\n" +
+            " ) AS t ON p1.person_uuid = t.person_id AND t.rn = 1\n" +
+            " JOIN hiv_regimen hr ON r.regimenName = hr.description\n" +
+            "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
+            ") ph ON p.uuid = ph.person_uuid"+
             "\t  LEFT JOIN \n" +
             "   (SELECT DISTINCT ON (person_uuid)\n" +
             "     person_uuid, visit_date, refill_period, regimen\n" +
@@ -133,18 +385,54 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "     person_uuid DESC ) pharm ON pharm.person_uuid = p.uuid\n" +
             "      LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
             "      WHERE p.archived=0 AND p.facility_id= ?1 AND e.date_started > pharm.visit_date\n" +
-            "      GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, pharm.visit_date\n" +
+            "      GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status, pharm.visit_date\n" +
             "      ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getPatientArtDateGreaterThanClinicDay (Long facilityId);
 
 
     @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex\n" +
             "    , CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) AS age, \n" +
-            "       p.date_of_birth AS dateOfBirth\n" +
+            "       p.date_of_birth AS dateOfBirth, ph.status\n" +
             "      FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
             "      LEFT JOIN\n" +
             "      (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "      GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
+            "LEFT JOIN (\n" +
+            "SELECT DISTINCT ON (p1.person_uuid)\n" +
+            "p1.person_uuid,\n" +
+            "p1.visit_date AS last_visit_date,\n" +
+            "p1.next_appointment AS last_next_appointment,\n" +
+            "r.duration,\n" +
+            "CASE\n" +
+            "WHEN t.hiv_status = 'KNOWN_DEATH' THEN 'Dead'\n" +
+            "WHEN t.hiv_status IN ('ART_TRANSFER_OUT', 'ART Transfer Out') THEN 'Transferred Out'\n" +
+            "WHEN AGE(NOW(), (p1.visit_date + r.duration * INTERVAL '1 DAY')) <= INTERVAL '28 DAYS' THEN 'Active'\n" +
+            "WHEN AGE(NOW(), (p1.visit_date + r.duration * INTERVAL '1 DAY')) > INTERVAL '28 DAYS' THEN 'IIT'\n" +
+            "END AS status\n" +
+            "FROM (\n" +
+            "SELECT \n" +
+            "person_uuid,\n" +
+            "MAX(visit_date) AS max_visit_date\n" +
+            "FROM hiv_art_pharmacy\n" +
+            "GROUP BY person_uuid\n" +
+            ") AS max_dates\n" +
+            "JOIN hiv_art_pharmacy p1 ON max_dates.person_uuid = p1.person_uuid AND max_dates.max_visit_date = p1.visit_date\n" +
+            "CROSS JOIN LATERAL (\n" +
+            "SELECT\n" +
+            "reg->>'regimenName' AS regimenName,\n" +
+            "CAST ((reg->>'duration') AS INTEGER) AS duration\n" +
+            "FROM jsonb_array_elements(p1.extra->'regimens') AS reg\n" +
+            " ) AS r\n" +
+            "JOIN (\n" +
+            "SELECT\n" +
+            "person_id,\n" +
+            "hiv_status,\n" +
+            "ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC) AS rn\n" +
+            "FROM hiv_status_tracker\n" +
+            " ) AS t ON p1.person_uuid = t.person_id AND t.rn = 1\n" +
+            " JOIN hiv_regimen hr ON r.regimenName = hr.description\n" +
+            "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
+            ") ph ON p.uuid = ph.person_uuid"+
             "\t  LEFT JOIN \n" +
             "   (SELECT DISTINCT ON (person_uuid)\n" +
             "     person_uuid, visit_date, refill_period, regimen\n" +
@@ -154,36 +442,108 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "     person_uuid DESC ) pharm ON pharm.person_uuid = p.uuid\n" +
             "      LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
             "      WHERE p.archived=0 AND p.facility_id= ?1 AND e.date_confirmed_hiv > pharm.visit_date\n" +
-            "      GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, pharm.visit_date\n" +
+            "      GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status, pharm.visit_date\n" +
             "      ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getPatientLastPickUpGreaterThanConfirmDate (Long facilityId);
 
 
     @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex\n" +
             "      , CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) AS age,\n" +
-            "         p.date_of_birth AS dateOfBirth\n" +
+            "         p.date_of_birth AS dateOfBirth, ph.status\n" +
             "        FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
             "        LEFT JOIN\n" +
             "        (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "        GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
+            "LEFT JOIN (\n" +
+            "SELECT DISTINCT ON (p1.person_uuid)\n" +
+            "p1.person_uuid,\n" +
+            "p1.visit_date AS last_visit_date,\n" +
+            "p1.next_appointment AS last_next_appointment,\n" +
+            "r.duration,\n" +
+            "CASE\n" +
+            "WHEN t.hiv_status = 'KNOWN_DEATH' THEN 'Dead'\n" +
+            "WHEN t.hiv_status IN ('ART_TRANSFER_OUT', 'ART Transfer Out') THEN 'Transferred Out'\n" +
+            "WHEN AGE(NOW(), (p1.visit_date + r.duration * INTERVAL '1 DAY')) <= INTERVAL '28 DAYS' THEN 'Active'\n" +
+            "WHEN AGE(NOW(), (p1.visit_date + r.duration * INTERVAL '1 DAY')) > INTERVAL '28 DAYS' THEN 'IIT'\n" +
+            "END AS status\n" +
+            "FROM (\n" +
+            "SELECT \n" +
+            "person_uuid,\n" +
+            "MAX(visit_date) AS max_visit_date\n" +
+            "FROM hiv_art_pharmacy\n" +
+            "GROUP BY person_uuid\n" +
+            ") AS max_dates\n" +
+            "JOIN hiv_art_pharmacy p1 ON max_dates.person_uuid = p1.person_uuid AND max_dates.max_visit_date = p1.visit_date\n" +
+            "CROSS JOIN LATERAL (\n" +
+            "SELECT\n" +
+            "reg->>'regimenName' AS regimenName,\n" +
+            "CAST ((reg->>'duration') AS INTEGER) AS duration\n" +
+            "FROM jsonb_array_elements(p1.extra->'regimens') AS reg\n" +
+            " ) AS r\n" +
+            "JOIN (\n" +
+            "SELECT\n" +
+            "person_id,\n" +
+            "hiv_status,\n" +
+            "ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC) AS rn\n" +
+            "FROM hiv_status_tracker\n" +
+            " ) AS t ON p1.person_uuid = t.person_id AND t.rn = 1\n" +
+            " JOIN hiv_regimen hr ON r.regimenName = hr.description\n" +
+            "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
+            ") ph ON p.uuid = ph.person_uuid"+
             "\t\tLEFT JOIN\n" +
             "\t\t(SELECT DISTINCT (person_id)\n" +
             "\t\tperson_id, MAX(status_date) AS status_date, hiv_status FROM hiv_status_tracker where hiv_status = 'ART_TRANSFER_IN'\n" +
             "\t\tGROUP BY person_id, hiv_status ) transfer ON p.uuid = transfer.person_id\n" +
             "        LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
             "        WHERE p.archived=0 AND p.facility_id= ?1 AND transfer.status_date < e.date_started\n" +
-            "        GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, transfer.status_date\n" +
+            "        GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status, transfer.status_date\n" +
             "        ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getPatientStartDateGreaterThanTransferIn (Long facilityId);
 
 
     @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex\n" +
             "    , CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) AS age, \n" +
-            "       p.date_of_birth AS dateOfBirth\n" +
+            "       p.date_of_birth AS dateOfBirth, ph.status\n" +
             "      FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
             "      LEFT JOIN\n" +
             "      (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "      GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
+            "LEFT JOIN (\n" +
+            "SELECT DISTINCT ON (p1.person_uuid)\n" +
+            "p1.person_uuid,\n" +
+            "p1.visit_date AS last_visit_date,\n" +
+            "p1.next_appointment AS last_next_appointment,\n" +
+            "r.duration,\n" +
+            "CASE\n" +
+            "WHEN t.hiv_status = 'KNOWN_DEATH' THEN 'Dead'\n" +
+            "WHEN t.hiv_status IN ('ART_TRANSFER_OUT', 'ART Transfer Out') THEN 'Transferred Out'\n" +
+            "WHEN AGE(NOW(), (p1.visit_date + r.duration * INTERVAL '1 DAY')) <= INTERVAL '28 DAYS' THEN 'Active'\n" +
+            "WHEN AGE(NOW(), (p1.visit_date + r.duration * INTERVAL '1 DAY')) > INTERVAL '28 DAYS' THEN 'IIT'\n" +
+            "END AS status\n" +
+            "FROM (\n" +
+            "SELECT \n" +
+            "person_uuid,\n" +
+            "MAX(visit_date) AS max_visit_date\n" +
+            "FROM hiv_art_pharmacy\n" +
+            "GROUP BY person_uuid\n" +
+            ") AS max_dates\n" +
+            "JOIN hiv_art_pharmacy p1 ON max_dates.person_uuid = p1.person_uuid AND max_dates.max_visit_date = p1.visit_date\n" +
+            "CROSS JOIN LATERAL (\n" +
+            "SELECT\n" +
+            "reg->>'regimenName' AS regimenName,\n" +
+            "CAST ((reg->>'duration') AS INTEGER) AS duration\n" +
+            "FROM jsonb_array_elements(p1.extra->'regimens') AS reg\n" +
+            " ) AS r\n" +
+            "JOIN (\n" +
+            "SELECT\n" +
+            "person_id,\n" +
+            "hiv_status,\n" +
+            "ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC) AS rn\n" +
+            "FROM hiv_status_tracker\n" +
+            " ) AS t ON p1.person_uuid = t.person_id AND t.rn = 1\n" +
+            " JOIN hiv_regimen hr ON r.regimenName = hr.description\n" +
+            "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
+            ") ph ON p.uuid = ph.person_uuid"+
             "\t  LEFT JOIN \n" +
             "   (SELECT DISTINCT ON (person_uuid)\n" +
             "     person_uuid, visit_date, refill_period, regimen\n" +
@@ -193,18 +553,54 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "     person_uuid DESC ) pharm ON pharm.person_uuid = p.uuid\n" +
             "      LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
             "      WHERE p.archived=0 AND p.facility_id= ?1 AND p.date_of_birth > pharm.visit_date\n" +
-            "      GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, pharm.visit_date\n" +
+            "      GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status, pharm.visit_date\n" +
             "      ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getPatientDobGreaterThanLastPick (Long facilityId);
 
 
     @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex\n" +
             "    , CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) AS age, \n" +
-            "       p.date_of_birth AS dateOfBirth, pharm.visit_date, transfer.status_date\n" +
+            "       p.date_of_birth AS dateOfBirth, ph.status\n" +
             "      FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
             "      LEFT JOIN\n" +
             "      (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "      GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
+            "LEFT JOIN (\n" +
+            "SELECT DISTINCT ON (p1.person_uuid)\n" +
+            "p1.person_uuid,\n" +
+            "p1.visit_date AS last_visit_date,\n" +
+            "p1.next_appointment AS last_next_appointment,\n" +
+            "r.duration,\n" +
+            "CASE\n" +
+            "WHEN t.hiv_status = 'KNOWN_DEATH' THEN 'Dead'\n" +
+            "WHEN t.hiv_status IN ('ART_TRANSFER_OUT', 'ART Transfer Out') THEN 'Transferred Out'\n" +
+            "WHEN AGE(NOW(), (p1.visit_date + r.duration * INTERVAL '1 DAY')) <= INTERVAL '28 DAYS' THEN 'Active'\n" +
+            "WHEN AGE(NOW(), (p1.visit_date + r.duration * INTERVAL '1 DAY')) > INTERVAL '28 DAYS' THEN 'IIT'\n" +
+            "END AS status\n" +
+            "FROM (\n" +
+            "SELECT \n" +
+            "person_uuid,\n" +
+            "MAX(visit_date) AS max_visit_date\n" +
+            "FROM hiv_art_pharmacy\n" +
+            "GROUP BY person_uuid\n" +
+            ") AS max_dates\n" +
+            "JOIN hiv_art_pharmacy p1 ON max_dates.person_uuid = p1.person_uuid AND max_dates.max_visit_date = p1.visit_date\n" +
+            "CROSS JOIN LATERAL (\n" +
+            "SELECT\n" +
+            "reg->>'regimenName' AS regimenName,\n" +
+            "CAST ((reg->>'duration') AS INTEGER) AS duration\n" +
+            "FROM jsonb_array_elements(p1.extra->'regimens') AS reg\n" +
+            " ) AS r\n" +
+            "JOIN (\n" +
+            "SELECT\n" +
+            "person_id,\n" +
+            "hiv_status,\n" +
+            "ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC) AS rn\n" +
+            "FROM hiv_status_tracker\n" +
+            " ) AS t ON p1.person_uuid = t.person_id AND t.rn = 1\n" +
+            " JOIN hiv_regimen hr ON r.regimenName = hr.description\n" +
+            "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
+            ") ph ON p.uuid = ph.person_uuid"+
             "\t  LEFT JOIN\n" +
             "\t(SELECT DISTINCT (person_id)\n" +
             "\tperson_id, MAX(status_date) AS status_date, hiv_status FROM hiv_status_tracker where hiv_status = 'ART_TRANSFER_IN'\n" +
@@ -218,7 +614,7 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "     person_uuid DESC ) pharm ON pharm.person_uuid = p.uuid\n" +
             "      LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
             "      WHERE p.archived=0 AND p.facility_id= ?1 AND pharm.visit_date < transfer.status_date\n" +
-            "      GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, pharm.visit_date, transfer.status_date\n" +
+            "      GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status, pharm.visit_date, transfer.status_date\n" +
             "      ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getPatientLastPickUpGreaterThanTransferInDate (Long facilityId);
 
@@ -228,11 +624,47 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "  p.hospital_number AS hospitalNumber,\n" +
             "  INITCAP(p.sex) AS sex,\n" +
             "  CAST(EXTRACT(YEAR FROM AGE(NOW(), p.date_of_birth)) AS INTEGER) AS age,\n" +
-            "  p.date_of_birth AS dateOfBirth\n" +
+            "  p.date_of_birth AS dateOfBirth, ph.status\n" +
             "FROM\n" +
             "  patient_person p\n" +
             "INNER JOIN\n" +
             "  hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "LEFT JOIN (\n" +
+            "SELECT DISTINCT ON (p1.person_uuid)\n" +
+            "p1.person_uuid,\n" +
+            "p1.visit_date AS last_visit_date,\n" +
+            "p1.next_appointment AS last_next_appointment,\n" +
+            "r.duration,\n" +
+            "CASE\n" +
+            "WHEN t.hiv_status = 'KNOWN_DEATH' THEN 'Dead'\n" +
+            "WHEN t.hiv_status IN ('ART_TRANSFER_OUT', 'ART Transfer Out') THEN 'Transferred Out'\n" +
+            "WHEN AGE(NOW(), (p1.visit_date + r.duration * INTERVAL '1 DAY')) <= INTERVAL '28 DAYS' THEN 'Active'\n" +
+            "WHEN AGE(NOW(), (p1.visit_date + r.duration * INTERVAL '1 DAY')) > INTERVAL '28 DAYS' THEN 'IIT'\n" +
+            "END AS status\n" +
+            "FROM (\n" +
+            "SELECT \n" +
+            "person_uuid,\n" +
+            "MAX(visit_date) AS max_visit_date\n" +
+            "FROM hiv_art_pharmacy\n" +
+            "GROUP BY person_uuid\n" +
+            ") AS max_dates\n" +
+            "JOIN hiv_art_pharmacy p1 ON max_dates.person_uuid = p1.person_uuid AND max_dates.max_visit_date = p1.visit_date\n" +
+            "CROSS JOIN LATERAL (\n" +
+            "SELECT\n" +
+            "reg->>'regimenName' AS regimenName,\n" +
+            "CAST ((reg->>'duration') AS INTEGER) AS duration\n" +
+            "FROM jsonb_array_elements(p1.extra->'regimens') AS reg\n" +
+            " ) AS r\n" +
+            "JOIN (\n" +
+            "SELECT\n" +
+            "person_id,\n" +
+            "hiv_status,\n" +
+            "ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC) AS rn\n" +
+            "FROM hiv_status_tracker\n" +
+            " ) AS t ON p1.person_uuid = t.person_id AND t.rn = 1\n" +
+            " JOIN hiv_regimen hr ON r.regimenName = hr.description\n" +
+            "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
+            ") ph ON p.uuid = ph.person_uuid"+
             "LEFT JOIN\n" +
             "  hiv_art_clinical hac ON hac.person_uuid = e.person_uuid AND hac.archived = 0 AND hac.is_commencement IS TRUE\n" +
             "LEFT JOIN (\n" +
@@ -255,7 +687,7 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "  AND p.facility_id = ?1\n" +
             "  AND COALESCE(pharm.visit_date, NOW()) > NOW()\n" +
             "GROUP BY\n" +
-            "  e.unique_id, p.hospital_number, p.sex, p.date_of_birth, p.id\n" +
+            "  e.unique_id, p.hospital_number, p.sex, p.date_of_birth, ph.status, p.id\n" +
             "ORDER BY\n" +
             "  p.id DESC;", nativeQuery = true)
     List<PatientDTOProjection> getPatientLastPickUpGreaterThanToday (Long facilityId);
@@ -266,11 +698,47 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "  p.hospital_number AS hospitalNumber,\n" +
             "  INITCAP(p.sex) AS sex,\n" +
             "  CAST(EXTRACT(YEAR FROM AGE(NOW(), p.date_of_birth)) AS INTEGER) AS age,\n" +
-            "  p.date_of_birth AS dateOfBirth, p.uuid\n" +
+            "  p.date_of_birth AS dateOfBirth, ph.status\n" +
             "FROM\n" +
             "  patient_person p\n" +
             "INNER JOIN\n" +
             "  hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "LEFT JOIN (\n" +
+            "SELECT DISTINCT ON (p1.person_uuid)\n" +
+            "p1.person_uuid,\n" +
+            "p1.visit_date AS last_visit_date,\n" +
+            "p1.next_appointment AS last_next_appointment,\n" +
+            "r.duration,\n" +
+            "CASE\n" +
+            "WHEN t.hiv_status = 'KNOWN_DEATH' THEN 'Dead'\n" +
+            "WHEN t.hiv_status IN ('ART_TRANSFER_OUT', 'ART Transfer Out') THEN 'Transferred Out'\n" +
+            "WHEN AGE(NOW(), (p1.visit_date + r.duration * INTERVAL '1 DAY')) <= INTERVAL '28 DAYS' THEN 'Active'\n" +
+            "WHEN AGE(NOW(), (p1.visit_date + r.duration * INTERVAL '1 DAY')) > INTERVAL '28 DAYS' THEN 'IIT'\n" +
+            "END AS status\n" +
+            "FROM (\n" +
+            "SELECT \n" +
+            "person_uuid,\n" +
+            "MAX(visit_date) AS max_visit_date\n" +
+            "FROM hiv_art_pharmacy\n" +
+            "GROUP BY person_uuid\n" +
+            ") AS max_dates\n" +
+            "JOIN hiv_art_pharmacy p1 ON max_dates.person_uuid = p1.person_uuid AND max_dates.max_visit_date = p1.visit_date\n" +
+            "CROSS JOIN LATERAL (\n" +
+            "SELECT\n" +
+            "reg->>'regimenName' AS regimenName,\n" +
+            "CAST ((reg->>'duration') AS INTEGER) AS duration\n" +
+            "FROM jsonb_array_elements(p1.extra->'regimens') AS reg\n" +
+            " ) AS r\n" +
+            "JOIN (\n" +
+            "SELECT\n" +
+            "person_id,\n" +
+            "hiv_status,\n" +
+            "ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC) AS rn\n" +
+            "FROM hiv_status_tracker\n" +
+            " ) AS t ON p1.person_uuid = t.person_id AND t.rn = 1\n" +
+            " JOIN hiv_regimen hr ON r.regimenName = hr.description\n" +
+            "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
+            ") ph ON p.uuid = ph.person_uuid"+
             "LEFT JOIN\n" +
             "  hiv_art_clinical hac ON hac.person_uuid = e.person_uuid AND hac.archived = 0 AND hac.is_commencement IS TRUE\n" +
             "LEFT JOIN (\n" +
@@ -293,7 +761,7 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "  AND p.facility_id = ?1\n" +
             "  AND pharm.visit_date > NOW()\n" +
             "GROUP BY\n" +
-            "  e.unique_id, p.hospital_number, p.sex, p.date_of_birth, p.id\n" +
+            "  e.unique_id, p.hospital_number, p.sex, p.date_of_birth, ph.status, p.id\n" +
             "ORDER BY\n" +
             "  p.id DESC;", nativeQuery = true)
     List<PatientDTOProjection> getPatientLastClinicGreaterThanToday (Long facilityId);
@@ -301,11 +769,47 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
 
     @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex\n" +
             "      , CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) AS age,\n" +
-            "         p.date_of_birth AS dateOfBirth\n" +
+            "         p.date_of_birth AS dateOfBirth, ph.status\n" +
             "        FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
             "        LEFT JOIN\n" +
             "        (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "        GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
+            "LEFT JOIN (\n" +
+            "SELECT DISTINCT ON (p1.person_uuid)\n" +
+            "p1.person_uuid,\n" +
+            "p1.visit_date AS last_visit_date,\n" +
+            "p1.next_appointment AS last_next_appointment,\n" +
+            "r.duration,\n" +
+            "CASE\n" +
+            "WHEN t.hiv_status = 'KNOWN_DEATH' THEN 'Dead'\n" +
+            "WHEN t.hiv_status IN ('ART_TRANSFER_OUT', 'ART Transfer Out') THEN 'Transferred Out'\n" +
+            "WHEN AGE(NOW(), (p1.visit_date + r.duration * INTERVAL '1 DAY')) <= INTERVAL '28 DAYS' THEN 'Active'\n" +
+            "WHEN AGE(NOW(), (p1.visit_date + r.duration * INTERVAL '1 DAY')) > INTERVAL '28 DAYS' THEN 'IIT'\n" +
+            "END AS status\n" +
+            "FROM (\n" +
+            "SELECT \n" +
+            "person_uuid,\n" +
+            "MAX(visit_date) AS max_visit_date\n" +
+            "FROM hiv_art_pharmacy\n" +
+            "GROUP BY person_uuid\n" +
+            ") AS max_dates\n" +
+            "JOIN hiv_art_pharmacy p1 ON max_dates.person_uuid = p1.person_uuid AND max_dates.max_visit_date = p1.visit_date\n" +
+            "CROSS JOIN LATERAL (\n" +
+            "SELECT\n" +
+            "reg->>'regimenName' AS regimenName,\n" +
+            "CAST ((reg->>'duration') AS INTEGER) AS duration\n" +
+            "FROM jsonb_array_elements(p1.extra->'regimens') AS reg\n" +
+            " ) AS r\n" +
+            "JOIN (\n" +
+            "SELECT\n" +
+            "person_id,\n" +
+            "hiv_status,\n" +
+            "ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC) AS rn\n" +
+            "FROM hiv_status_tracker\n" +
+            " ) AS t ON p1.person_uuid = t.person_id AND t.rn = 1\n" +
+            " JOIN hiv_regimen hr ON r.regimenName = hr.description\n" +
+            "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
+            ") ph ON p.uuid = ph.person_uuid"+
             "\t\tLEFT JOIN (\n" +
             "\t\tSELECT DISTINCT ON(lo.patient_uuid) lo.patient_uuid as person_uuid, ls.date_sample_collected as dateSampleCollected,\n" +
             "\t\t-- \t\tCASE WHEN lr.result_reported ~ E'^\\\\d+(\\\\.\\\\d+)?$' THEN CAST(lr.result_reported AS DECIMAL)\n" +
@@ -327,22 +831,58 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "\t\t) vl ON e.person_uuid = vl.person_uuid\n" +
             "\t    LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
             "        WHERE p.archived=0 AND p.facility_id= ?1 AND vl.dateSampleCollected > vl.dateOfLastViralLoad\n" +
-            "        GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth\n" +
+            "        GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status\n" +
             "        ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getPatientVlSampleDateGreaterThanResultDate (Long facilityId);
 
 
 
-    @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex, p.date_of_birth AS dateOfBirth\n" +
+    @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex, p.date_of_birth, ph.status AS dateOfBirth\n" +
             "            FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
             "            LEFT JOIN\n" +
             "            (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date, hac.pregnancy_status  FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "            GROUP BY hac.person_uuid, hac.visit_date, hac.pregnancy_status)ca ON p.uuid = ca.person_uuid\n" +
+            "LEFT JOIN (\n" +
+            "SELECT DISTINCT ON (p1.person_uuid)\n" +
+            "p1.person_uuid,\n" +
+            "p1.visit_date AS last_visit_date,\n" +
+            "p1.next_appointment AS last_next_appointment,\n" +
+            "r.duration,\n" +
+            "CASE\n" +
+            "WHEN t.hiv_status = 'KNOWN_DEATH' THEN 'Dead'\n" +
+            "WHEN t.hiv_status IN ('ART_TRANSFER_OUT', 'ART Transfer Out') THEN 'Transferred Out'\n" +
+            "WHEN AGE(NOW(), (p1.visit_date + r.duration * INTERVAL '1 DAY')) <= INTERVAL '28 DAYS' THEN 'Active'\n" +
+            "WHEN AGE(NOW(), (p1.visit_date + r.duration * INTERVAL '1 DAY')) > INTERVAL '28 DAYS' THEN 'IIT'\n" +
+            "END AS status\n" +
+            "FROM (\n" +
+            "SELECT \n" +
+            "person_uuid,\n" +
+            "MAX(visit_date) AS max_visit_date\n" +
+            "FROM hiv_art_pharmacy\n" +
+            "GROUP BY person_uuid\n" +
+            ") AS max_dates\n" +
+            "JOIN hiv_art_pharmacy p1 ON max_dates.person_uuid = p1.person_uuid AND max_dates.max_visit_date = p1.visit_date\n" +
+            "CROSS JOIN LATERAL (\n" +
+            "SELECT\n" +
+            "reg->>'regimenName' AS regimenName,\n" +
+            "CAST ((reg->>'duration') AS INTEGER) AS duration\n" +
+            "FROM jsonb_array_elements(p1.extra->'regimens') AS reg\n" +
+            " ) AS r\n" +
+            "JOIN (\n" +
+            "SELECT\n" +
+            "person_id,\n" +
+            "hiv_status,\n" +
+            "ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC) AS rn\n" +
+            "FROM hiv_status_tracker\n" +
+            " ) AS t ON p1.person_uuid = t.person_id AND t.rn = 1\n" +
+            " JOIN hiv_regimen hr ON r.regimenName = hr.description\n" +
+            "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
+            ") ph ON p.uuid = ph.person_uuid"+
             "            LEFT JOIN (SELECT person_uuid, max(visit_date) as lastPS from hiv_art_clinical where archived=0 \n" +
             "            group by person_uuid, visit_date ORDER BY lastPS DESC LIMIT 1) lasPreg ON p.uuid = lasPreg.person_uuid\n" +
             "            LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
             "            WHERE p.archived=0 AND p.facility_id= ?1 AND CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) >12  AND INITCAP(p.sex) = 'Female' AND ca.pregnancy_status IS NULL\n" +
-            "            GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ca.visit_date, ca.pregnancy_status\n" +
+            "            GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status, ca.visit_date, ca.pregnancy_status\n" +
             "            ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getFemalePatientsWithoutPregStatusLastVisit (Long facilityId);
 
@@ -489,9 +1029,5 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "  FROM\n" +
             "   \tdataConsistence", nativeQuery = true)
     List<ClinicalConsistencyDTOProjection> getClinicalConsistencySummary (Long facilityId);
-
-
-
-
 
 }
