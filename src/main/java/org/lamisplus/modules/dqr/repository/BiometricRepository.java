@@ -28,7 +28,7 @@ public interface BiometricRepository extends JpaRepository<DQA, Long> {
             "SELECT DISTINCT ON (person_uuid) person_uuid, COUNT(biometric_type) AS biometric_fingers_captured, COUNT(*) FILTER (WHERE ENCODE(CAST(template AS BYTEA), 'hex') LIKE '46%') AS biometric_valid_captured, recapture FROM biometric\n" +
             " WHERE archived != 1 AND recapture != 0 GROUP BY person_uuid, recapture) bb ON e.person_uuid = bb.person_uuid\n" +
             "   LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "   WHERE p.archived=0 AND p.facility_id= 1722 AND CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) > 12\n" +
+            "   WHERE p.archived=0 AND p.facility_id= ?1 AND CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) > 12\n" +
             "   GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ca.visit_date, ca.pregnancy_status, b.biometric_fingers_captured, b.biometric_valid_captured,bb.biometric_valid_captured, b.person_uuid,\n" +
             "\tbb.recapture, bb.person_uuid\n" +
             "   ORDER BY p.id DESC\n" +
@@ -38,8 +38,8 @@ public interface BiometricRepository extends JpaRepository<DQA, Long> {
             "    COUNT(hospitalNumber) AS captureDenominator,\n" +
             "    ROUND((CAST(COUNT(person_uuid1) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS capturePerformance,\n" +
             "\tCOUNT(validcapture) AS validcapNumerator,\n" +
-            "    COUNT(hospitalNumber) AS validcapDenominator,\n" +
-            "    ROUND((CAST(COUNT(validcapture) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS validcapPerformance,\n" +
+            "    COUNT(person_uuid1) AS validcapDenominator,\n" +
+            "    ROUND((CAST(COUNT(validcapture) AS DECIMAL) / COUNT(person_uuid1)) * 100, 2) AS validcapPerformance,\n" +
             "\tCOUNT(recapture) AS recapNumerator,\n" +
             "    COUNT(person_uuid1) AS recapDenominator,\n" +
             "    ROUND((CAST(COUNT(recapture) AS DECIMAL) / COUNT(person_uuid1)) * 100, 2) AS recapPerformance,\n" +
