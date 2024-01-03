@@ -164,8 +164,11 @@ public interface BiometricRepository extends JpaRepository<DQA, Long> {
             "  (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date, hac.pregnancy_status  FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "  GROUP BY hac.person_uuid, hac.visit_date, hac.pregnancy_status)ca ON p.uuid = ca.person_uuid\n" +
             " LEFT JOIN (\n" +
-            "\tSELECT person_uuid, COUNT(biometric_type) AS biometric_fingers_captured, COUNT(*) FILTER (WHERE ENCODE(CAST(template AS BYTEA), 'hex') LIKE '46%') AS biometric_valid_captured, recapture FROM biometric\n" +
-            " WHERE archived != 1 AND recapture != 0 GROUP BY person_uuid, recapture) b ON p.uuid = b.person_uuid\n" +
+            " SELECT DISTINCT ON (person_uuid) person_uuid, COUNT(biometric_type) AS biometric_fingers_captured, COUNT(*) FILTER (WHERE ENCODE(CAST(template AS BYTEA), 'hex') LIKE '46%') AS biometric_valid_captured, recapture FROM biometric\n" +
+            "  WHERE archived != 1 GROUP BY person_uuid, recapture) b ON e.person_uuid = b.person_uuid\n" +
+            "LEFT JOIN (\n" +
+            "SELECT DISTINCT ON (person_uuid) person_uuid, COUNT(biometric_type) AS biometric_fingers_captured, COUNT(*) FILTER (WHERE ENCODE(CAST(template AS BYTEA), 'hex') LIKE '46%') AS biometric_valid_captured, recapture FROM biometric\n" +
+            " WHERE archived != 1 AND recapture != 0 GROUP BY person_uuid, recapture) bb ON e.person_uuid = bb.person_uuid\n" +
             "LEFT JOIN (\n" +
             "SELECT DISTINCT ON (p1.person_uuid)\n" +
             "p1.person_uuid,\n" +
@@ -179,7 +182,7 @@ public interface BiometricRepository extends JpaRepository<DQA, Long> {
             "WHEN AGE(NOW(), (p1.visit_date + r.duration * INTERVAL '1 DAY')) > INTERVAL '28 DAYS' THEN 'IIT'\n" +
             "END AS status\n" +
             "FROM (\n" +
-            "SELECT \n" +
+            "SELECT\n" +
             "person_uuid,\n" +
             "MAX(visit_date) AS max_visit_date\n" +
             "FROM hiv_art_pharmacy\n" +
@@ -201,10 +204,12 @@ public interface BiometricRepository extends JpaRepository<DQA, Long> {
             " ) AS t ON p1.person_uuid = t.person_id AND t.rn = 1\n" +
             " JOIN hiv_regimen hr ON r.regimenName = hr.description\n" +
             "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
-            ") ph ON p.uuid = ph.person_uuid "+
+            ") ph ON p.uuid = ph.person_uuid\n" +
             "  LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "  WHERE p.archived=0 AND p.facility_id= ?1 AND b.person_uuid is null AND CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) > 12\n" +
-            "  GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status, ca.visit_date, ca.pregnancy_status, b.biometric_fingers_captured, b.biometric_valid_captured, b.person_uuid\n" +
+            "  WHERE p.archived=0 AND p.facility_id= 1453 AND \n" +
+            "\t(bb.person_uuid IS NULL AND b.person_uuid IS NOT NULL) AND \n" +
+            "\tCAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) > 12\n" +
+            "  GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status, ca.visit_date, ca.pregnancy_status\n" +
             "  ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getPatientsNotRecaptured (Long facilityId);
 

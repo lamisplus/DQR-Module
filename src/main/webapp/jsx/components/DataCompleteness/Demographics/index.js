@@ -223,7 +223,7 @@ const DemographicsDQA = (props) => {
                   <td>
                   <div>
                   <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
-                   onClick={() => viewDetail("Proportion of all active patients with Patient Identifier", "patientDemo2" )}
+                   onClick={() => viewDetail("Proportion of all active patients with Patient Identifier", "patientDemo7" )}
                    >View</Button>
                     </div>
                   </td>
@@ -236,7 +236,7 @@ const DemographicsDQA = (props) => {
                   <td>{demographics[0]?.sexPerformance} %</td>
                   <td><div>
                   <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
-                   onClick={() => viewDetail("Proportion of all active patients with Sex", "patientDemo3" )}
+                   onClick={() => viewDetail("Proportion of all active patients with Sex", "patientDemo2" )}
                    >View</Button>
                   </div>
                   </td>
@@ -269,7 +269,7 @@ const DemographicsDQA = (props) => {
                   <td>
                   <div>
                   <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
-                    onClick={() => viewDetail("Proportion of all active patients with a documented marital", "patientDemo5" )}
+                    onClick={() => viewDetail("Proportion of all active patients with a documented marital", "patientDemo3" )}
                    >View</Button>
                     </div>
                   </td>
@@ -285,7 +285,7 @@ const DemographicsDQA = (props) => {
                   <td>
                   <div>
                   <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
-                    onClick={() => viewDetail("Proportion of all active patients with documented occupational status", "patientDemo6" )}
+                    onClick={() => viewDetail("Proportion of all active patients with documented occupational status", "patientDemo5" )}
                    >View</Button>
                     </div>
                   </td>
@@ -301,7 +301,7 @@ const DemographicsDQA = (props) => {
                   <td>
                   <div>
                   <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
-                    onClick={() => viewDetail("Proportion of all active patients with registered address/LGA of residence", "patientDemo7" )}
+                    onClick={() => viewDetail("Proportion of all active patients with registered address/LGA of residence", "patientDemo6" )}
                    >View</Button>
                     </div>
                   </td>
