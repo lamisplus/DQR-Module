@@ -19,7 +19,8 @@ import TbScreening from "../DataConsistency/TbScreening";
 import Laboratory from "../DataConsistency/Laboratory";
 import ValidityReport from "../DataValidity/ValidityReport";
 import EAC from "../DataConsistency/Eac";
-import Legenda from '../Legenda/ShowLegend/index'
+import Legenda from '../Legenda/ShowLegend/index';
+import ClientVerification from '../DataQualityVulnerability/ClientVerification/index';
 
 
 
@@ -114,6 +115,7 @@ const DQAList = (props) => {
     const [showLaboratory, setShowLaboratory] = useState(false);
     const [showValidityReport, setShowValidityReport] = useState(false);
     const [showLegend, setShowLegend] = useState(true);
+    const [showClientVerification, setShowClientVerification] = useState(true);
     
 
     const onClickDemographics =() =>{
@@ -121,6 +123,9 @@ const DQAList = (props) => {
     }
     const onClickLegend =() =>{
         setShowLegend(!showLegend)
+    }
+    const onClickClientVerification =() =>{
+        setShowClientVerification(!showClientVerification)
     }
     const onClickLaboratory =() =>{
         setShowLaboratory(!showLaboratory)
@@ -291,6 +296,17 @@ const DQAList = (props) => {
                                 </div>
                                 {showValidityReport && (
                                   <ValidityReport />
+                                 )}
+
+                            </div>
+                            <h2>Data Quality Vulnerability Index </h2>
+                            <div className="card">
+                                <div className="card-header" style={{backgroundColor:"#014d88",color:'#fff',fontWeight:'bolder',  borderRadius:"0.2rem"}}>
+                                    <h5 className="card-title" style={{color:'#fff'}}>Client Verification Flag </h5>
+                                    {showClientVerification===false  ? (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickClientVerification}><FaPlus /></span></>) :  (<><span className="float-end" style={{cursor: "pointer"}} onClick={onClickClientVerification}><FaAngleDown /></span> </>)}
+                                </div>
+                                {showClientVerification && (
+                                  <ClientVerification />
                                  )}
 
                             </div>
