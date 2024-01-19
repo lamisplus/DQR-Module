@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.ws.rs.client.Client;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -29,7 +30,51 @@ public class PatientDqaController {
     private final LaboratoryDQAService laboratoryDQAService;
     private final DataValidityService validityService;
     private final EacDQAService eacDQAService;
+    private final ClientVerificationDQAService verificationDQAService;
 
+
+    @GetMapping(value = "/client-verification", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<PatientDTOProjection>> getClientVerifications (
+            @RequestParam("indicator") String indicator
+    ) throws ExecutionException, InterruptedException {
+        Long facilityId = organizationService.getCurrentUserOrganization();
+        List<PatientDTOProjection> result;
+
+        switch (indicator) {
+            case "verify0":
+                result = verificationDQAService.getNoBiometricBaseLine (facilityId);
+                break;
+            case "verify1":
+                result = verificationDQAService.getNoRecaptureBiometric (facilityId);
+                break;
+            case "verify2":
+                result = verificationDQAService.getDuplicateDemo (facilityId);
+                break;
+            case "verify3":
+                result = verificationDQAService.getLongClinic (facilityId);
+                break;
+            case "verify4":
+                result = verificationDQAService.getClinicEncounterNoRecapture (facilityId);
+                break;
+            case "verify5":
+                result = verificationDQAService.getDrugPickUpMoreThanOneYear (facilityId);
+                break;
+            case "verify6":
+                result = verificationDQAService.getDuplicateClinicVisits (facilityId);
+                break;
+            case "verify7":
+                result =  verificationDQAService.getIncompleteEncounters (facilityId);
+                break;
+//            case "tb8":
+//                result = tbDQAService.getEligibleForIptNoDateCompletedStatus(facilityId);
+//                break;
+            default:
+                // Handle unknown dataType
+                return ResponseEntity.badRequest().build();
+        }
+
+        return ResponseEntity.ok(result);
+    }
     @GetMapping(value = "/patient-tb", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<PatientDTOProjection>> getPatientTbData (
             @RequestParam("indicator") String indicator
@@ -392,6 +437,12 @@ public class PatientDqaController {
     public ResponseEntity<List<EacDTOProjection>> eacSummary () throws ExecutionException, InterruptedException {
         Long facility = organizationService.getCurrentUserOrganization();
         return ResponseEntity.ok(eacDQAService.getEacSummary(facility));
+    }
+
+    @GetMapping(value = "/verification-summary", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<ClientVerificationDTOProjection>> verificationSummary () throws ExecutionException, InterruptedException {
+        Long facility = organizationService.getCurrentUserOrganization();
+        return ResponseEntity.ok(dqaService.getClientVerificationSummary(facility));
     }
 
 }
