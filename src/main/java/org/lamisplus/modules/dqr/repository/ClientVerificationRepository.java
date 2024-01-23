@@ -19,6 +19,66 @@ public interface ClientVerificationRepository extends JpaRepository<DQA, Long> {
             "FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
             "   INNER JOIN\n" +
             "   (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "   GROUP BY hac.person_uuid, hac.visit_date)ca ON p.uuid = ca.person_uuid\n" +
+            "LEFT JOIN (\n" +
+            "SELECT CAST(sample.date_sample_collected AS DATE ) as dateOfViralLoadSampleCollection, patient_uuid as person_uuid1  FROM (\n" +
+            "     SELECT lt.viral_load_indication, sm.facility_id,sm.date_sample_collected, sm.patient_uuid, sm.archived, ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_sample_collected DESC) as rnkk\n" +
+            "     FROM public.laboratory_sample  sm\n" +
+            "  INNER JOIN public.laboratory_test lt ON lt.id = sm.test_id\n" +
+            "     WHERE lt.lab_test_id=16\n" +
+            "       AND  lt.viral_load_indication !=719\n" +
+            "       AND date_sample_collected IS NOT null\n" +
+            " )as sample\n" +
+            "         WHERE sample.rnkk = 1\n" +
+            "           AND (sample.archived is null OR sample.archived = 0)\n" +
+            ") sampleCol ON ca.person_uuid = sampleCol.person_uuid1\n" +
+            "LEFT JOIN (\n" +
+            "SELECT DISTINCT ON (p1.person_uuid)\n" +
+            "p1.person_uuid,\n" +
+            "p1.visit_date AS last_visit_date,\n" +
+            "p1.next_appointment AS last_next_appointment,\n" +
+            "r.duration,\n" +
+            "CASE\n" +
+            "WHEN t.hiv_status = 'KNOWN_DEATH' THEN 'Dead'\n" +
+            "WHEN t.hiv_status IN ('ART_TRANSFER_OUT', 'ART Transfer Out') THEN 'Transferred Out'\n" +
+            "WHEN AGE(NOW(), (p1.visit_date + r.duration * INTERVAL '1 DAY')) <= INTERVAL '28 DAYS' THEN 'Active'\n" +
+            "WHEN AGE(NOW(), (p1.visit_date + r.duration * INTERVAL '1 DAY')) > INTERVAL '28 DAYS' THEN 'IIT'\n" +
+            "END AS status\n" +
+            "FROM (\n" +
+            "SELECT \n" +
+            "person_uuid,\n" +
+            "MAX(visit_date) AS max_visit_date\n" +
+            "FROM hiv_art_pharmacy\n" +
+            "GROUP BY person_uuid\n" +
+            ") AS max_dates\n" +
+            "JOIN hiv_art_pharmacy p1 ON max_dates.person_uuid = p1.person_uuid AND max_dates.max_visit_date = p1.visit_date\n" +
+            "CROSS JOIN LATERAL (\n" +
+            "SELECT\n" +
+            "reg->>'regimenName' AS regimenName,\n" +
+            "CAST ((reg->>'duration') AS INTEGER) AS duration\n" +
+            "FROM jsonb_array_elements(p1.extra->'regimens') AS reg\n" +
+            " ) AS r\n" +
+            "JOIN (\n" +
+            "SELECT\n" +
+            "person_id,\n" +
+            "hiv_status,\n" +
+            "ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC) AS rn\n" +
+            "FROM hiv_status_tracker\n" +
+            " ) AS t ON p1.person_uuid = t.person_id AND t.rn = 1\n" +
+            " JOIN hiv_regimen hr ON r.regimenName = hr.description\n" +
+            "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
+            ") ph ON p.uuid = ph.person_uuid\n" +
+            "  WHERE p.archived=0 AND p.facility_id= ?1 AND\n" +
+            "  CAST(DATE_PART('year', AGE(NOW(), ca.visit_date)) * 12 + DATE_PART('month', AGE(NOW(), ca.visit_date)) AS INTEGER ) >= 6 \n" +
+            "  AND sampleCol.dateOfViralLoadSampleCollection IS NULL", nativeQuery = true)
+    List<PatientDTOProjection> getVlPrior (Long facilityId);
+
+    @Query(value = "SELECT e.unique_id AS patientId, p.hospital_number AS hospitalNumber,\n" +
+            "        INITCAP(p.sex) AS sex, CAST(EXTRACT(YEAR FROM AGE(NOW(), p.date_of_birth)) AS INTEGER) AS age,\n" +
+            "        p.date_of_birth AS dateOfBirth, ph.status\n" +
+            "FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "   INNER JOIN\n" +
+            "   (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "   GROUP BY hac.person_uuid, hac.visit_date)ca ON p.uuid = ca.person_uuid\t\n" +
             "INNER JOIN (\n" +
             "\tSELECT DISTINCT ON (hap.person_uuid) hap.person_uuid,hac.pregnancy_status ,hac.next_appointment, hac.tb_status ,\n" +
@@ -519,7 +579,10 @@ public interface ClientVerificationRepository extends JpaRepository<DQA, Long> {
             "CASE WHEN b.person_uuid IS NULL THEN 1 ELSE NULL END AS noBaseline,\n" +
             "CASE WHEN b.person_uuid IS NOT NULL AND recap.person_uuid IS NULL THEN 1 ELSE NULL END AS hasBaseLineNoRecapture,\n" +
             "\tsameDemographics.uuid AS sameDemographic, sameClinical.person_uuid AS dupClinical,\n" +
-            "\tincompleteEncounter.person_uuid AS incomplete\n" +
+            "\tincompleteEncounter.person_uuid AS incomplete, \n" +
+            "\tsampleCol.dateOfViralLoadSampleCollection, ca.visit_date,\n" +
+            "\tCASE WHEN\n" +
+            "CAST(DATE_PART('year', AGE(NOW(), ca.visit_date)) * 12 + DATE_PART('month', AGE(NOW(), ca.visit_date)) AS INTEGER ) >= 6 AND sampleCol.dateOfViralLoadSampleCollection IS NULL THEN 1 ELSE NULL END AS vlPrior\n" +
             "   FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
             "   INNER JOIN\n" +
             "   (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
@@ -619,13 +682,25 @@ public interface ClientVerificationRepository extends JpaRepository<DQA, Long> {
             "WHERE hap.archived = 0 AND hac.archived = 0 AND (hac.pregnancy_status IS NULL OR hac.next_appointment IS NULL OR hac.tb_status IS NULL OR\n" +
             "hap.next_appointment IS NULL OR hap.extra IS NULL OR hap.refill_period IS NULL)\n" +
             ") incompleteEncounter ON ca.person_uuid = incompleteEncounter.person_uuid\n" +
+            "LEFT JOIN (\n" +
+            "SELECT CAST(sample.date_sample_collected AS DATE ) as dateOfViralLoadSampleCollection, patient_uuid as person_uuid1  FROM (\n" +
+            "     SELECT lt.viral_load_indication, sm.facility_id,sm.date_sample_collected, sm.patient_uuid, sm.archived, ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_sample_collected DESC) as rnkk\n" +
+            "     FROM public.laboratory_sample  sm\n" +
+            "  INNER JOIN public.laboratory_test lt ON lt.id = sm.test_id\n" +
+            "     WHERE lt.lab_test_id=16\n" +
+            "       AND  lt.viral_load_indication !=719\n" +
+            "       AND date_sample_collected IS NOT null\n" +
+            " )as sample\n" +
+            "         WHERE sample.rnkk = 1\n" +
+            "           AND (sample.archived is null OR sample.archived = 0)\n" +
+            ") sampleCol ON ca.person_uuid = sampleCol.person_uuid1\n" +
             "\t\n" +
             "\tWHERE p.archived=0 AND p.facility_id= ?1\n" +
             "--    AND CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) > 12\n" +
             "   GROUP BY e.id, p.id, p.hospital_number, p.date_of_birth, b.biometric_valid_captured, b.person_uuid, \n" +
             "\trecap.biometric_valid_captured, recap.person_uuid, sameDemographics.uuid, lastVisit.visit_date,\n" +
             "\tlastVisit.monthTillDate, pickUp.visit_date,pickUp.monthApart, pickUp.previousPickUpDrugDate, b.enrollment_date, recap.enrollment_date,\n" +
-            "\tsameClinical.person_uuid, incompleteEncounter.person_uuid\n" +
+            "\tsameClinical.person_uuid, incompleteEncounter.person_uuid, sampleCol.dateOfViralLoadSampleCollection, ca.visit_date\n" +
             "   ORDER BY p.id DESC\n" +
             ")\n" +
             "SELECT\n" +
@@ -652,7 +727,10 @@ public interface ClientVerificationRepository extends JpaRepository<DQA, Long> {
             "    ROUND((CAST(COUNT(dupClinical) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS sameClinicalPerformance,\n" +
             "\tCOUNT(incomplete) AS incompleteNumerator,\n" +
             "    COUNT(hospitalNumber) AS incompleteDenominator,\n" +
-            "    ROUND((CAST(COUNT(incomplete) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS incompletePerformance\n" +
+            "    ROUND((CAST(COUNT(incomplete) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS incompletePerformance,\n" +
+            "\tCOUNT(vlPrior) AS labNumerator,\n" +
+            "    COUNT(hospitalNumber) AS labDenominator,\n" +
+            "    ROUND((CAST(COUNT(vlPrior) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS labPerformance\n" +
             "\t\t\n" +
             "FROM\n" +
             "    clientVerification", nativeQuery = true)

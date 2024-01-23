@@ -17,6 +17,11 @@ public class ClientVerificationDQAService {
     private final ClientVerificationRepository verificationRepository;
 
 
+    public List<PatientDTOProjection> getVlPrior (Long facilityId) {
+        List<PatientDTOProjection> cvlMoreThanSixMonth = verificationRepository.getVlPrior (currentUserOrganizationService.getCurrentUserOrganization());
+        return cvlMoreThanSixMonth;
+    }
+
     public List<PatientDTOProjection> getIncompleteEncounters (Long facilityId) {
         List<PatientDTOProjection> cNoCompleteEnco = verificationRepository.getIncompleteEncounter (currentUserOrganizationService.getCurrentUserOrganization());
         return cNoCompleteEnco;

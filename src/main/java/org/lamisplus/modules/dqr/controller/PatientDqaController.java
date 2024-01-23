@@ -65,9 +65,9 @@ public class PatientDqaController {
             case "verify7":
                 result =  verificationDQAService.getIncompleteEncounters (facilityId);
                 break;
-//            case "tb8":
-//                result = tbDQAService.getEligibleForIptNoDateCompletedStatus(facilityId);
-//                break;
+            case "verify8":
+                result = verificationDQAService.getVlPrior (facilityId);
+                break;
             default:
                 // Handle unknown dataType
                 return ResponseEntity.badRequest().build();

@@ -33,18 +33,10 @@ public interface ClientVerificationDTOProjection {
     Integer getIncompleteNumerator();
     Integer getIncompleteDenominator();
     Double getIncompletePerformance();
-//
-//    Integer getCaptureNumerator();
-//    Integer getCaptureDenominator();
-//    Double getCapturePerformance();
-//
-//    Integer getCaptureNumerator();
-//    Integer getCaptureDenominator();
-//    Double getCapturePerformance();
-//
-//    Integer getCaptureNumerator();
-//    Integer getCaptureDenominator();
-//    Double getCapturePerformance();
+
+    Integer getLabNumerator();
+    Integer getLabDenominator();
+    Double getLabPerformance();
 
 
 }
