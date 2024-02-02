@@ -246,7 +246,9 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{biometrics[0]?.capturePerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Biometric fingerprint captured", "bioDemo0" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                 onClick={() => viewDetail("Proportion of all active patients with Biometric fingerprint captured", "bioDemo0" )}
+                                    >View</Button>
                                     </div>
                                 </td>
                             </tr>
@@ -262,7 +264,9 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{biometrics[0]?.validCapPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with valid Biometric fingerprint captured", "bioDemo1" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                 onClick={() => viewDetail("Proportion of all active patients with valid Biometric fingerprint captured", "bioDemo1" )}
+                                    >View</Button>
                                     </div>
                                     
                                 </td>
@@ -279,7 +283,9 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{biometrics[0]?.recapPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Biometric fingerprint (recapture)", "bioDemo2" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                 onClick={() => viewDetail("Proportion of all active patients with Biometric fingerprint (recapture)", "bioDemo2" )}
+                                    >View</Button>
                                     </div>   
                                 </td>
                             </tr>
@@ -295,7 +301,9 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{biometrics[0]?.validRecapPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patients with valid Biometric fingerprint (recapture)", "bioDemo3" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                 onClick={() => viewDetail("Proportion of patients with valid Biometric fingerprint (recapture)", "bioDemo3" )}
+                                    >View</Button>
                                     </div> 
                                 </td>
                             </tr>
