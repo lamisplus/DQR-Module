@@ -169,7 +169,7 @@ const EAC = (props) => {
     setGetHeaderInfo(headerTitle)
     const eacDemo =patientDemoObj
     axios
-          .get(`${baseUrl}dqr/patient-clinic?indicator=${eacDemo}`, {
+          .get(`${baseUrl}dqr/patient-eac?indicator=${eacDemo}`, {
             headers: { Authorization: `Bearer ${token}` },
           })
           .then((response) => {
@@ -229,7 +229,9 @@ const EAC = (props) => {
                                 <td>{eac[0]?.eacCommencedPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of eligible patients with documented EAC commencement date", "" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of eligible patients with documented EAC commencement date", "eac0" )}
+                                    >View</Button>
                                 </div>
                                 </td>
                             </tr>
@@ -245,7 +247,9 @@ const EAC = (props) => {
                                 <td>{eac[0]?.eacComDatePerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patient with completed EAC session with VL sample collection date documented", "" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of patient with completed EAC session with VL sample collection date documented", "eac1" )}
+                                    >View</Button>
                                 </div>
                                 </td>
                             </tr>
@@ -261,7 +265,9 @@ const EAC = (props) => {
                                 <td>{eac[0]?.postEacPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patient who completed EAC with documented VL result for post EAC", "" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of patient who completed EAC with documented VL result for post EAC", "eac2" )}
+                                    >View</Button>
                                 </div>
                                 </td>
                             

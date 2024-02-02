@@ -69,6 +69,9 @@ public class ClinicalDqaController {
             case "clinic11":
                 result = clinicalDQAService.getNoCommencementDate(facilityId);
                 break;
+            case "clinic12":
+                result = clinicalDQAService.getNoMonthRefill(facilityId);
+                break;
             default:
                 // Handle unknown dataType
                 return ResponseEntity.badRequest().build();

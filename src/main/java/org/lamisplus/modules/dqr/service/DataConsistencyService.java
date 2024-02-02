@@ -44,8 +44,57 @@ public class DataConsistencyService {
         return cPregStatusLastVisit;
     }
 
+    public List<PatientDTOProjection> getPatientStartDateGreaterThanToday(Long facilityId) {
+        List<PatientDTOProjection> cStartDateToday = consistencyRepository.getPatientStartDateGreaterThanToday(currentUserOrganizationService.getCurrentUserOrganization());
+        return cStartDateToday;
+    }
 
-    //                  Summary Block
+    public List<PatientDTOProjection> getPatientClinicDateGreaterThanToday(Long facilityId) {
+        List<PatientDTOProjection> cClinicDateToday = consistencyRepository.getPatientClinicDateGreaterThanToday(currentUserOrganizationService.getCurrentUserOrganization());
+        return cClinicDateToday;
+    }
+
+    public List<PatientDTOProjection> getArtDateGreaterThanClinicDay (Long facilityId) {
+        List<PatientDTOProjection> cArtClinicDate = consistencyRepository.getPatientArtDateGreaterThanClinicDay(currentUserOrganizationService.getCurrentUserOrganization());
+        return cArtClinicDate;
+    }
+
+
+    public List<PatientDTOProjection> getLastPickUpGreaterThanHivConfirmDate (Long facilityId) {
+        List<PatientDTOProjection> lPickUpGreaterThanConfirmDate = consistencyRepository.getPatientLastPickUpGreaterThanConfirmDate(currentUserOrganizationService.getCurrentUserOrganization());
+        return lPickUpGreaterThanConfirmDate;
+    }
+
+    public List<PatientDTOProjection> getArtStartGreaterThanTransferInDate (Long facilityId) {
+        List<PatientDTOProjection> artStartGreaterThanConfirmDate = consistencyRepository.getPatientStartDateGreaterThanTransferIn(currentUserOrganizationService.getCurrentUserOrganization());
+        return artStartGreaterThanConfirmDate;
+    }
+
+
+    public List<PatientDTOProjection> getDobGreaterThanLastPickUp (Long facilityId) {
+        List<PatientDTOProjection> dobGreaterThanLastPickUp = consistencyRepository.getPatientDobGreaterThanLastPick(currentUserOrganizationService.getCurrentUserOrganization());
+        return dobGreaterThanLastPickUp;
+    }
+
+    public List<PatientDTOProjection> getLastPickUpGreaterThanTransferIn (Long facilityId) {
+        List<PatientDTOProjection> lPickUpGreaterThanTransferIn = consistencyRepository.getPatientLastPickUpGreaterThanTransferInDate(currentUserOrganizationService.getCurrentUserOrganization());
+        return lPickUpGreaterThanTransferIn;
+    }
+
+    public List<PatientDTOProjection> getLastPickUpGreaterThanToday (Long facilityId) {
+        List<PatientDTOProjection> lPickUpGreaterThanToday = consistencyRepository.getPatientLastPickUpGreaterThanToday(currentUserOrganizationService.getCurrentUserOrganization());
+        return lPickUpGreaterThanToday;
+    }
+
+    public List<PatientDTOProjection> getLastClinicGreaterThanToday (Long facilityId) {
+        List<PatientDTOProjection> lClinicGreaterThanToday = consistencyRepository.getPatientLastClinicGreaterThanToday(currentUserOrganizationService.getCurrentUserOrganization());
+        return lClinicGreaterThanToday;
+    }
+
+    public List<PatientDTOProjection> getLastSampleDateGreaterThanResultDate (Long facilityId) {
+        List<PatientDTOProjection> vlSampleDateGreaterThanResultDate = consistencyRepository.getPatientVlSampleDateGreaterThanResultDate(currentUserOrganizationService.getCurrentUserOrganization());
+        return vlSampleDateGreaterThanResultDate;
+    }
 
 
 
