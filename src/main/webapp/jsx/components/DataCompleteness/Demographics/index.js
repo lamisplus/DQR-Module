@@ -177,6 +177,7 @@ const DemographicsDQA = (props) => {
                   <th>Complete Variables</th>
                   <th>Numerator</th>
                   <th>Denominator</th>
+                  <th>Variance</th>
                   <th>Performance</th>
                   <th>Action</th>
                 </tr>
@@ -189,7 +190,11 @@ const DemographicsDQA = (props) => {
                   </td>
                   <td>{demographics[0]?.dobNumerator}</td>
                   <td>{demographics[0]?.dobDenominator}</td>
-                  <td>{demographics[0]?.dobPerformance} %</td>
+                   <td></td>
+                   <td style={{ backgroundColor: demographics[0]?.dobPerformance  >= 95 ? 'green' : demographics[0]?.dobPerformance >= 90 ? 'yellow' : 'red', color: demographics[0]?.dobPerformance >= 95 ? 'white' : demographics[0]?.dobPerformance>= 90 ? 'black' : 'white',
+                   textAlign: 'center', fontWeight: 'bold' }}>
+                   {demographics[0]?.dobPerformance} % </td>
+                  
                   <td>
                   <div>
                   <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
@@ -203,7 +208,12 @@ const DemographicsDQA = (props) => {
                   <td>Proportion of all active patients with Current Age</td>
                   <td>{demographics[0]?.ageNumerator}</td>
                    <td>{demographics[0]?.ageDenominator}</td>
-                   <td>{demographics[0]?.agePerformance} %</td>
+                   <td></td>
+                   <td style={{ backgroundColor: demographics[0]?.agePerformance >= 95 ? 'green' : demographics[0]?.agePerformance >= 90 ? 'yellow' : 'red', color: demographics[0]?.agePerformance >= 95 ? 'white' : demographics[0]?.agePerformance >= 90 ? 'black' : 'white',
+                   textAlign: 'center', fontWeight: 'bold' }}>
+                    {demographics[0]?.agePerformance} %
+                   </td>
+
                   <td>
                   <div>
                   <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
@@ -219,7 +229,12 @@ const DemographicsDQA = (props) => {
                   </td>
                   <td>{demographics[0]?.pidNumerator}</td>
                   <td>{demographics[0]?.pidDenominator}</td>
-                  <td>{demographics[0]?.pidPerformance} %</td>
+                  <td></td>
+                  <td style={{ backgroundColor: demographics[0]?.pidPerformance >= 95 ? 'green' : demographics[0]?.pidPerformance >= 90 ? 'yellow' : 'red', color: demographics[0]?.pidPerformance >= 95 ? 'white' : demographics[0]?.pidPerformance >= 90 ? 'black' : 'white',
+                   textAlign: 'center', fontWeight: 'bold' }}>
+                    {demographics[0]?.pidPerformance} %
+                  </td>
+
                   <td>
                   <div>
                   <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
@@ -233,7 +248,12 @@ const DemographicsDQA = (props) => {
                   <td>Proportion of all active patients with Sex</td>
                   <td>{demographics[0]?.sexNumerator}</td>
                   <td>{demographics[0]?.sexDenominator}</td>
-                  <td>{demographics[0]?.sexPerformance} %</td>
+                  <td></td>
+                  <td style={{ backgroundColor: demographics[0]?.sexPerformance >= 95 ? 'green' : demographics[0]?.sexPerformance >= 90 ? 'yellow' : 'red', color: demographics[0]?.sexPerformance >= 95 ? 'white' : demographics[0]?.sexPerformance >= 90 ? 'black' : 'white',
+                   textAlign: 'center', fontWeight: 'bold' }}>
+                    {demographics[0]?.sexPerformance} %
+                 </td>
+
                   <td><div>
                   <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
                    onClick={() => viewDetail("Proportion of all active patients with Sex", "patientDemo2" )}
@@ -249,7 +269,12 @@ const DemographicsDQA = (props) => {
                   </td>
                   <td>{demographics[0]?.eduNumerator}</td>
                   <td>{demographics[0]?.eduDenominator}</td>
-                  <td>{demographics[0]?.eduPerformance} %</td>
+                  <td></td>
+                  <td style={{ backgroundColor: demographics[0]?.eduPerformance >= 95 ? 'green' : demographics[0]?.eduPerformance >= 90 ? 'yellow' : 'red', color: demographics[0]?.eduPerformance >= 95 ? 'white' : demographics[0]?.eduPerformance >= 90 ? 'black' : 'white',
+                   textAlign: 'center', fontWeight: 'bold' }}>
+                    {demographics[0]?.eduPerformance} %
+                   </td>
+
                   <td>
                     <div>
                     <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
@@ -265,7 +290,12 @@ const DemographicsDQA = (props) => {
                   </td>
                   <td>{demographics[0]?.maritalNumerator}</td>
                   <td>{demographics[0]?.maritalDenominator}</td>
-                  <td>{demographics[0]?.maritalPerformance} %</td>
+                  <td></td>
+                  <td style={{ backgroundColor: demographics[0]?.maritalPerformance >= 95 ? 'green' : demographics[0]?.maritalPerformance >= 90 ? 'yellow' : 'red', color: demographics[0]?.maritalPerformance >= 95 ? 'white' : demographics[0]?.maritalPerformance >= 90 ? 'black' : 'white',
+                   textAlign: 'center', fontWeight: 'bold' }}>
+                    {demographics[0]?.maritalPerformance} %
+                  </td>
+
                   <td>
                   <div>
                   <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
@@ -281,7 +311,12 @@ const DemographicsDQA = (props) => {
                   </td>
                   <td>{demographics[0]?.employNumerator}</td>
                   <td>{demographics[0]?.employDenominator}</td>
-                  <td>{demographics[0]?.employPerformance} %</td>
+                   <td></td>
+                   <td style={{ backgroundColor: demographics[0]?.employPerformance >= 95 ? 'green' : demographics[0]?.employPerformance >= 90 ? 'yellow' : 'red', color: demographics[0]?.employPerformance >= 95 ? 'white' : demographics[0]?.employPerformance >= 90 ? 'black' : 'white',
+                   textAlign: 'center', fontWeight: 'bold' }}>
+                    {demographics[0]?.employPerformance} %
+                   </td>
+
                   <td>
                   <div>
                   <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
@@ -297,7 +332,12 @@ const DemographicsDQA = (props) => {
                   </td>
                   <td>{demographics[0]?.addressNumerator}</td>
                   <td>{demographics[0]?.addressDenominator}</td>
-                  <td>{demographics[0]?.addressPerformance} %</td>
+                   <td></td>
+                   <td style={{ backgroundColor: demographics[0]?.addressPerformance >= 95 ? 'green' : demographics[0]?.addressPerformance >= 90 ? 'yellow' : 'red', color: demographics[0]?.addressPerformance >= 95 ? 'white' : demographics[0]?.addressPerformance >= 90 ? 'black' : 'white',
+                   textAlign: 'center', fontWeight: 'bold' }}>
+                    {demographics[0]?.addressPerformance} %
+                   </td>
+
                   <td>
                   <div>
                   <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 

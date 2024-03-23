@@ -220,6 +220,9 @@ const Clinical = (props) => {
                                   Denominator
                                 </th>
                                 <th>
+                                  Variance
+                                </th>
+                                <th>
                                   Performance
                                 </th>
                                 <th>
@@ -237,7 +240,12 @@ const Clinical = (props) => {
                                 </td>
                                 <td>{clinical[0]?.refillMonthNumerator}</td>
                                 <td>{clinical[0]?.refillMonthDenominator}</td>
-                                <td>{clinical[0]?.refillMonthPerformance} %</td>
+                                <td> </td>
+                                <td style={{ backgroundColor: clinical[0]?.refillMonthPerformance >= 95 ? 'green' : clinical[0]?.refillMonthPerformance >= 90 ? 'yellow' : 'red', color: clinical[0]?.refillMonthPerformance >= 95 ? 'white' : clinical[0]?.refillMonthPerformance >= 90 ? 'black' : 'white',
+                                  textAlign: 'center', fontWeight: 'bold' }}>
+                                 {clinical[0]?.refillMonthPerformance} %
+                                </td>
+
                                 <td>
                                 <div>
                                 <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
@@ -255,7 +263,12 @@ const Clinical = (props) => {
                                 </td>
                                 <td>{clinical[0]?.startDateNumerator}</td>
                                 <td>{clinical[0]?.startDateDenominator}</td>
-                                <td>{clinical[0]?.startDatePerformance} %</td>
+                                <td> </td>
+                                <td style={{ backgroundColor: clinical[0]?.startDatePerformance >= 95 ? 'green' : clinical[0]?.startDatePerformance >= 90 ? 'yellow' : 'red', color: clinical[0]?.startDatePerformance >= 95 ? 'white' : clinical[0]?.startDatePerformance >= 90 ? 'black' : 'white',
+                                  textAlign: 'center', fontWeight: 'bold' }}>
+                                    {clinical[0]?.startDatePerformance} %
+                                 </td>
+
                                 <td>
                                 <div>
                                 <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
@@ -273,7 +286,12 @@ const Clinical = (props) => {
                                 </td>
                                 <td>{clinical[0]?.confirmDateNumerator}</td>
                                 <td>{clinical[0]?.confirmDateDenominator}</td>
-                                <td>{clinical[0]?.confirmDatePerformance} %</td>
+                                <td> </td>
+                                <td style={{ backgroundColor: clinical[0]?.confirmDatePerformance >= 95 ? 'green' : clinical[0]?.confirmDatePerformance >= 90 ? 'yellow' : 'red', color: clinical[0]?.confirmDatePerformance >= 95 ? 'white' : clinical[0]?.confirmDatePerformance >= 90 ? 'black' : 'white',
+                                  textAlign: 'center', fontWeight: 'bold' }}>
+                                    {clinical[0]?.confirmDatePerformance} %
+                                </td>
+
                                 <td>
                                 <div>
                                 <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
@@ -291,7 +309,12 @@ const Clinical = (props) => {
                                 </td>
                                 <td>{clinical[0]?.lastPickNumerator}</td>
                                 <td>{clinical[0]?.lastPickDenominator}</td>
-                                <td>{clinical[0]?.lastPickPerformance} %</td>
+                                 <td> </td>
+                                 <td style={{ backgroundColor: clinical[0]?.lastPickPerformance >= 95 ? 'green' : clinical[0]?.lastPickPerformance >= 90 ? 'yellow' : 'red', color: clinical[0]?.lastPickPerformance >= 95 ? 'white' : clinical[0]?.lastPickPerformance >= 90 ? 'black' : 'white',
+                                  textAlign: 'center', fontWeight: 'bold' }}>
+                                    {clinical[0]?.lastPickPerformance} %
+                                  </td>
+
                                 <td>
                                 <div>
                                 <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
@@ -309,7 +332,11 @@ const Clinical = (props) => {
                                 </td>
                                <td>{clinical[0]?.ageNumerator}</td>
                                <td>{clinical[0]?.ageDenominator}</td>
-                               <td>{clinical[0]?.agePerformance} %</td>
+                                <td> </td>
+                                <td style={{ backgroundColor: clinical[0]?.agePerformance >= 95 ? 'green' : clinical[0]?.agePerformance >= 90 ? 'yellow' : 'red', color: clinical[0]?.agePerformance >= 95 ? 'white' :clinical[0]?.agePerformance >= 90 ? 'black' : 'white',
+                                  textAlign: 'center', fontWeight: 'bold' }}>
+                                    {clinical[0]?.agePerformance} %
+                                 </td>
                                 <td>
                                 <div>
                                 <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
@@ -327,7 +354,12 @@ const Clinical = (props) => {
                                 </td>
                                 <td>{clinical[0]?.regimenNumerator}</td>
                                 <td>{clinical[0]?.regimenDenominator}</td>
-                                <td>{clinical[0]?.regimenPerformance} %</td>
+                                 <td> </td>
+                                 <td style={{ backgroundColor: clinical[0]?.regimenPerformance >= 95 ? 'green' : clinical[0]?.regimenPerformance >= 90 ? 'yellow' : 'red', color: clinical[0]?.refillMonthPerformance >= 95 ? 'white' : clinical[0]?.refillMonthPerformance >= 90 ? 'black' : 'white',
+                                  textAlign: 'center', fontWeight: 'bold' }}>
+                                    {clinical[0]?.regimenPerformance} %
+                                </td>
+
                                 <td>
                                 <div>
                                 <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
@@ -345,7 +377,11 @@ const Clinical = (props) => {
                                 </td>
                                 <td>{clinical[0]?.targNumerator}</td>
                                 <td>{clinical[0]?.targDenominator}</td>
-                                <td>{clinical[0]?.targPerformance} %</td>
+                                 <td> </td>
+                                 <td style={{ backgroundColor: clinical[0]?.targPerformance >= 95 ? 'green' : clinical[0]?.targPerformance >= 90 ? 'yellow' : 'red', color: clinical[0]?.targPerformance>= 95 ? 'white' : clinical[0]?.targPerformance>= 90 ? 'black' : 'white',
+                                  textAlign: 'center', fontWeight: 'bold' }}>
+                                 {clinical[0]?.targPerformance} % </td>
+
                                 <td>
                                 <div>
                                 <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
@@ -363,7 +399,11 @@ const Clinical = (props) => {
                                 </td>
                                 <td>{clinical[0]?.entryNumerator}</td>
                                 <td>{clinical[0]?.entryDenominator}</td>
-                                <td>{clinical[0]?.entryPerformance} %</td>
+                                <td> </td>
+                                <td style={{ backgroundColor: clinical[0]?.entryPerformance >= 95 ? 'green' : clinical[0]?.entryPerformance >= 90 ? 'yellow' : 'red', color: clinical[0]?.entryPerformance >= 95 ? 'white' : clinical[0]?.entryPerformance >= 90 ? 'black' : 'white',
+                                  textAlign: 'center', fontWeight: 'bold' }}>
+                                    {clinical[0]?.entryPerformance} % </td>
+
                                 <td>
                                 <div>
                                 <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
@@ -398,7 +438,12 @@ const Clinical = (props) => {
                                 </td>
                                 <td>{clinical[0]?.lastVisitNumerator}</td>
                                 <td>{clinical[0]?.lastVisitDenominator}</td>
-                                <td>{clinical[0]?.lastVisitPerformance} %</td>
+                                 <td> </td>
+                                  <td style={{
+                                      backgroundColor: clinical[0]?.lastVisitPerformance >= 95 ? 'green' : clinical[0]?.lastVisitPerformance >= 90 ? 'yellow' : 'red', color: clinical[0]?.lastVisitPerformance >= 95 ? 'white' : clinical[0]?.lastVisitPerformance >= 90 ? 'black' : 'white',
+                                      textAlign: 'center', fontWeight: 'bold' }}>
+                                      {clinical[0]?.lastVisitPerformance} %
+                                  </td>
                                 <td>
                                 <div>
                                 <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
@@ -417,7 +462,10 @@ const Clinical = (props) => {
                                 </td>
                                 <td>{clinical[0]?.weightNumerator}</td>
                                 <td>{clinical[0]?.weightDenominator}</td>
-                                <td>{clinical[0]?.weightPerformance} %</td>
+                                 <td> </td>
+                                 <td style={{ backgroundColor: clinical[0]?.weightPerformance >= 95 ? 'green' : clinical[0]?.weightPerformance >= 90 ? 'yellow' : 'red', color: clinical[0]?.weightPerformance >= 95 ? 'white' : clinical[0]?.weightPerformance >= 90 ? 'black' : 'white',
+                                  textAlign: 'center', fontWeight: 'bold' }}>
+                                  {clinical[0]?.weightPerformance} % </td>
                                 <td>
                                 <div>
                                 <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
@@ -436,7 +484,11 @@ const Clinical = (props) => {
                                 </td>
                                <td>{clinical[0]?.pregNumerator}</td>
                                <td>{clinical[0]?.pregDenominator}</td>
-                               <td>{clinical[0]?.pregPerformance} %</td>
+                               <td> </td>
+                               <td style={{ backgroundColor: clinical[0]?.pregPerformance >= 95 ? 'green' : clinical[0]?.pregPerformance >= 90 ? 'yellow' : 'red', color: clinical[0]?.pregPerformance >= 95 ? 'white' : clinical[0]?.pregPerformance >= 90 ? 'black' : 'white',
+                                  textAlign: 'center', fontWeight: 'bold' }}>
+                                  {clinical[0]?.pregPerformance} % </td>
+
                                 <td>
                                 <div>
                                 <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
@@ -455,7 +507,11 @@ const Clinical = (props) => {
                                 </td>
                                 <td>{clinical[0]?.diagnoseNumerator}</td>
                                 <td>{clinical[0]?.diagnoseDenominator}</td>
-                                <td>{clinical[0]?.diagnosePerformance} %</td>
+                                <td> </td>
+                                <td style={{ backgroundColor: clinical[0]?.diagnosePerformance >= 95 ? 'green' : clinical[0]?.diagnosePerformance >= 90 ? 'yellow' : 'red', color: clinical[0]?.diagnosePerformance >= 95 ? 'white' : clinical[0]?.diagnosePerformance >= 90 ? 'black' : 'white',
+                                  textAlign: 'center', fontWeight: 'bold' }}>
+                                  {clinical[0]?.diagnosePerformance} % </td>
+
                                 <td>
                                 <div>
                                 <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
@@ -474,7 +530,10 @@ const Clinical = (props) => {
                                 </td>
                                 <td>{clinical[0]?.enrolledDateNumerator}</td>
                                 <td>{clinical[0]?.enrolledDateDenominator}</td>
-                                <td>{clinical[0]?.enrolledDatePerformance} %</td>
+                                <td> </td>
+                                <td style={{ backgroundColor: clinical[0]?.enrolledDatePerformance >= 95 ? 'green' : clinical[0]?.enrolledDatePerformance >= 90 ? 'yellow' : 'red', color: clinical[0]?.enrolledDatePerformance >= 95 ? 'white' : clinical[0]?.enrolledDatePerformance >= 90 ? 'black' : 'white',
+                                  textAlign: 'center', fontWeight: 'bold' }}>
+                                  {clinical[0]?.enrolledDatePerformance} % </td>
                                 <td>
                                 <div>
                                 <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
@@ -493,7 +552,10 @@ const Clinical = (props) => {
                                </td>
                                <td>{clinical[0]?.commencedNumerator}</td>
                                <td>{clinical[0]?.commencedDenominator}</td>
-                               <td>{clinical[0]?.commencedPerformance} %</td>
+                               <td> </td>
+                               <td style={{ backgroundColor: clinical[0]?.commencedPerformance >= 95 ? 'green' : clinical[0]?.commencedPerformance >= 90 ? 'yellow' : 'red', color: clinical[0]?.commencedPerformance >= 95 ? 'white' : clinical[0]?.commencedPerformance >= 90 ? 'black' : 'white',
+                                  textAlign: 'center', fontWeight: 'bold' }}>
+                                  {clinical[0]?.commencedPerformance} % </td>
                                <td>
                                <div>
                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 

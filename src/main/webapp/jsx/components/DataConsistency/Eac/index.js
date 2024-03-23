@@ -208,6 +208,7 @@ const EAC = (props) => {
                                 <th>
                                   Denominator
                                 </th>
+                                <th> Variance </th>
                                 <th>
                                   Performance
                                 </th>
@@ -226,7 +227,9 @@ const EAC = (props) => {
                                 </td>
                                 <td>{eac[0]?.eacCommencedNumerator}</td>
                                 <td>{eac[0]?.eacCommencedDenominator}</td>
-                                <td>{eac[0]?.eacCommencedPerformance} %</td>
+                                <td> </td>
+                                <td style={{ backgroundColor: eac[0]?.eacCommencedPerformance >= 95 ? 'green' : eac[0]?.eacCommencedPerformance >= 90 ? 'yellow' : 'red', color: eac[0]?.eacCommencedPerformance >= 95 ? 'white' : eac[0]?.eacCommencedPerformance >= 90 ? 'black' : 'white',
+                                    textAlign: 'center', fontWeight: 'bold' }}>{eac[0]?.eacCommencedPerformance} %</td>
                                 <td>
                                 <div>
                                 <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
@@ -244,7 +247,9 @@ const EAC = (props) => {
                                 </td>
                                 <td>{eac[0]?.eacComDateNumerator}</td>
                                 <td>{eac[0]?.eacComDateDenominator}</td>
-                                <td>{eac[0]?.eacComDatePerformance} %</td>
+                                <td> </td>
+                                <td style={{ backgroundColor: eac[0]?.eacComDatePerformance >= 95 ? 'green' : eac[0]?.eacComDatePerformance >= 90 ? 'yellow' : 'red', color: eac[0]?.eacComDatePerformance >= 95 ? 'white' : eac[0]?.eacComDatePerformance >= 90 ? 'black' : 'white',
+                                    textAlign: 'center', fontWeight: 'bold' }}>{eac[0]?.eacComDatePerformance} %</td>
                                 <td>
                                 <div>
                                 <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
@@ -262,7 +267,9 @@ const EAC = (props) => {
                                 </td>
                                 <td>{eac[0]?.postEacNumerator}</td>
                                 <td>{eac[0]?.postEacDenominator}</td>
-                                <td>{eac[0]?.postEacPerformance} %</td>
+                                <td> </td>
+                                <td style={{ backgroundColor: eac[0]?.postEacPerformance >= 95 ? 'green' : eac[0]?.postEacPerformance >= 90 ? 'yellow' : 'red', color: eac[0]?.postEacPerformance >= 95 ? 'white' : eac[0]?.postEacPerformance >= 90 ? 'black' : 'white',
+                                    textAlign: 'center', fontWeight: 'bold' }}>{eac[0]?.postEacPerformance} %</td>
                                 <td>
                                 <div>
                                 <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 

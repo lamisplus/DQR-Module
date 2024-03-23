@@ -206,6 +206,7 @@ const useStyles = makeStyles((theme) => ({
                                 <th>
                                   Denominator
                                 </th>
+                                <th> Variance </th>
                                 <th>
                                   Performance
                                 </th>
@@ -225,6 +226,7 @@ const useStyles = makeStyles((theme) => ({
                                 <td>{hts[0]?.totalPosNumerator}</td>
                                 <td>{hts[0]?.totalPosDenominator}</td>
                                 <td> </td>
+                                <td> </td>
                                 <td>
                                 <div>
                                 <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
@@ -242,7 +244,9 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{hts[0]?.withVLNumerator}</td>
                                 <td>{hts[0]?.withVLDenominator}</td>
-                                <td>{hts[0]?.withVLPerformance} %</td>
+                                <td> </td>
+                                <td style={{ backgroundColor: hts[0]?.withVLPerformance >= 95 ? 'green' : hts[0]?.withVLPerformance >= 90 ? 'yellow' : 'red', color: hts[0]?.withVLPerformance >= 95 ? 'white' : hts[0]?.withVLPerformance >= 90 ? 'black' : 'white',
+                                    textAlign: 'center', fontWeight: 'bold' }}>{hts[0]?.withVLPerformance} %</td>
                                 <td>
                                 <div>
                                 <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
@@ -260,7 +264,9 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{hts[0]?.withVlResNumerator}</td>
                                 <td>{hts[0]?.withVlResDenominator}</td>
-                                <td>{hts[0]?.withVlResPerformance} %</td>
+                                <td> </td>
+                                <td style={{ backgroundColor: hts[0]?.withVlResPerformance >= 95 ? 'green' : hts[0]?.withVlResPerformance >= 90 ? 'yellow' : 'red', color: hts[0]?.withVlResPerformance >= 95 ? 'white' : hts[0]?.withVlResPerformance >= 90 ? 'black' : 'white',
+                                    textAlign: 'center', fontWeight: 'bold' }}>{hts[0]?.withVlResPerformance} %</td>
                                 <td>
                                 <div>
                                 <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
@@ -278,7 +284,9 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{hts[0]?.rsGreaterNumerator}</td>
                                 <td>{hts[0]?.rsGreaterPerformance}</td>
-                                <td>{hts[0]?.rsGreaterPerformance} %</td>
+                                <td> </td>
+                                <td style={{ backgroundColor: hts[0]?.rsGreaterPerformance >= 95 ? 'green' : hts[0]?.rsGreaterPerformance >= 90 ? 'yellow' : 'red', color: hts[0]?.rsGreaterPerformance >= 95 ? 'white' : hts[0]?.rsGreaterPerformance >= 90 ? 'black' : 'white',
+                                    textAlign: 'center', fontWeight: 'bold' }}>{hts[0]?.rsGreaterPerformance} %</td>
                                 <td>
                                 <div>
                                 <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
@@ -296,7 +304,9 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                <td>{hts[0]?.recencyNumerator}</td>
                                <td>{hts[0]?.recencyDenominator}</td>
-                               <td>{hts[0]?.recencyPerformance} %</td>
+                               <td> </td>
+                               <td style={{ backgroundColor: hts[0]?.recencyPerformance >= 95 ? 'green' : hts[0]?.recencyPerformance >= 90 ? 'yellow' : 'red', color: hts[0]?.recencyPerformance >= 95 ? 'white' : hts[0]?.recencyPerformance >= 90 ? 'black' : 'white',
+                                    textAlign: 'center', fontWeight: 'bold' }}>{hts[0]?.recencyPerformance} %</td>
                                 <td>
                                 <div>
                                 <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
@@ -314,7 +324,9 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{hts[0]?.elicitedNumerator}</td>
                                 <td>{hts[0]?.elicitedDenominator}</td>
-                                <td>{hts[0]?.elicitedPerformance} %</td>
+                                <td> </td>
+                                <td style={{ backgroundColor: hts[0]?.elicitedPerformance >= 95 ? 'green' : hts[0]?.elicitedPerformance >= 90 ? 'yellow' : 'red', color: hts[0]?.elicitedPerformance >= 95 ? 'white' : hts[0]?.elicitedPerformance >= 90 ? 'black' : 'white',
+                                    textAlign: 'center', fontWeight: 'bold' }}>{hts[0]?.elicitedPerformance} %</td>
                                 <td>
                                 <div>
                                 <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
@@ -332,7 +344,9 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{hts[0]?.settingsNumerator}</td>
                                 <td>{hts[0]?.settingsDenominator}</td>
-                                <td>{hts[0]?.settingsPerformance} %</td>
+                                <td> </td>
+                                <td style={{ backgroundColor: hts[0]?.settingsPerformance >= 95 ? 'green' : hts[0]?.settingsPerformance >= 90 ? 'yellow' : 'red', color: hts[0]?.settingsPerformance >= 95 ? 'white' : hts[0]?.settingsPerformance >= 90 ? 'black' : 'white',
+                                    textAlign: 'center', fontWeight: 'bold' }}>{hts[0]?.settingsPerformance} %</td>
                                 <td>
                                 <div>
                                 <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
@@ -350,7 +364,9 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{hts[0]?.targNumerator}</td>
                                 <td>{hts[0]?.targDenominator}</td>
-                                <td>{hts[0]?.targPerformance} %</td>
+                                <td> </td>
+                                <td style={{ backgroundColor: hts[0]?.targPerformance >= 95 ? 'green' : hts[0]?.targPerformance >= 90 ? 'yellow' : 'red', color: hts[0]?.targPerformance >= 95 ? 'white' : hts[0]?.targPerformance >= 90 ? 'black' : 'white',
+                                    textAlign: 'center', fontWeight: 'bold' }}>{hts[0]?.targPerformance} %</td>
                                 <td>
                                 <div>
                                 <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 

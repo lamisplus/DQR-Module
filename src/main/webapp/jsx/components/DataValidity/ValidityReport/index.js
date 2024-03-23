@@ -177,6 +177,7 @@ const useStyles = makeStyles((theme) => ({
                   <th>Complete Variables</th>
                   <th>Numerator</th>
                   <th>Denominator</th>
+                  <th> Variance </th>
                   <th>Performance</th>
                   <th>Action</th>
                 </tr>
@@ -189,7 +190,9 @@ const useStyles = makeStyles((theme) => ({
                   </td>
                   <td>{validity[0]?.normalDobNumerator}</td>
                   <td>{validity[0]?.normalDobDenominator}</td>
-                  <td>{validity[0]?.normalDobPerformance} %</td>
+                  <td> </td>
+                  <td style={{ backgroundColor: validity[0]?.normalDobPerformance >= 95 ? 'green' : validity[0]?.normalDobPerformance >= 90 ? 'yellow' : 'red', color: validity[0]?.normalDobPerformance >= 95 ? 'white' : validity[0]?.normalDobPerformance >= 90 ? 'black' : 'white',
+                    textAlign: 'center', fontWeight: 'bold' }}>{validity[0]?.normalDobPerformance} %</td>
                   <td>
                   <div>
                   <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
@@ -205,7 +208,9 @@ const useStyles = makeStyles((theme) => ({
                   </td>
                   <td>{validity[0]?.ageInitiatedNumerator}</td>
                    <td>{validity[0]?.ageInitiatedDenominator}</td>
-                   <td>{validity[0]?.ageInitiatedPerformance} %</td>
+                   <td> </td>
+                   <td style={{ backgroundColor: validity[0]?.ageInitiatedPerformance >= 95 ? 'green' : validity[0]?.ageInitiatedPerformance >= 90 ? 'yellow' : 'red', color: validity[0]?.ageInitiatedPerformance >= 95 ? 'white' : validity[0]?.ageInitiatedPerformance >= 90 ? 'black' : 'white',
+                    textAlign: 'center', fontWeight: 'bold' }}>{validity[0]?.ageInitiatedPerformance} %</td>
                   <td>
                   <div>
                   <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
@@ -221,7 +226,9 @@ const useStyles = makeStyles((theme) => ({
                   </td>
                   <td>{validity[0]?.startDateNumerator}</td>
                   <td>{validity[0]?.startDateDenominator}</td>
-                  <td>{validity[0]?.startDatePerformance} %</td>
+                  <td> </td>
+                  <td style={{ backgroundColor: validity[0]?.startDatePerformance >= 95 ? 'green' : validity[0]?.startDatePerformance >= 90 ? 'yellow' : 'red', color: validity[0]?.startDatePerformance >= 95 ? 'white' : validity[0]?.startDatePerformance >= 90 ? 'black' : 'white',
+                    textAlign: 'center', fontWeight: 'bold' }}>{validity[0]?.startDatePerformance} %</td>
                   <td>
                   <div>
                   <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
@@ -235,7 +242,9 @@ const useStyles = makeStyles((theme) => ({
                   <td>Proportion of eligible patient with First confirmed HIV test date (from 1985 to current calendar year)</td>
                   <td>{validity[0]?.hivDateNumerator}</td>
                   <td>{validity[0]?.hivDateDenominator}</td>
-                  <td>{validity[0]?.hivDatePerformance} %</td>
+                  <td> </td>
+                  <td style={{ backgroundColor: validity[0]?.hivDatePerformance >= 95 ? 'green' : validity[0]?.hivDatePerformance >= 90 ? 'yellow' : 'red', color: validity[0]?.hivDatePerformance >= 95 ? 'white' : validity[0]?.hivDatePerformance >= 90 ? 'black' : 'white',
+                    textAlign: 'center', fontWeight: 'bold' }}>{validity[0]?.hivDatePerformance} %</td>
                   <td>
                     <div>
                   <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
@@ -251,7 +260,9 @@ const useStyles = makeStyles((theme) => ({
                   </td>
                   <td>{validity[0]?.vlDateNumerator}</td>
                   <td>{validity[0]?.vlDateDenominator}</td>
-                  <td>{validity[0]?.vlDatePerformance} %</td>
+                  <td> </td>
+                  <td style={{ backgroundColor: validity[0]?.vlDatePerformance >= 95 ? 'green' : validity[0]?.vlDatePerformance >= 90 ? 'yellow' : 'red', color: validity[0]?.vlDatePerformance >= 95 ? 'white' : validity[0]?.vlDatePerformance >= 90 ? 'black' : 'white',
+                    textAlign: 'center', fontWeight: 'bold' }}>{validity[0]?.vlDatePerformance} %</td>
                   <td>
                     <div>
                     <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
@@ -267,7 +278,9 @@ const useStyles = makeStyles((theme) => ({
                   </td>
                   <td>{validity[0]?.bioNumerator}</td>
                   <td>{validity[0]?.bioDenominator}</td>
-                  <td>{validity[0]?.bioPerformance} %</td>
+                  <td> </td>
+                  <td style={{ backgroundColor: validity[0]?.bioPerformance >= 95 ? 'green' : validity[0]?.bioPerformance >= 90 ? 'yellow' : 'red', color: validity[0]?.bioPerformance >= 95 ? 'white' : validity[0]?.bioPerformance >= 90 ? 'black' : 'white',
+                    textAlign: 'center', fontWeight: 'bold' }}>{validity[0]?.bioPerformance} %</td>
                   <td>
                   <div>
                   <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
@@ -283,7 +296,9 @@ const useStyles = makeStyles((theme) => ({
                   </td>
                   <td>{validity[0]?.regimenNumerator}</td>
                   <td>{validity[0]?.regimenDenominator}</td>
-                  <td>{validity[0]?.regimenPerformance} %</td>
+                  <td> </td>
+                  <td style={{ backgroundColor: validity[0]?.regimenPerformance >= 95 ? 'green' : validity[0]?.regimenPerformance >= 90 ? 'yellow' : 'red', color: validity[0]?.regimenPerformance >= 95 ? 'white' : validity[0]?.regimenPerformance >= 90 ? 'black' : 'white',
+                    textAlign: 'center', fontWeight: 'bold' }}>{validity[0]?.regimenPerformance} %</td>
                   <td>
                   <div>
                   <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
