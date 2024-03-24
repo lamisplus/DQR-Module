@@ -8,6 +8,7 @@ menus:
     state: DQR
     url: /across/resources/static/dqr/index.html
 umdLocation: /across/resources/static/dqr/index.html
+gitHubLink: https://api.github.com/repos/lamisplus/DQR-Module/releases/latest
 webModules:
   - breadcrumb: DQR
     name: DQRModule
