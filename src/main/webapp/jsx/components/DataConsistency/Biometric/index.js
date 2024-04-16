@@ -244,7 +244,7 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{biometrics[0]?.captureNumerator}</td>
                                 <td>{biometrics[0]?.captureDenominator}</td>
-                                <td> </td>
+                                <td> {biometrics[0]?.captureVariance}</td>
                                 <td style={{ backgroundColor: biometrics[0]?.capturePerformance >= 95 ? 'green' : biometrics[0]?.capturePerformance >= 90 ? 'yellow' : 'red', color: biometrics[0]?.capturePerformance >= 95 ? 'white' : biometrics[0]?.capturePerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{biometrics[0]?.capturePerformance} %</td>
                                 <td>
@@ -264,7 +264,7 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{biometrics[0]?.validCapNumerator}</td>
                                 <td>{biometrics[0]?.validCapDenominator}</td>
-                                 <td> </td>
+                                 <td> {biometrics[0]?.validCapVariance}</td>
                                  <td style={{ backgroundColor: biometrics[0]?.validCapPerformance >= 95 ? 'green' : biometrics[0]?.validCapPerformance >= 90 ? 'yellow' : 'red', color: biometrics[0]?.validCapPerformance >= 95 ? 'white' : biometrics[0]?.validCapPerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{biometrics[0]?.validCapPerformance} %</td>
                                 <td>
@@ -285,7 +285,7 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{biometrics[0]?.recapNumerator}</td>
                                 <td>{biometrics[0]?.recapDenominator}</td>
-                                 <td> </td>
+                                 <td>{biometrics[0]?.recapVariance} </td>
                                  <td style={{ backgroundColor: biometrics[0]?.recapPerformance >= 95 ? 'green' : biometrics[0]?.recapPerformance >= 90 ? 'yellow' : 'red', color: biometrics[0]?.recapPerformance >= 95 ? 'white' : biometrics[0]?.recapPerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{biometrics[0]?.recapPerformance} %</td>
                                 <td>
@@ -305,7 +305,7 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{biometrics[0]?.validRecapNumerator}</td>
                                 <td>{biometrics[0]?.validRecapDenominator}</td>
-                                 <td> </td>
+                                 <td>{biometrics[0]?.validRecapVariance} </td>
                                  <td style={{ backgroundColor: biometrics[0]?.validRecapPerformance >= 95 ? 'green' : biometrics[0]?.validRecapPerformance >= 90 ? 'yellow' : 'red', color: biometrics[0]?.validRecapPerformance >= 95 ? 'white' : biometrics[0]?.validRecapPerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{biometrics[0]?.validRecapPerformance} %</td>
                                 <td>

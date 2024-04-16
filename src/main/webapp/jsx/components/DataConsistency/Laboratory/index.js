@@ -225,7 +225,7 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{laboratory[0]?.eligibleVlNumerator}</td>
                                 <td>{laboratory[0]?.eligibleVlDenominator}</td>
-                                <td> </td>
+                                <td>{laboratory[0]?.eligibleVlVariance} </td>
                                 <td style={{ backgroundColor: laboratory[0]?.eligibleVlPerformance >= 95 ? 'green' : laboratory[0]?.eligibleVlPerformance >= 90 ? 'yellow' : 'red', color: laboratory[0]?.eligibleVlPerformance >= 95 ? 'white' : laboratory[0]?.eligibleVlPerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{laboratory[0]?.eligibleVlPerformance} %</td>
                                 <td>
@@ -245,7 +245,7 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{laboratory[0]?.hadVlNumerator}</td>
                                 <td>{laboratory[0]?.hadVlDenominator}</td>
-                                <td> </td>
+                                <td>{laboratory[0]?.hadVlVariance} </td>
                                 <td style={{ backgroundColor: laboratory[0]?.hadVlPerformance >= 95 ? 'green' : laboratory[0]?.hadVlPerformance >= 90 ? 'yellow' : 'red', color: laboratory[0]?.hadVlPerformance >= 95 ? 'white' : laboratory[0]?.hadVlPerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{laboratory[0]?.hadVlPerformance} %</td>
                                 <td>
@@ -265,7 +265,7 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{laboratory[0]?.hadPcrDateNumerator}</td>
                                 <td>{laboratory[0]?.hadPcrDateDenominator}</td>
-                                <td> </td>
+                                <td>{laboratory[0]?.hadPcrDateVariance} </td>
                                 <td style={{ backgroundColor: laboratory[0]?.hadPcrDatePerformance >= 95 ? 'green' : laboratory[0]?.hadPcrDatePerformance >= 90 ? 'yellow' : 'red', color: laboratory[0]?.hadPcrDatePerformance >= 95 ? 'white' : laboratory[0]?.hadPcrDatePerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{laboratory[0]?.hadPcrDatePerformance} %</td>
                                 <td>
@@ -285,7 +285,7 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{laboratory[0]?.hadIndicatorNumerator}</td>
                                 <td>{laboratory[0]?.hadIndicatorDenominator}</td>
-                                <td> </td>
+                                <td>{laboratory[0]?.hadIndicatorVariance} </td>
                                 <td style={{ backgroundColor: laboratory[0]?.hadIndicatorPerformance >= 95 ? 'green' : laboratory[0]?.hadIndicatorPerformance >= 90 ? 'yellow' : 'red', color: laboratory[0]?.hadIndicatorPerformance >= 95 ? 'white' : laboratory[0]?.hadIndicatorPerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{laboratory[0]?.hadIndicatorPerformance} %</td>
                                 <td>
@@ -305,7 +305,7 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{laboratory[0]?.vlDateGsDateNumerator}</td>
                                 <td>{laboratory[0]?.vlDateGsDateDenominator}</td>
-                                <td> </td>
+                                <td>{laboratory[0]?.vlDateGsDateVariance} </td>
                                 <td style={{ backgroundColor: laboratory[0]?.vlDateGsDatePerformance >= 95 ? 'green' : laboratory[0]?.vlDateGsDatePerformance >= 90 ? 'yellow' : 'red', color: laboratory[0]?.vlDateGsDatePerformance >= 95 ? 'white' : laboratory[0]?.vlDateGsDatePerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{laboratory[0]?.vlDateGsDatePerformance} %</td>
                                 <td>
@@ -325,7 +325,7 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{laboratory[0]?.treatmentCd4Numerator}</td>
                                 <td>{laboratory[0]?.treatmentCd4Denominator}</td>
-                                <td> </td>
+                                <td>{laboratory[0]?.treatmentCd4Variance} </td>
                                 <td style={{ backgroundColor: laboratory[0]?.treatmentCd4Performance >= 95 ? 'green' : laboratory[0]?.treatmentCd4Performance >= 90 ? 'yellow' : 'red', color: laboratory[0]?.treatmentCd4Performance >= 95 ? 'white' : laboratory[0]?.treatmentCd4Performance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{laboratory[0]?.treatmentCd4Performance} %</td>
                                 <td>
@@ -345,7 +345,7 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{laboratory[0]?.cd4WithinYearNumerator}</td>
                                 <td>{laboratory[0]?.cd4WithinYearDenominator}</td>
-                                <td> </td>
+                                <td>{laboratory[0]?.cd4WithinYearVariance} </td>
                                 <td style={{ backgroundColor: laboratory[0]?.cd4WithinYearPerformance >= 95 ? 'green' : laboratory[0]?.cd4WithinYearPerformance >= 90 ? 'yellow' : 'red', color: laboratory[0]?.cd4WithinYearPerformance >= 95 ? 'white' : laboratory[0]?.cd4WithinYearPerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{laboratory[0]?.cd4WithinYearPerformance} %</td>
                                 <td>

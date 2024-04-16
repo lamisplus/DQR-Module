@@ -225,7 +225,7 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{hts[0]?.totalPosNumerator}</td>
                                 <td>{hts[0]?.totalPosDenominator}</td>
-                                <td> </td>
+                                <td>{hts[0]?.totalPosVariance} </td>
                                 <td> </td>
                                 <td>
                                 <div>
@@ -244,7 +244,7 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{hts[0]?.withVLNumerator}</td>
                                 <td>{hts[0]?.withVLDenominator}</td>
-                                <td> </td>
+                                <td>{hts[0]?.withVLVariance} </td>
                                 <td style={{ backgroundColor: hts[0]?.withVLPerformance >= 95 ? 'green' : hts[0]?.withVLPerformance >= 90 ? 'yellow' : 'red', color: hts[0]?.withVLPerformance >= 95 ? 'white' : hts[0]?.withVLPerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{hts[0]?.withVLPerformance} %</td>
                                 <td>
@@ -264,7 +264,7 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{hts[0]?.withVlResNumerator}</td>
                                 <td>{hts[0]?.withVlResDenominator}</td>
-                                <td> </td>
+                                <td>{hts[0]?.withVlResVariance} </td>
                                 <td style={{ backgroundColor: hts[0]?.withVlResPerformance >= 95 ? 'green' : hts[0]?.withVlResPerformance >= 90 ? 'yellow' : 'red', color: hts[0]?.withVlResPerformance >= 95 ? 'white' : hts[0]?.withVlResPerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{hts[0]?.withVlResPerformance} %</td>
                                 <td>
@@ -283,8 +283,8 @@ const useStyles = makeStyles((theme) => ({
                                 Proportion of HIV Positive patients with recency test (RECENT) done whose VL confirmation result date {">"} VL sample collection date
                                 </td>
                                 <td>{hts[0]?.rsGreaterNumerator}</td>
-                                <td>{hts[0]?.rsGreaterPerformance}</td>
-                                <td> </td>
+                                <td>{hts[0]?.rsGreaterDenominator}</td>
+                                <td>{hts[0]?.rsGreaterVariance} </td>
                                 <td style={{ backgroundColor: hts[0]?.rsGreaterPerformance >= 95 ? 'green' : hts[0]?.rsGreaterPerformance >= 90 ? 'yellow' : 'red', color: hts[0]?.rsGreaterPerformance >= 95 ? 'white' : hts[0]?.rsGreaterPerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{hts[0]?.rsGreaterPerformance} %</td>
                                 <td>
@@ -304,7 +304,7 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                <td>{hts[0]?.recencyNumerator}</td>
                                <td>{hts[0]?.recencyDenominator}</td>
-                               <td> </td>
+                               <td>{hts[0]?.recencyVariance} </td>
                                <td style={{ backgroundColor: hts[0]?.recencyPerformance >= 95 ? 'green' : hts[0]?.recencyPerformance >= 90 ? 'yellow' : 'red', color: hts[0]?.recencyPerformance >= 95 ? 'white' : hts[0]?.recencyPerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{hts[0]?.recencyPerformance} %</td>
                                 <td>
@@ -324,7 +324,7 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{hts[0]?.elicitedNumerator}</td>
                                 <td>{hts[0]?.elicitedDenominator}</td>
-                                <td> </td>
+                                <td>{hts[0]?.elicitedVariance} </td>
                                 <td style={{ backgroundColor: hts[0]?.elicitedPerformance >= 95 ? 'green' : hts[0]?.elicitedPerformance >= 90 ? 'yellow' : 'red', color: hts[0]?.elicitedPerformance >= 95 ? 'white' : hts[0]?.elicitedPerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{hts[0]?.elicitedPerformance} %</td>
                                 <td>
@@ -344,7 +344,7 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{hts[0]?.settingsNumerator}</td>
                                 <td>{hts[0]?.settingsDenominator}</td>
-                                <td> </td>
+                                <td>{hts[0]?.settingsVariance} </td>
                                 <td style={{ backgroundColor: hts[0]?.settingsPerformance >= 95 ? 'green' : hts[0]?.settingsPerformance >= 90 ? 'yellow' : 'red', color: hts[0]?.settingsPerformance >= 95 ? 'white' : hts[0]?.settingsPerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{hts[0]?.settingsPerformance} %</td>
                                 <td>
@@ -364,7 +364,7 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{hts[0]?.targNumerator}</td>
                                 <td>{hts[0]?.targDenominator}</td>
-                                <td> </td>
+                                <td>{hts[0]?.targVariance} </td>
                                 <td style={{ backgroundColor: hts[0]?.targPerformance >= 95 ? 'green' : hts[0]?.targPerformance >= 90 ? 'yellow' : 'red', color: hts[0]?.targPerformance >= 95 ? 'white' : hts[0]?.targPerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{hts[0]?.targPerformance} %</td>
                                 <td>

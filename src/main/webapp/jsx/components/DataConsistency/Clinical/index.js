@@ -208,7 +208,7 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                  <td>{clinicals[0]?.targNumerator}</td>
                                  <td>{clinicals[0]?.targDenominator}</td>
-                                 <td> </td>
+                                 <td>{clinicals[0]?.targVariance} </td>
                                  <td style={{ backgroundColor: clinicals[0]?.targPerformance >= 95 ? 'green' : clinicals[0]?.targPerformance >= 90 ? 'yellow' : 'red', color: clinicals[0]?.targPerformance >= 95 ? 'white' : clinicals[0]?.targPerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>
                                         {clinicals[0]?.targPerformance} %
@@ -230,7 +230,7 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{clinicals[0]?.entryNumerator}</td>
                                 <td>{clinicals[0]?.entryDenominator}</td>
-                                <td> </td>
+                                <td>{clinicals[0]?.entryVariance} </td>
                                 <td style={{ backgroundColor: clinicals[0]?.entryPerformance >= 95 ? 'green' : clinicals[0]?.entryPerformance >= 90 ? 'yellow' : 'red', color: clinicals[0]?.entryPerformance >= 95 ? 'white' : clinicals[0]?.entryPerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}> {clinicals[0]?.entryPerformance} %</td>
                                 <td>
@@ -250,7 +250,7 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{clinicals[0]?.adultWeightNumerator}</td>
                                 <td>{clinicals[0]?.adultWeightDenominator}</td>
-                                <td> </td>
+                                <td>{clinicals[0]?.adultWeightVariance} </td>
                                 <td style={{ backgroundColor: clinicals[0]?.adultWeightPerformance >= 95 ? 'green' : clinicals[0]?.adultWeightPerformance >= 90 ? 'yellow' : 'red', color: clinicals[0]?.adultWeightPerformance >= 95 ? 'white' : clinicals[0]?.adultWeightPerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{clinicals[0]?.adultWeightPerformance} %</td>
                                 <td>
@@ -270,7 +270,7 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{clinicals[0]?.peadWeightNumerator}</td>
                                 <td>{clinicals[0]?.peadWeightDenominator}</td>
-                                <td> </td>
+                                <td>{clinicals[0]?.peadWeightVariance} </td>
                                 <td style={{ backgroundColor: clinicals[0]?.peadWeightPerformance >= 95 ? 'green' : clinicals[0]?.peadWeightPerformance >= 90 ? 'yellow' : 'red', color: clinicals[0]?.peadWeightPerformance >= 95 ? 'white' : clinicals[0]?.peadWeightPerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{clinicals[0]?.peadWeightPerformance} %</td>
                                 <td>
@@ -290,7 +290,7 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{clinicals[0]?.pregNumerator}</td>
                                 <td>{clinicals[0]?.pregDenominator}</td>
-                                <td> </td>
+                                <td>{clinicals[0]?.pregVariance} </td>
                                 <td style={{ backgroundColor: clinicals[0]?.pregPerformance >= 95 ? 'green' : clinicals[0]?.pregPerformance >= 90 ? 'yellow' : 'red', color: clinicals[0]?.pregPerformance >= 95 ? 'white' : clinicals[0]?.pregPerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}> {clinicals[0]?.pregPerformance} %</td>
                                 <td>
@@ -310,7 +310,7 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                <td>{clinicals[0]?.artDateLessTodayNumerator}</td>
                                <td>{clinicals[0]?.artDateLessTodayDenominator}</td>
-                               <td> </td>
+                               <td>{clinicals[0]?.artDateLessTodayVariance} </td>
                                <td style={{ backgroundColor: clinicals[0]?.artDateLessTodayPerformance >= 95 ? 'green' : clinicals[0]?.artDateLessTodayPerformance >= 90 ? 'yellow' : 'red', color: clinicals[0]?.artDateLessTodayPerformance >= 95 ? 'white' : clinicals[0]?.artDateLessTodayPerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{clinicals[0]?.artDateLessTodayPerformance} %</td>
                                 <td>
@@ -330,7 +330,7 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{clinicals[0]?.artEqClinicNumerator}</td>
                                 <td>{clinicals[0]?.artEqClinicDenominator}</td>
-                                <td> </td>
+                                <td>{clinicals[0]?.artEqClinicVariance} </td>
                                 <td style={{ backgroundColor: clinicals[0]?.artEqClinicPerformance >= 95 ? 'green' : clinicals[0]?.artEqClinicPerformance >= 90 ? 'yellow' : 'red', color: clinicals[0]?.artEqClinicPerformance >= 95 ? 'white' : clinicals[0]?.artEqClinicPerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{clinicals[0]?.artEqClinicPerformance} %</td>
                                 <td>
@@ -350,7 +350,7 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{clinicals[0]?.artEqLastPickupNumerator}</td>
                                 <td>{clinicals[0]?.artEqLastPickupDenominator}</td>
-                                <td> </td>
+                                <td>{clinicals[0]?.artEqLastPickupVariance} </td>
                                 <td style={{ backgroundColor: clinicals[0]?.artEqLastPickupPerformance >= 95 ? 'green' : clinicals[0]?.artEqLastPickupPerformance >= 90 ? 'yellow' : 'red', color: clinicals[0]?.artEqLastPickupPerformance >= 95 ? 'white' : clinicals[0]?.artEqLastPickupPerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{clinicals[0]?.artEqLastPickupPerformance} %</td>
                                 <td>
@@ -370,7 +370,7 @@ const useStyles = makeStyles((theme) => ({
                               </td>
                               <td>{clinicals[0]?.lgreaterConfNumerator}</td>
                               <td>{clinicals[0]?.lgreaterConfDenominator}</td>
-                              <td> </td>
+                              <td>{clinicals[0]?.lgreaterConfVariance} </td>
                               <td style={{ backgroundColor: clinicals[0]?.lgreaterConfPerformance >= 95 ? 'green' : clinicals[0]?.lgreaterConfPerformance >= 90 ? 'yellow' : 'red', color: clinicals[0]?.lgreaterConfPerformance >= 95 ? 'white' : clinicals[0]?.lgreaterConfPerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{clinicals[0]?.lgreaterConfPerformance} %</td>
                               <td>
@@ -390,7 +390,7 @@ const useStyles = makeStyles((theme) => ({
                              </td>
                              <td>{clinicals[0]?.artGreaterTransNumerator}</td>
                              <td>{clinicals[0]?.artGreaterTransDenominator}</td>
-                             <td> </td>
+                             <td>{clinicals[0]?.artGreaterTransVariance} </td>
                              <td style={{ backgroundColor: clinicals[0]?.artGreaterTransPerformance >= 95 ? 'green' : clinicals[0]?.artGreaterTransPerformance >= 90 ? 'yellow' : 'red', color: clinicals[0]?.artGreaterTransPerformance >= 95 ? 'white' : clinicals[0]?.artGreaterTransPerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{clinicals[0]?.artGreaterTransPerformance} %</td>
                              <td>
@@ -411,7 +411,7 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{clinicals[0]?.lstPickGreaterDObNumerator}</td>
                                 <td>{clinicals[0]?.lstPickGreaterDObDenominator}</td>
-                                <td> </td>
+                                <td>{clinicals[0]?.lstPickGreaterDObVariance} </td>
                                 <td style={{ backgroundColor: clinicals[0]?.lstPickGreaterDObPerformance >= 95 ? 'green' : clinicals[0]?.lstPickGreaterDObPerformance >= 90 ? 'yellow' : 'red', color: clinicals[0]?.lstPickGreaterDObPerformance >= 95 ? 'white' : clinicals[0]?.lstPickGreaterDObPerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{clinicals[0]?.lstPickGreaterDObPerformance} %</td>
                                 <td>
@@ -450,7 +450,7 @@ const useStyles = makeStyles((theme) => ({
                             </td>
                             <td>{clinicals[0]?.ldrugPickHighNumerator}</td>
                             <td>{clinicals[0]?.ldrugPickHighDenominator}</td>
-                            <td> </td>
+                            <td>{clinicals[0]?.ldrugPickHighVariance} </td>
                             <td style={{ backgroundColor: clinicals[0]?.ldrugPickHighPerformance >= 95 ? 'green' : clinicals[0]?.ldrugPickHighPerformance >= 90 ? 'yellow' : 'red', color: clinicals[0]?.ldrugPickHighPerformance >= 95 ? 'white' : clinicals[0]?.ldrugPickHighPerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{clinicals[0]?.ldrugPickHighPerformance} %</td>
                             <td>
@@ -470,7 +470,7 @@ const useStyles = makeStyles((theme) => ({
                              </td>
                              <td>{clinicals[0]?.clinicPickLessTodayNumerator}</td>
                              <td>{clinicals[0]?.clinicPickLessTodayDenominator}</td>
-                             <td> </td>
+                             <td>{clinicals[0]?.clinicPickLessTodayVariance} </td>
                              <td style={{ backgroundColor: clinicals[0]?.clinicPickLessTodayPerformance >= 95 ? 'green' : clinicals[0]?.clinicPickLessTodayPerformance >= 90 ? 'yellow' : 'red', color: clinicals[0]?.clinicPickLessTodayPerformance >= 95 ? 'white' : clinicals[0]?.clinicPickLessTodayPerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{clinicals[0]?.clinicPickLessTodayPerformance} %</td>
                              <td>
@@ -490,7 +490,7 @@ const useStyles = makeStyles((theme) => ({
                              </td>
                              <td>{clinicals[0]?.clinicPickLessTodayNumerator}</td>
                              <td>{clinicals[0]?.clinicPickLessTodayDenominator}</td>
-                             <td> </td>
+                             <td>{clinicals[0]?.clinicPickLessTodayVariance} </td>
                              <td style={{ backgroundColor: clinicals[0]?.clinicPickLessTodayPerformance >= 95 ? 'green' : clinicals[0]?.clinicPickLessTodayPerformance >= 90 ? 'yellow' : 'red', color: clinicals[0]?.clinicPickLessTodayPerformance >= 95 ? 'white' : clinicals[0]?.clinicPickLessTodayPerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{clinicals[0]?.clinicPickLessTodayPerformance} %</td>
                              <td>
@@ -510,7 +510,7 @@ const useStyles = makeStyles((theme) => ({
                              </td>
                              <td>{clinicals[0]?.vlNumerator}</td>
                              <td>{clinicals[0]?.vlDenominator}</td>
-                             <td> </td>
+                             <td>{clinicals[0]?.vlVariance} </td>
                              <td style={{ backgroundColor: clinicals[0]?.vlPerformance >= 95 ? 'green' : clinicals[0]?.vlPerformance >= 90 ? 'yellow' : 'red', color: clinicals[0]?.vlPerformance >= 95 ? 'white' : clinicals[0]?.vlPerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{clinicals[0]?.vlPerformance} %</td>
                              <td>

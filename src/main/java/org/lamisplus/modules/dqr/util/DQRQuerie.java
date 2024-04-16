@@ -2,8 +2,627 @@ package org.lamisplus.modules.dqr.util;
 
 public class DQRQuerie {
 
-    public static final String DEMOGRAPHIC_QUERY = "";
 
+
+    public class DataConsistency {
+
+        public static final  String CLINICALS_SUMMARY_QUERIES = "WITH dataConsistence AS (\n" +
+                "SELECT e.unique_id AS patientId , p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex,p.date_of_birth AS dateOfBirth, tri.body_weight AS adultweight, \n" +
+                "tri.visit_date AS visit_date, e.target_group_id as target_group, e.entry_point_id AS entryPoint,\n" +
+                "e.date_confirmed_hiv AS hiv_confirm_date, (CASE WHEN lasClinic.lastvisit >= e.date_confirmed_hiv THEN 1 ELSE null END) AS lGreaterConf,\n" +
+                "pharm.visit_date AS lastPickUp,(CASE WHEN pharm.visit_date >  p.date_of_birth THEN 1 ELSE null END) AS lstPickGreaterDOb,\n" +
+                "transfer.hiv_status, transfer.status_date,(CASE WHEN e.date_started < transfer.status_date THEN 1 ELSE null END)  AS ArtGreaterTrans,\n" +
+                "(CASE WHEN e.date_started = lasClinic.lastvisit  THEN 1 ELSE null END) ArtEqClinicD, (CASE WHEN e.date_started = pharm.visit_date  THEN 1 ELSE null END) ArtEqDrugPickupD,\n" +
+                "(CASE WHEN pharm.visit_date >= transfer.status_date THEN 1 ELSE null END)  AS DrugPickHigherThanTrans,\n" +
+                "(CASE WHEN pharm.visit_date <= CAST(now() AS DATE) THEN 1 ELSE null END)  AS DrugPickLessToday,\n" +
+                "(CASE WHEN lasClinic.lastvisit <= CAST(now() AS DATE) THEN 1 ELSE null END)  AS clinicPickLessToday,\n" +
+                "(CASE WHEN e.date_started <= CAST(now() AS DATE) THEN 1 ELSE null END)  AS artDateLessToday,\n" +
+                "(CASE WHEN lasClinic.lastvisit > transfer.status_date  THEN 1 ELSE null END)  AS clinicGreaterThanTrans,\n" +
+                "(CASE WHEN vl.dateOfLastViralLoad > vl.dateSampleCollected THEN 1 ELSE NULL END) AS vlSample,\n" +
+                "CASE WHEN SEX = 'Female' AND CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) > 12 THEN 1 ELSE NULL END AS activeFemaleAdult,\n" +
+                "CASE WHEN lasClinic.pregnancy_status IS NOT NULL AND CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) > 12 AND INITCAP(p.sex) = 'Female' THEN 1 ELSE NULL END AS adultPre,\n" +
+                "CASE WHEN tri.body_weight < 61 AND CAST (EXTRACT(YEAR from AGE(NOW(), p.date_of_birth)) AS INTEGER) BETWEEN 0 AND 14 THEN 1 ELSE NULL END AS peadweight,\n" +
+                "CASE WHEN CAST (EXTRACT(YEAR from AGE(NOW(), p.date_of_birth)) AS INTEGER) BETWEEN 0 AND 14 THEN 1 ELSE NULL END AS peadcURR\n" +
+                "\n" +
+                " FROM patient_person p\n" +
+                " INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+                " LEFT JOIN\n" +
+                " (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date, hac.pregnancy_status  FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+                " GROUP BY hac.person_uuid, hac.visit_date, hac.pregnancy_status)ca ON p.uuid = ca.person_uuid\n" +
+                " LEFT JOIN\n" +
+                " (SELECT DISTINCT ON (person_uuid)\n" +
+                "   person_uuid, visit_date, body_weight\n" +
+                "FROM ( SELECT ht.person_uuid, MAX(ht.visit_date) AS visit_date, tr.body_weight\n" +
+                "   FROM hiv_art_clinical ht JOIN triage_vital_sign tr ON ht.person_uuid = tr.person_uuid AND ht.vital_sign_uuid = tr.uuid \n" +
+                "GROUP BY ht.person_uuid, tr.body_weight ORDER BY ht.person_uuid DESC ) fi ORDER BY\n" +
+                "   person_uuid DESC ) tri ON tri.person_uuid = p.uuid\n" +
+                "LEFT JOIN (SELECT DISTINCT ON (person_uuid)\n" +
+                "person_uuid, lastVisit,pregnancy_status\n" +
+                "  FROM\n" +
+                "(SELECT hacc.person_uuid, MAX(hacc.visit_date) as lastVisit, pregnancy_status from hiv_art_clinical hacc JOIN patient_person p2\n" +
+                "ON hacc.person_uuid = p2.uuid\n" +
+                "where hacc.archived=0 \n" +
+                " group by person_uuid, pregnancy_status ORDER BY person_uuid DESC ) lClinicVisit ORDER BY\n" +
+                "   person_uuid DESC ) \n" +
+                " lasClinic ON p.uuid = lasClinic.person_uuid\n" +
+                "LEFT JOIN\n" +
+                "(SELECT DISTINCT (person_id)\n" +
+                "person_id, MAX(status_date) AS status_date, hiv_status FROM hiv_status_tracker where hiv_status = 'ART_TRANSFER_IN'\n" +
+                "GROUP BY person_id, hiv_status ) transfer ON p.uuid = transfer.person_id\n" +
+                "LEFT JOIN (\n" +
+                "SELECT DISTINCT ON(lo.patient_uuid) lo.patient_uuid as person_uuid, ls.date_sample_collected as dateSampleCollected,\n" +
+                "lr.result_reported AS lastViralLoad,\n" +
+                "lr.date_result_reported as dateOfLastViralLoad\n" +
+                "FROM laboratory_order lo\n" +
+                "LEFT JOIN ( SELECT patient_uuid, MAX(order_date) AS MAXDATE FROM laboratory_order lo\n" +
+                "GROUP BY patient_uuid ORDER BY MAXDATE ASC ) AS current_lo\n" +
+                "ON current_lo.patient_uuid=lo.patient_uuid AND current_lo.MAXDATE=lo.order_date\n" +
+                "LEFT JOIN laboratory_test lt ON lt.lab_order_id=lo.id AND lt.patient_uuid = lo.patient_uuid\n" +
+                "LEFT JOIN base_application_codeset bac_viral_load ON bac_viral_load.id=lt.viral_load_indication\n" +
+                "LEFT JOIN laboratory_labtest ll ON ll.id=lt.lab_test_id\n" +
+                "-- INNER JOIN hiv_enrollment h ON h.person_uuid=current_lo.patient_uuid\n" +
+                "LEFT JOIN laboratory_sample ls ON ls.test_id=lt.id AND ls.patient_uuid = lo.patient_uuid\n" +
+                "LEFT JOIN laboratory_result lr ON lr.test_id=lt.id AND lr.patient_uuid = lo.patient_uuid\n" +
+                "WHERE  lo.archived=0 AND\n" +
+                "lr.date_result_reported IS NOT NULL\n" +
+                ") vl ON e.person_uuid = vl.person_uuid\n" +
+                "LEFT JOIN \n" +
+                "  (SELECT DISTINCT ON (person_uuid)\n" +
+                "    person_uuid, visit_date, refill_period, regimen\n" +
+                "FROM ( select person_uuid, refill_period, MAX(visit_date) AS visit_date, extra->'regimens'->0->>'name' AS regimen from hiv_art_pharmacy\n" +
+                "GROUP BY refill_period, person_uuid, extra ORDER BY person_uuid DESC ) fi\n" +
+                "ORDER BY\n" +
+                "    person_uuid DESC ) pharm ON pharm.person_uuid = p.uuid\n" +
+                " LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
+                " WHERE p.archived=0 AND p.facility_id= ?1\n" +
+                " GROUP BY e.id, p.hospital_number, p.date_of_birth, ca.visit_date, tri.body_weight, p.facility_id, tri.visit_date, \n" +
+                "e.target_group_id, e.entry_point_id,  e.date_confirmed_hiv, p.sex, p.id,\n" +
+                "transfer.hiv_status, transfer.status_date,lasclinic.lastvisit, pharm.visit_date, \n" +
+                "vl.dateOfLastViralLoad,vl.dateSampleCollected,  \n" +
+                "lasClinic.pregnancy_status\n" +
+                " ORDER BY p.id DESC )\n" +
+                " SELECT \n" +
+                " COUNT(target_group) AS targNumerator,\n" +
+                " COUNT(hospitalNumber) AS targDenominator,\n" +
+                "  COUNT(hospitalNumber) -  COUNT(target_group) AS targVariance,\n" +
+                " ROUND((CAST(COUNT(target_group) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS targPerformance,\n" +
+                " COUNT(entrypoint) AS entryNumerator,\n" +
+                " COUNT(hospitalNumber) AS entryDenominator,\n" +
+                "  COUNT(hospitalNumber) -  COUNT(entrypoint) AS entryVariance,\n" +
+                " ROUND((CAST(COUNT(entrypoint) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS entryPerformance,\n" +
+                " COUNT(adultweight) AS adultWeightNumerator,\n" +
+                " COUNT(hospitalNumber) AS adultWeightDenominator,\n" +
+                " COUNT(hospitalNumber) -  COUNT(adultweight) AS adultWeightVariance,\n" +
+                " ROUND((CAST(COUNT(adultweight) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS adultWeightPerformance,\n" +
+                " COUNT(peadweight) AS peadWeightNumerator,\n" +
+                " COUNT(peadcURR) AS peadWeightDenominator,\n" +
+                "  COUNT(peadcURR) - COUNT(peadweight) AS peadWeightVariance,\n" +
+                " ROUND((CAST(COUNT(peadweight) AS DECIMAL) / COUNT(peadcURR)) * 100, 2) AS peadWeightPerformance,\n" +
+                " COUNT(adultPre) AS pregNumerator,\n" +
+                " COUNT(activeFemaleAdult) AS pregDenominator,\n" +
+                "  COUNT(activeFemaleAdult) - COUNT(adultPre) AS pregVariance,\n" +
+                " ROUND((CAST(COUNT(adultPre) AS DECIMAL) / COUNT(activeFemaleAdult)) * 100, 2) AS pregPerformance,\n" +
+                " COUNT(ArtEqClinicD) AS artEqClinicNumerator,\n" +
+                " COUNT(hospitalNumber) AS artEqClinicDenominator,\n" +
+                " COUNT(hospitalNumber) - COUNT(ArtEqClinicD) AS artEqClinicVariance,\n" +
+                " ROUND((CAST(COUNT(ArtEqClinicD) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS artEqClinicPerformance,\n" +
+                " COUNT(ArtEqDrugPickupD) AS artEqLastPickupNumerator,\n" +
+                " COUNT(hospitalNumber) AS artEqLastPickupDenominator,\n" +
+                " COUNT(hospitalNumber) - COUNT(ArtEqDrugPickupD) AS artEqLastPickupVariance,\n" +
+                " ROUND((CAST(COUNT(ArtEqDrugPickupD) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS artEqLastPickupPerformance,\n" +
+                " COUNT(lGreaterConf) AS lGreaterConfNumerator,\n" +
+                " COUNT(hospitalNumber) AS lGreaterConfDenominator,\n" +
+                " COUNT(hospitalNumber) - COUNT(lGreaterConf) AS lGreaterConfVariance,\n" +
+                " ROUND((CAST(COUNT(lGreaterConf) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS lGreaterConfPerformance,\n" +
+                " COUNT(ArtGreaterTrans) AS artGreaterTransNumerator,\n" +
+                " COUNT(hiv_status) AS ArtGreaterTransDenominator,\n" +
+                " COUNT(hiv_status) - COUNT(ArtGreaterTrans) AS ArtGreaterTransVariance,\n" +
+                " ROUND((CAST(COUNT(ArtGreaterTrans) AS DECIMAL) / COUNT(hiv_status)) * 100, 2) AS ArtGreaterTransPerformance,\n" +
+                " COUNT(lstPickGreaterDOb) AS lstPickGreaterDObNumerator,\n" +
+                " COUNT(hospitalNumber) AS lstPickGreaterDObDenominator,\n" +
+                " COUNT(hospitalNumber) - COUNT(lstPickGreaterDOb) AS lstPickGreaterDObVariance,\n" +
+                " ROUND((CAST(COUNT(lstPickGreaterDOb) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS lstPickGreaterDObPerformance,\n" +
+                " COUNT(DrugPickHigherThanTrans) AS lDrugPickHighNumerator,\n" +
+                " COUNT(hospitalNumber) AS lDrugPickHighDenominator,\n" +
+                " COUNT(hospitalNumber) - COUNT(DrugPickHigherThanTrans) AS lDrugPickHighVariance,\n" +
+                " ROUND((CAST(COUNT(DrugPickHigherThanTrans) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS lDrugPickHighPerformance,\n" +
+                " COUNT(DrugPickLessToday) AS lDrugPickHighTodayNumerator,\n" +
+                " COUNT(hospitalNumber) AS lDrugPickHighTodayDenominator,\n" +
+                " COUNT(hospitalNumber) - COUNT(DrugPickLessToday) AS lDrugPickHighTodayVariance,\n" +
+                " ROUND((CAST(COUNT(DrugPickLessToday) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS lDrugPickHighTodayPerformance,\n" +
+                " COUNT(clinicPickLessToday) AS clinicPickLessTodayNumerator,\n" +
+                " COUNT(hospitalNumber) AS clinicPickLessTodayDenominator,\n" +
+                " COUNT(hospitalNumber) - COUNT(clinicPickLessToday) AS clinicPickLessTodayVariance,\n" +
+                " ROUND((CAST(COUNT(clinicPickLessToday) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS clinicPickLessTodayPerformance,\n" +
+                " COUNT(artDateLessToday) AS artDateLessTodayNumerator,\n" +
+                " COUNT(hospitalNumber) AS artDateLessTodayDenominator,\n" +
+                " COUNT(hospitalNumber) - COUNT(artDateLessToday) AS artDateLessTodayVariance,\n" +
+                " ROUND((CAST(COUNT(artDateLessToday) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS artDateLessTodayPerformance,\n" +
+                " COUNT(vlSample) AS vlNumerator,\n" +
+                " COUNT(hospitalNumber) AS vlDenominator,\n" +
+                " COUNT(hospitalNumber) -  COUNT(vlSample) AS vlVariance,\n" +
+                " ROUND((CAST(COUNT(vlSample) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS vlPerformance\n" +
+                " FROM\n" +
+                "  dataConsistence";
+
+
+        public static final String PHARMACY_SUMMARY_QUERIES = "With pharmacySummary AS (\n" +
+                "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex\n" +
+                ",p.date_of_birth AS dateOfBirth, pharm.refill_period as refillMonth, pharm.visit_date AS visit_date, pharm.extra AS regimen\n" +
+                "  FROM patient_person p \n" +
+                "  INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+                "  LEFT JOIN\n" +
+                "  (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date, hac.pregnancy_status  FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+                "  GROUP BY hac.person_uuid, hac.visit_date, hac.pregnancy_status)ca ON p.uuid = ca.person_uuid\n" +
+                "  LEFT JOIN\n" +
+                "  (SELECT DISTINCT ON (person_uuid)\n" +
+                "    person_uuid, visit_date, refill_period, extra\n" +
+                "FROM ( select person_uuid, refill_period, MAX(visit_date) AS visit_date, extra from hiv_art_pharmacy\n" +
+                "where archived = 0\n" +
+                "GROUP BY refill_period, person_uuid, extra ORDER BY person_uuid DESC ) fi ORDER BY\n" +
+                "    person_uuid DESC ) pharm ON pharm.person_uuid = p.uuid\n" +
+                "  LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
+                "  WHERE p.archived=0 AND p.facility_id= ?1\n" +
+                "  GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ca.visit_date, pharm.refill_period, p.facility_id, pharm.visit_date, pharm.extra\n" +
+                "  ORDER BY p.id DESC )\n" +
+                "SELECT\n" +
+                "    COUNT(refillMonth) AS refillNumerator,\n" +
+                "    COUNT(hospitalNumber) AS refillDenominator,\n" +
+                "\tCOUNT(hospitalNumber) - COUNT(refillMonth) AS refillVariance,\n" +
+                "    ROUND((CAST(COUNT(refillMonth) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS refillPerformance,\n" +
+                "    COUNT(regimen) AS regimenNumerator,\n" +
+                "    COUNT(hospitalNumber) AS regimenDenominator,\n" +
+                "\tCOUNT(hospitalNumber) - COUNT(regimen) AS regimenVariance,\n" +
+                "    ROUND((CAST(COUNT(regimen) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS regimenPerformance\n" +
+                "FROM pharmacySummary";
+
+
+        public static final String LABORATORY_SUMMARY_QUERIES = "WITH vlSummary AS ( \n" +
+                "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex,\n" +
+                "CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) AS age,\n" +
+                "         p.date_of_birth AS dateOfBirth, vl.dateSampleCollected, vl.lastViralLoad, vl.dateOfLastViralLoad, pharm.visit_date,\n" +
+                " (CASE WHEN pharm.visit_date >= NOW() - INTERVAL '1 YEAR' AND pharm.visit_date <= NOW() THEN 1 ELSE null END) AS eligibleVl1year,\n" +
+                "(CASE WHEN vl.dateOfLastViralLoad >= NOW() - INTERVAL '1 YEAR' AND vl.dateOfLastViralLoad <= NOW() THEN 1 ELSE null END) AS hadvl1year,\n" +
+                "(CASE WHEN vl.dateOfLastViralLoad IS NOT NULL AND vl.dateSampleCollected IS NOT NULL THEN 1 ELSE NULL END) AS hadvlAndSampleDate,\n" +
+                "(CASE WHEN vl.dateOfLastViralLoad IS NOT NULL AND vl.pcrDate IS NOT NULL THEN 1 ELSE NULL END) AS hadvlAndpcrDate,\n" +
+                "(CASE WHEN vl.viralLoadType IS NOT NULL AND vl.dateSampleCollected IS NOT NULL THEN 1 ELSE NULL END) AS hadVlIndicator,\n" +
+                "(CASE WHEN vl.dateOfLastViralLoad > vl.dateSampleCollected THEN 1 ELSE NULL END) AS vlDateGsDate,\n" +
+                "(CASE WHEN cd4.cd4date >= NOW() - INTERVAL '1 YEAR' AND cd4.cd4date <= NOW() THEN 1 ELSE null END) AS hadcd4vl1year\n" +
+                "\n" +
+                "\n" +
+                "        FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+                "        LEFT JOIN\n" +
+                "        (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+                "        GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
+                "LEFT JOIN (\n" +
+                "SELECT DISTINCT ON(lo.patient_uuid) lo.patient_uuid as person_uuid, ll.lab_test_name as test,\n" +
+                "bac_viral_load.display AS viralLoadType, ls.date_sample_collected as dateSampleCollected,\n" +
+                "-- CASE WHEN lr.result_reported ~ E'^\\\\\\\\d+(\\\\\\\\.\\\\\\\\d+)?$' THEN CAST(lr.result_reported AS DECIMAL)\n" +
+                "--            ELSE NULL END AS lastViralLoad, \n" +
+                "lr.result_reported AS lastViralLoad,\n" +
+                "lr.date_sample_received_at_pcr_lab AS pcrDate,\n" +
+                "lr.date_result_reported as dateOfLastViralLoad\n" +
+                "FROM laboratory_order lo\n" +
+                "LEFT JOIN ( SELECT patient_uuid, MAX(order_date) AS MAXDATE FROM laboratory_order lo\n" +
+                "GROUP BY patient_uuid ORDER BY MAXDATE ASC ) AS current_lo\n" +
+                "ON current_lo.patient_uuid=lo.patient_uuid AND current_lo.MAXDATE=lo.order_date\n" +
+                "LEFT JOIN laboratory_test lt ON lt.lab_order_id=lo.id AND lt.patient_uuid = lo.patient_uuid\n" +
+                "LEFT JOIN base_application_codeset bac_viral_load ON bac_viral_load.id=lt.viral_load_indication\n" +
+                "LEFT JOIN laboratory_labtest ll ON ll.id=lt.lab_test_id\n" +
+                "INNER JOIN hiv_enrollment h ON h.person_uuid=current_lo.patient_uuid\n" +
+                "LEFT JOIN laboratory_sample ls ON ls.test_id=lt.id AND ls.patient_uuid = lo.patient_uuid\n" +
+                "LEFT JOIN laboratory_result lr ON lr.test_id=lt.id AND lr.patient_uuid = lo.patient_uuid\n" +
+                "WHERE  lo.archived=0\n" +
+                ") vl ON e.person_uuid = vl.person_uuid\n" +
+                "LEFT JOIN(\n" +
+                "select DISTINCT ON (patient_uuid) patient_uuid, MAX(date_sample_collected) AS cd4date \n" +
+                "from laboratory_sample\n" +
+                "WHERE test_id = 1\n" +
+                "GROUP BY patient_uuid, date_sample_collected ORDER BY patient_uuid, date_sample_collected DESC )\n" +
+                "cd4 ON e.person_uuid = cd4.patient_uuid\n" +
+                "LEFT JOIN\n" +
+                "  (SELECT DISTINCT ON (person_uuid)\n" +
+                "    person_uuid, visit_date, refill_period\n" +
+                "FROM ( select person_uuid, refill_period, MAX(visit_date) AS visit_date from hiv_art_pharmacy\n" +
+                "  where archived !=1\n" +
+                "GROUP BY refill_period, person_uuid ORDER BY person_uuid DESC ) fi ORDER BY\n" +
+                "    person_uuid DESC ) pharm ON e.person_uuid = pharm.person_uuid\n" +
+                "        WHERE p.archived=0 AND p.facility_id= ?1 \n" +
+                "        GROUP BY e.id, ca.commenced, p.id, p.hospital_number, p.date_of_birth, vl.dateSampleCollected, \n" +
+                "vl.lastViralLoad, vl.dateOfLastViralLoad, pharm.visit_date, vl.pcrDate, vl.viralLoadType, cd4.cd4date\n" +
+                "        ORDER BY p.id DESC )\n" +
+                "SELECT \n" +
+                "  COUNT(hadvl1year) AS eligibleVlNumerator,\n" +
+                "  COUNT(eligibleVl1year) AS eligibleVlDenominator,\n" +
+                "  COUNT(eligibleVl1year) - COUNT(hadvl1year) AS eligibleVlVariance,\n" +
+                "  ROUND((CAST(COUNT(hadvl1year) AS DECIMAL) / COUNT(eligibleVl1year)) * 100, 2) AS eligibleVlPerformance,\n" +
+                "  COUNT(hadvlAndSampleDate) AS hadVlNumerator,\n" +
+                "  COUNT(dateOfLastViralLoad) AS hadVlDenominator,\n" +
+                "  COUNT(dateOfLastViralLoad) - COUNT(hadvlAndSampleDate) AS hadVlVariance,\n" +
+                "  ROUND((CAST(COUNT(hadvlAndSampleDate) AS DECIMAL) / COUNT(dateOfLastViralLoad)) * 100, 2) AS hadVlPerformance,\n" +
+                "  COUNT(hadvlAndpcrDate) AS hadPcrDateNumerator,\n" +
+                "  COUNT(dateSampleCollected) AS hadPcrDateDenominator,\n" +
+                "  COUNT(dateSampleCollected) - COUNT(hadvlAndpcrDate) AS hadPcrDateVariance,\n" +
+                "  ROUND((CAST(COUNT(hadvlAndpcrDate) AS DECIMAL) / COUNT(dateSampleCollected)) * 100, 2) AS hadPcrDatePerformance,\n" +
+                "  COUNT(hadVlIndicator) AS  hadIndicatorNumerator,\n" +
+                "  COUNT(dateSampleCollected) AS  hadIndicatorDenominator,\n" +
+                "  COUNT(dateSampleCollected) - COUNT(hadVlIndicator) AS hadIndicatorVariance,\n" +
+                "  ROUND((CAST(COUNT(hadVlIndicator) AS DECIMAL) / COUNT(dateSampleCollected)) * 100, 2) AS hadIndicatorPerformance,\n" +
+                "  COUNT(vlDateGsDate) AS vlDateGsDateNumerator,\n" +
+                "  COUNT(dateOfLastViralLoad) AS vlDateGsDateDenominator,\n" +
+                "  COUNT(dateOfLastViralLoad) - COUNT(vlDateGsDate) AS vlDateGsDateVariance,\n" +
+                "  ROUND((CAST(COUNT(vlDateGsDate) AS DECIMAL) / COUNT(dateOfLastViralLoad)) * 100, 2) AS vlDateGsDatePerformance,\n" +
+                "  COUNT(hadcd4vl1year) AS treatmentCd4Numerator,\n" +
+                "  COUNT(eligibleVl1year) AS treatmentCd4Denominator,\n" +
+                "  COUNT(eligibleVl1year) - COUNT(hadcd4vl1year) AS treatmentCd4Variance,\n" +
+                "  ROUND((CAST(COUNT(hadcd4vl1year) AS DECIMAL) / COUNT(eligibleVl1year)) * 100, 2) AS treatmentCd4Performance,\n" +
+                "  COUNT(hadcd4vl1year) AS cd4WithinYearNumerator,\n" +
+                "  COUNT(eligibleVl1year) AS cd4WithinYearDenominator,\n" +
+                "  COUNT(eligibleVl1year) - COUNT(hadcd4vl1year) AS cd4WithinYearVariance,\n" +
+                "  ROUND((CAST(COUNT(hadcd4vl1year) AS DECIMAL) / COUNT(eligibleVl1year)) * 100, 2) AS cd4WithinYearPerformance\n" +
+                "  FROM \n" +
+                "vlSummary";
+
+        public static final String EAC_SUMMARY_QUERIES = "WITH eacSummary AS (\n" +
+                "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex, \n" +
+                "p.date_of_birth AS dateOfBirth, e.date_started,e.person_uuid,\n" +
+                "(CASE WHEN e.date_started >= NOW() - INTERVAL '1 YEAR' AND e.date_started <= NOW() THEN 1 ELSE null END) AS hadVl1year,\n" +
+                "(CASE WHEN ((pharm.visit_date  >= NOW() - INTERVAL '6 MONTH' AND pharm.visit_date <= NOW()) AND CAST(vl.clastViralLoad AS NUMERIC) > 1000) THEN 1 ELSE null END) AS sixmVl,\n" +
+                "(CASE WHEN ((pharm.visit_date  >= NOW() - INTERVAL '6 MONTH' AND pharm.visit_date <= NOW()) AND eac.eac_commenced IS NOT NULL AND CAST(vl.clastViralLoad AS NUMERIC) > 1000) THEN 1 ELSE null END) AS hadeac,\n" +
+                "pharm.visit_date,\n" +
+                "vl.dateSampleCollected,\n" +
+                "eac1.status , eac1.last_viral_load, eac1.date_of_last_viral_load, eac1.visit_date AS eac_completion,\n" +
+                "(CASE WHEN eac1.status is NOT NULL AND vl.dateSampleCollected IS NOT NULL THEN 1 ELSE NULL END) AS compleacdate,\n" +
+                "(CASE WHEN eac1.status is NOT NULL AND eac1.visit_date IS NOT NULL THEN 1 ELSE NULL END) AS cmpleac,\n" +
+                "(CASE WHEN eac1.status is NOT NULL AND eac1.visit_date IS NOT NULL AND eac1.date_of_last_viral_load IS NOT NULL THEN 1 ELSE NULL END) AS postEac\n" +
+                "  FROM patient_person p \n" +
+                "  INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+                "LEFT JOIN\n" +
+                "  (SELECT DISTINCT ON (person_uuid)\n" +
+                "    person_uuid, visit_date, refill_period\n" +
+                "FROM ( select person_uuid, refill_period, MAX(visit_date) AS visit_date from hiv_art_pharmacy\n" +
+                "  where archived !=1\n" +
+                "GROUP BY refill_period, person_uuid ORDER BY person_uuid DESC ) fi ORDER BY\n" +
+                "    person_uuid DESC ) pharm ON e.person_uuid = pharm.person_uuid\n" +
+                "  LEFT JOIN\n" +
+                "  (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date, hac.pregnancy_status  FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+                "  GROUP BY hac.person_uuid, hac.visit_date, hac.pregnancy_status) ca ON p.uuid = ca.person_uuid\n" +
+                "LEFT JOIN (\n" +
+                "SELECT DISTINCT ON(lo.patient_uuid) lo.patient_uuid as person_uuid, ll.lab_test_name as test,\n" +
+                "bac_viral_load.display AS viralLoadType, ls.date_sample_collected as dateSampleCollected,\n" +
+                "CASE WHEN lr.result_reported ~ E'^\\\\\\\\d+(\\\\\\\\.\\\\\\\\d+)?$' THEN CAST(lr.result_reported AS DECIMAL)\n" +
+                "           ELSE NULL END AS clastViralLoad, \n" +
+                "lr.result_reported AS lastViralLoad,\n" +
+                "lr.date_sample_received_at_pcr_lab AS pcrDate,\n" +
+                "lr.date_result_reported as dateOfLastViralLoad\n" +
+                "FROM laboratory_order lo\n" +
+                "LEFT JOIN ( SELECT patient_uuid, MAX(order_date) AS MAXDATE FROM laboratory_order lo\n" +
+                "GROUP BY patient_uuid ORDER BY MAXDATE ASC ) AS current_lo\n" +
+                "ON current_lo.patient_uuid=lo.patient_uuid AND current_lo.MAXDATE=lo.order_date\n" +
+                "LEFT JOIN laboratory_test lt ON lt.lab_order_id=lo.id AND lt.patient_uuid = lo.patient_uuid\n" +
+                "LEFT JOIN base_application_codeset bac_viral_load ON bac_viral_load.id=lt.viral_load_indication\n" +
+                "LEFT JOIN laboratory_labtest ll ON ll.id=lt.lab_test_id\n" +
+                "INNER JOIN hiv_enrollment h ON h.person_uuid=current_lo.patient_uuid\n" +
+                "LEFT JOIN laboratory_sample ls ON ls.test_id=lt.id AND ls.patient_uuid = lo.patient_uuid\n" +
+                "LEFT JOIN laboratory_result lr ON lr.test_id=lt.id AND lr.patient_uuid = lo.patient_uuid\n" +
+                "WHERE  lo.archived=0 ) vl ON  e.person_uuid = vl.person_uuid\n" +
+                "LEFT JOIN\n" +
+                "(\n" +
+                "select DISTINCT ON (ha.person_uuid) ha.person_uuid, ha.status,   ha.last_viral_load, ha.date_of_last_viral_load, MAX(has.eac_session_date) as visit_date from hiv_eac ha\n" +
+                "LEFT JOIN hiv_eac_session has ON ha.visit_id = has.visit_id AND ha.person_uuid = has.person_uuid\n" +
+                "WHERE ha.status = 'COMPLETED'\n" +
+                "GROUP BY ha.person_uuid,  ha.status, ha.last_viral_load, ha.date_of_last_viral_load, has.eac_session_date\n" +
+                "ORDER BY ha.person_uuid, has.eac_session_date\n" +
+                ") eac1 ON e.person_uuid = eac1.person_uuid\n" +
+                "LEFT JOIN \n" +
+                "( select DISTINCT ON (person_uuid) person_uuid, MIN(eac_session_date) AS eac_commenced from hiv_eac_session\n" +
+                " GROUP BY person_uuid, eac_session_date ORDER BY  person_uuid, eac_session_date ASC ) eac ON e.person_uuid = eac.person_uuid \n" +
+                "  LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
+                "  LEFT JOIN hiv_eac ha ON e.person_uuid = ha.person_uuid\n" +
+                "  WHERE p.archived=0 AND p.facility_id= ?1 \n" +
+                "  GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ca.visit_date, p.facility_id, \n" +
+                "  pharm.visit_date, ha.status, vl.clastViralLoad, eac.eac_commenced, vl.dateSampleCollected,\n" +
+                "  eac1.status, eac1.last_viral_load, eac1.date_of_last_viral_load, eac1.visit_date\n" +
+                "  ORDER BY p.id DESC )\n" +
+                "  SELECT \n" +
+                "  COUNT(hadeac) AS eacCommencedNumerator,\n" +
+                "  COUNT(sixmVl) AS eacCommencedDenominator,\n" +
+                "  COUNT(sixmVl) - COUNT(hadeac) AS eacCommencedVariance,\n" +
+                "  ROUND((CAST(COUNT(hadeac) AS DECIMAL) / COUNT(sixmVl)) * 100, 2) AS eacCommencedPerformance,\n" +
+                "  COUNT(compleacdate) AS eacComDateNumerator,\n" +
+                "  COUNT(eac_completion) AS eacComDateDenominator,\n" +
+                "  COUNT(eac_completion) - COUNT(compleacdate) AS eacComDateVariance,\n" +
+                "  ROUND((CAST(COUNT(compleacdate) AS DECIMAL) / COUNT(eac_completion)) * 100, 2) AS eacComDatePerformance,\n" +
+                "  COUNT(postEac) AS postEacNumerator,\n" +
+                "  COUNT(cmpleac) AS postEacDenominator,\n" +
+                "  COUNT(cmpleac) - COUNT(postEac) AS postEacVariance,\n" +
+                "  ROUND((CAST(COUNT(postEac) AS DECIMAL) / COUNT(cmpleac)) * 100, 2) AS postEacPerformance\n" +
+                "  FROM\n" +
+                "  eacSummary";
+
+
+        public static final String HTS_SUMMARY_QUERIES = "WITH htsSummary AS (\n" +
+                "SELECT person_uuid, client_code, date_visit, target_group, hts_client_uuid, hasindex, testing_setting, gender,date_of_birth, age, hiv_test_result, poscount, adultPos,\n" +
+                " (CASE WHEN adultPos =1 AND recency IS NOT NULL  THEN 1 ELSE NULL END) AS adPosRec,\n" +
+                " rita, order_date,\n" +
+                "(CASE WHEN rita ILIKE '%Recent%' ESCAPE ' ' THEN 1 ELSE NULL END) AS recentInfection,\n" +
+                "(CASE WHEN (rita ILIKE '%Recent%' ESCAPE ' '  AND order_date IS NOT NULL) THEN 1 ELSE NULL END) AS recentwitVL,\n" +
+                "(CASE WHEN (rita ILIKE '%Recent%' ESCAPE ' '  AND result_reported IS NOT NULL AND order_date IS NOT NULL) THEN 1 ELSE NULL END) AS recentwitVlResl,\n" +
+                "(CASE WHEN resultdate > order_date THEN 1 ELSE NULL END) AS rsGreaterThan, resultdate, recency, recencydate,\n" +
+                "(CASE WHEN (recencydate >= date_visit) AND recencydate IS NOT NULL AND date_visit IS NOT NULL THEN 1 ELSE NULL END) AS dateconfirm,\n" +
+                "(CASE WHEN testing_setting IS NOT NULL AND hasindex IS NOT NULL  THEN 1 ELSE NULL END) AS settings\n" +
+                "FROM \n" +
+                "(\n" +
+                "select DISTINCT ON (person_uuid) hc.person_uuid, hc.client_code, hc.date_visit,  hc.target_group,  hie.hts_client_uuid, (CASE WHEN hc.index_client = 'true' THEN 1 ELSE null END) hasIndex,\n" +
+                "hc.testing_setting,\n" +
+                "CAST((hc.extra->>'gender') AS VARCHAR(100)) AS gender, CAST((hc.extra->>'date_of_birth') AS DATE) AS date_of_birth, \n" +
+                "CAST(EXTRACT(YEAR FROM AGE(NOW(), CAST(hc.extra->>'date_of_birth' AS DATE))) AS INTEGER) AS age\n" +
+                ", hc.hiv_test_result,\n" +
+                "(CASE WHEN hc.hiv_test_result = 'Positive' THEN 1 ELSE null END) AS posCount,\n" +
+                "(CASE WHEN CAST(EXTRACT(YEAR FROM AGE(NOW(), CAST(hc.extra->>'date_of_birth' AS DATE))) AS INTEGER) > 15 THEN 1 ELSE null END) AS adultPos,\n" +
+                "recency->>'rencencyId' As recency,\n" +
+                "recency->>'rencencyInterpretation' AS RIta,CAST(lo.order_date AS DATE),\n" +
+                "lr.result_reported, CAST(lr.date_result_reported AS DATE) AS resultdate, (CASE   WHEN recency->>'optOutRTRITestDate' IS NOT NULL   AND recency->>'optOutRTRITestDate' <> '' \n" +
+                "  THEN CAST(recency->>'optOutRTRITestDate' AS DATE) \n" +
+                "  ELSE NULL \n" +
+                "END) AS recencydate\n" +
+                "from hts_client hc\n" +
+                "LEFT JOIN hts_index_elicitation hie on hc.uuid = hie.hts_client_uuid\n" +
+                "LEFT JOIN laboratory_order lo ON lo.patient_uuid = hc.person_uuid\n" +
+                "LEFT JOIN laboratory_result lr ON lr.patient_uuid = hc.person_uuid\n" +
+                "where hc.facility_id = ?1 ) pro\n" +
+                ")\n" +
+                "SELECT \n" +
+                "  COUNT(adPosRec) AS totalPosNumerator,\n" +
+                "  COUNT(adultpos) AS totalPosDenominator,\n" +
+                "  COUNT(adultpos) - COUNT(adPosRec) AS totalPosVariance,\n" +
+                "--   ROUND((CAST(COUNT(prep_offered) AS DECIMAL) / COUNT(person_uuid)) * 100, 2) AS pOfferredPerformance,\n" +
+                "  COUNT(recentwitVL) AS withVLNumerator,\n" +
+                "  COUNT(recentInfection) AS withVLDenominator,\n" +
+                "  COUNT(recentInfection) - COUNT(recentwitVL) AS withVLVariance, \n" +
+                "  ROUND((CAST(COUNT(recentwitVL) AS DECIMAL) / COUNT(recentInfection)) * 100, 2) AS withVLPerformance,\n" +
+                "  COUNT(recentwitVlResl) AS withVlResNumerator,\n" +
+                "  COUNT(recentwitVL) AS withVlResDenominator,\n" +
+                "  COUNT(recentwitVL) - COUNT(recentwitVlResl) AS withVlResVariance,\n" +
+                "  ROUND((CAST(COUNT(recentwitVlResl) AS DECIMAL) / COUNT(recentwitVL)) * 100, 2) AS withVlResPerformance,\n" +
+                "  COUNT(rsGreaterThan) AS rsGreaterNumerator,\n" +
+                "  COUNT(resultdate) AS rsGreaterDenominator,\n" +
+                "  COUNT(resultdate) - COUNT(rsGreaterThan) AS rsGreaterVariance,\n" +
+                "  ROUND((CAST(COUNT(rsGreaterThan) AS DECIMAL) / COUNT(resultdate)) * 100, 2) AS rsGreaterPerformance,\n" +
+                "  COUNT(dateconfirm) AS recencyNumerator,\n" +
+                "  COUNT(recency) AS recencyDenominator,\n" +
+                "  COUNT(recency) - COUNT(dateconfirm) AS recencyVariance,\n" +
+                "  ROUND((CAST(COUNT(dateconfirm) AS DECIMAL) / COUNT(recency)) * 100, 2) AS recencyPerformance,\n" +
+                "  COUNT(hts_client_uuid) AS elicitedNumerator,\n" +
+                "  COUNT(hasindex) AS elicitedDenominator,\n" +
+                "  COUNT(hasindex) - COUNT(hts_client_uuid) AS elicitedVariance,\n" +
+                "  ROUND((CAST(COUNT(dateconfirm) AS DECIMAL) / COUNT(hasindex)) * 100, 2) AS elicitedPerformance,\n" +
+                "  COUNT(settings) AS settingsNumerator,\n" +
+                "  COUNT(hasindex) AS settingsDenominator,\n" +
+                "  COUNT(hasindex) - COUNT(settings) AS settingsVariance,\n" +
+                "  ROUND((CAST(COUNT(settings) AS DECIMAL) / COUNT(hasindex)) * 100, 2) AS settingsPerformance,\n" +
+                "  COUNT(target_group) AS targNumerator,\n" +
+                "  COUNT(person_uuid) AS targDenominator,\n" +
+                "  COUNT(person_uuid) - COUNT(target_group) AS targVariance,\n" +
+                "  ROUND((CAST(COUNT(target_group) AS DECIMAL) / COUNT(person_uuid)) * 100, 2) AS targPerformance\n" +
+                "  FROM\n" +
+                "  htsSummary";
+
+
+        public static final String PREP_SUMMARY_QUERIES = "WITH prepSummary AS (\n" +
+                "SELECT DISTINCT ON (person_uuid) hc.person_uuid, hc.client_code, hc.date_visit,  (CASE WHEN hc.prep_offered = true  THEN 1 ELSE null END) AS prep_offered, \n" +
+                "hc.prep_accepted, hc.prep_offered = hc.prep_accepted AS offAndAccpt,\n" +
+                " hc.hiv_test_result, pe.status, pe.unique_id, pe.date_enrolled, pe.date_started, \n" +
+                "(CASE WHEN pe.date_enrolled IS NULL  THEN pe.date_started ELSE pe.date_enrolled END) AS date_enrolled_prep,\n" +
+                "pc. urinalysis, CAST((pc. urinalysis->>'testDate') AS DATE) AS UrinalysisDate,\n" +
+                "(CASE WHEN CAST((pc. urinalysis->>'testDate') AS DATE) > (CASE WHEN pe.date_enrolled IS NULL  THEN pe.date_started ELSE pe.date_enrolled END)\n" +
+                " THEN 1 ELSE NULL END) AS urinaGreaterthanenrollDate,\n" +
+                "hc.date_visit AS status_date,\n" +
+                "(CASE WHEN CAST((pc. urinalysis->>'testDate') AS DATE) > hc.date_visit\n" +
+                " THEN 1 ELSE NULL END) AS urinaGreaterthanStatusDate,\n" +
+                "iscommenced.encounter_date,\n" +
+                "(CASE WHEN (CASE WHEN pe.date_enrolled IS NULL  THEN pe.date_started ELSE pe.date_enrolled END) < iscommenced.encounter_date\n" +
+                " THEN 1 ELSE NULL END) AS enrollDateLessThanCommenced\n" +
+                "FROM\n" +
+                "hts_client hc  LEFT JOIN prep_enrollment pe ON hc.person_uuid = pe.person_uuid\n" +
+                "LEFT JOIN prep_clinic pc ON hc.person_uuid = pc.person_uuid\n" +
+                "LEFT JOIN \n" +
+                "(\n" +
+                "select DISTINCT ON (person_uuid) pc.person_uuid, pc.is_commencement, pc.encounter_date from prep_enrollment pe JOIN prep_clinic pc on pe.uuid = pc.prep_enrollment_uuid\n" +
+                "where is_commencement = true\n" +
+                ") iscommenced ON pe.person_uuid = iscommenced.person_uuid\n" +
+                "where hc.hiv_test_result is not null AND hc.hiv_test_result = 'Negative' AND pe.facility_id = ?1\n" +
+                ")\n" +
+                "SELECT \n" +
+                "  COUNT(prep_offered) AS pOfferredNumerator,\n" +
+                "  COUNT(person_uuid) AS pOfferedDenominator,\n" +
+                "  COUNT(person_uuid) - COUNT(prep_offered) AS pOfferedVariance,\n" +
+                "  ROUND((CAST(COUNT(prep_offered) AS DECIMAL) / COUNT(person_uuid)) * 100, 2) AS pOfferredPerformance,\n" +
+                "  COUNT(prep_accepted) AS pAcceptedNumerator,\n" +
+                "  COUNT(prep_offered) AS pAcceptedDenominator,\n" +
+                "  COUNT(prep_offered) - COUNT(prep_accepted) AS pAcceptedVariance,\n" +
+                "  ROUND((CAST(COUNT(prep_offered) AS DECIMAL) / COUNT(prep_offered)) * 100, 2) AS pAcceptedPerformance,\n" +
+                "  COUNT(date_enrolled_prep) AS pEnrollNumerator,\n" +
+                "  COUNT(offAndAccpt) AS pEnrollDenominator,\n" +
+                "  COUNT(offAndAccpt) - COUNT(date_enrolled_prep) AS pEnrollVariance,\n" +
+                "  ROUND((CAST(COUNT(date_enrolled_prep) AS DECIMAL) / COUNT(offAndAccpt)) * 100, 2) AS pEnrollPerformance,\n" +
+                "  COUNT(urinalysis) AS pEnrolledPrepUrinaNumerator,\n" +
+                "  COUNT(date_enrolled_prep) AS pEnrolledPrepUrinaDenominator,\n" +
+                "  COUNT(date_enrolled_prep) - COUNT(urinalysis) AS pEnrolledPrepUrinaVariance,\n" +
+                "  ROUND((CAST(COUNT(urinalysis) AS DECIMAL) / COUNT(date_enrolled_prep)) * 100, 2) AS pEnrolledPrepUrinaPerformance,\n" +
+                "  COUNT(urinaGreaterthanenrollDate) AS pUrinaGreaterEnrollNumerator,\n" +
+                "  COUNT(urinalysis) AS pUrinaGreaterEnrollDenominator,\n" +
+                "  COUNT(urinalysis) - COUNT(urinaGreaterthanenrollDate) AS pUrinaGreaterEnrollVariance,\n" +
+                "  ROUND((CAST(COUNT(urinaGreaterthanenrollDate) AS DECIMAL) / COUNT(urinalysis)) * 100, 2) AS pUrinaGreaterEnrollPerformance,\n" +
+                "  COUNT(urinaGreaterthanStatusDate) AS pUrinaGreaterStatusDateNumerator,\n" +
+                "  COUNT(urinalysis) AS pUrinaGreaterStatusDateDenominator,\n" +
+                "  COUNT(urinalysis) - COUNT(urinaGreaterthanStatusDate) AS pUrinaGreaterStatusDateVariance,\n" +
+                "  ROUND((CAST(COUNT(urinaGreaterthanStatusDate) AS DECIMAL) / COUNT(urinalysis)) * 100, 2) AS pUrinaGreaterStatusDatePerformance,\n" +
+                "  COUNT(enrollDateLessThanCommenced) AS commencedNumerator,\n" +
+                "  COUNT(encounter_date) AS commencedDenominator,\n" +
+                "  COUNT(encounter_date) - COUNT(enrollDateLessThanCommenced) AS commencedVariance,\n" +
+                "  ROUND((CAST(COUNT(enrollDateLessThanCommenced) AS DECIMAL) / COUNT(encounter_date)) * 100, 2) AS commencedPerformance\n" +
+                "FROM\n" +
+                "prepSummary";
+
+
+    }
+
+    public  class ClinicalVariables {
+
+        public static final String CLINICAL_VARIABLE_SUMMARY_QUERIES = "WITH PatientClinic AS (\n" +
+                " SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex,p.date_of_birth AS dateOfBirth,\n" +
+                "pharm.refill_period as refillMonth, pharm.visit_date AS drug_visit_date, pharm.regimen, e.date_started as start_date,\n" +
+                "e.date_confirmed_hiv AS hiv_confirm_date, e.target_group_id as target_group, e.entry_point_id AS entryPoint,\n" +
+                "ca.visit_date as commence_date,  e.time_hiv_diagnosis as hivDiagnose, CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) AS age,\n" +
+                "preg.pregnancy_status as pregStatus, tri.body_weight as weight, tri.visit_date AS visit_date,\n" +
+                "CASE WHEN preg.pregnancy_status IS NOT NULL AND CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) > 12 AND INITCAP(p.sex) = 'Female' THEN 1 ELSE NULL END AS adultPre,\n" +
+                "CASE WHEN CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) > 12 AND INITCAP(p.sex) = 'Female' THEN 1 ELSE NULL END AS adultAge\n" +
+                "   FROM patient_person p\n" +
+                "   INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+                "   LEFT JOIN\n" +
+                "   (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date, hac.pregnancy_status  FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+                "   GROUP BY hac.person_uuid, hac.visit_date, hac.pregnancy_status)ca ON p.uuid = ca.person_uuid\n" +
+                "   LEFT JOIN\n" +
+                "   (SELECT DISTINCT ON (person_uuid)\n" +
+                "     person_uuid, visit_date, refill_period, regimen\n" +
+                " FROM ( select person_uuid, refill_period, MAX(visit_date) AS visit_date, extra->'regimens'->0->>'name' AS regimen from hiv_art_pharmacy\n" +
+                " GROUP BY refill_period, person_uuid, extra ORDER BY person_uuid DESC ) fi ORDER BY\n" +
+                "     person_uuid DESC ) pharm ON pharm.person_uuid = e.person_uuid\n" +
+                "LEFT JOIN\n" +
+                "  (SELECT DISTINCT ON (person_uuid)\n" +
+                "    person_uuid, visit_date, body_weight\n" +
+                "FROM ( SELECT ht.person_uuid, MAX(ht.visit_date) AS visit_date, tr.body_weight\n" +
+                "    FROM hiv_art_clinical ht JOIN triage_vital_sign tr ON ht.person_uuid = tr.person_uuid AND ht.vital_sign_uuid = tr.uuid\n" +
+                "    GROUP BY ht.person_uuid, tr.body_weight ORDER BY ht.person_uuid DESC ) fi ORDER BY\n" +
+                "    person_uuid DESC ) tri ON tri.person_uuid = e.person_uuid\n" +
+                "LEFT JOIN (\n" +
+                "select DISTINCT ON (h1.person_uuid) h1.person_uuid, MAX(h1.visit_date) AS visit_date,\n" +
+                "h1.pregnancy_status\n" +
+                "from hiv_art_clinical h1\n" +
+                "GROUP BY h1.person_uuid, h1.visit_date, h1.pregnancy_status\n" +
+                "ORDER BY h1.person_uuid, h1.visit_date DESC \n" +
+                ") preg ON e.person_uuid = preg.person_uuid \n" +
+                "   LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
+                "   WHERE p.archived=0 AND p.facility_id= ?1\n" +
+                "   GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ca.visit_date, \n" +
+                "pharm.refill_period, p.facility_id, pharm.visit_date, e.date_started, e.date_confirmed_hiv, e.target_group_id,\n" +
+                "e.time_hiv_diagnosis,preg.pregnancy_status, tri.body_weight, tri.visit_date, pharm.regimen\n" +
+                "   ORDER BY p.id DESC\n" +
+                ")\n" +
+                "      SELECT\n" +
+                "    COUNT(refillMonth) AS refillMonthNumerator,\n" +
+                "    COUNT(hospitalNumber) AS refillMonthDenominator,\n" +
+                "\tCOUNT(hospitalNumber) - COUNT(refillMonth) AS refillMonthVariance,\n" +
+                "    ROUND((CAST(COUNT(refillMonth) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS refillMonthPerformance,\n" +
+                "\tCOUNT(regimen) AS regimenNumerator,\n" +
+                "    COUNT(hospitalNumber) AS regimenDenominator,\n" +
+                "\tCOUNT(hospitalNumber) - COUNT(regimen) AS regimenVariance,\n" +
+                "    ROUND((CAST(COUNT(regimen) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS regimenPerformance,\n" +
+                "\tCOUNT(start_date) AS startDateNumerator,\n" +
+                "    COUNT(hospitalNumber) AS startDateDenominator,\n" +
+                "\tCOUNT(hospitalNumber) - COUNT(start_date) AS startDateVariance,\n" +
+                "    ROUND((CAST(COUNT(start_date) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS startDatePerformance,\n" +
+                "\tCOUNT(hiv_confirm_date) AS confirmDateNumerator,\n" +
+                "    COUNT(hospitalNumber) AS confirmDateDenominator,\n" +
+                "\tCOUNT(hospitalNumber) - COUNT(hiv_confirm_date) AS confirmDateVariance,\n" +
+                "    ROUND((CAST(COUNT(hiv_confirm_date) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS confirmDatePerformance,\n" +
+                "\tCOUNT(target_group) AS targNumerator,\n" +
+                "    COUNT(hospitalNumber) AS targDenominator,\n" +
+                "\tCOUNT(hospitalNumber) - COUNT(target_group) AS targVariance, \n" +
+                "    ROUND((CAST(COUNT(target_group) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS targPerformance,\n" +
+                "\tCOUNT(entryPoint) AS entryNumerator,\n" +
+                "    COUNT(hospitalNumber) AS entryDenominator,\n" +
+                "\tCOUNT(hospitalNumber) - COUNT(entryPoint) AS entryVariance,\n" +
+                "    ROUND((CAST(COUNT(entryPoint) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS entryPerformance,\n" +
+                "\tCOUNT(commence_date) AS commencedNumerator,\n" +
+                "    COUNT(hospitalNumber) AS commencedDenominator,\n" +
+                "   COUNT(hospitalNumber) - COUNT(commence_date) AS commencedVariance, " +
+                "    ROUND((CAST(COUNT(commence_date) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS commencedPerformance,\n" +
+                "\tCOUNT(start_date) AS enrolledDateNumerator,\n" +
+                "    COUNT(hospitalNumber) AS enrolledDateDenominator,\n" +
+                "\tCOUNT(hospitalNumber) - COUNT(start_date) AS enrolledDateVariance,\n" +
+                "    ROUND((CAST(COUNT(start_date) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS enrolledDatePerformance,\n" +
+                "\tCOUNT(hivDiagnose) AS diagnoseNumerator,\n" +
+                "    COUNT(hospitalNumber) AS diagnoseDenominator,\n" +
+                "\tCOUNT(hospitalNumber) - COUNT(hivDiagnose) AS diagnoseVariance,\n" +
+                "    ROUND((CAST(COUNT(hivDiagnose) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS diagnosePerformance,\n" +
+                "\tCOUNT(adultPre) AS pregNumerator,\n" +
+                "    COUNT(adultAge) AS pregDenominator,\n" +
+                "\tCOUNT(adultAge) - COUNT(adultPre) AS pregVariance,\n" +
+                "    ROUND((CAST(COUNT(adultPre) AS DECIMAL) / COUNT(adultAge)) * 100, 2) AS pregPerformance,\n" +
+                "\tCOUNT(weight) AS weightNumerator,\n" +
+                "    COUNT(hospitalNumber) AS weightDenominator,\n" +
+                "\tCOUNT(hospitalNumber) - COUNT(weight) AS weightVariance,\n" +
+                "    ROUND((CAST(COUNT(weight) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS weightPerformance,\n" +
+                "\tCOUNT(visit_date) AS lastVisitNumerator,\n" +
+                "    COUNT(hospitalNumber) AS lastVisitDenominator,\n" +
+                "\tCOUNT(hospitalNumber) - COUNT(visit_date) AS lastVisitVariance,\n" +
+                "    ROUND((CAST(COUNT(visit_date) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS lastVisitPerformance,\n" +
+                "\tCOUNT(age) AS ageNumerator,\n" +
+                "    COUNT(hospitalNumber) AS ageDenominator,\n" +
+                "\tCOUNT(hospitalNumber) - COUNT(age) AS ageVariance,\n" +
+                "    ROUND((CAST(COUNT(age) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS agePerformance,\n" +
+                "\tCOUNT(drug_visit_date) AS lastPickNumerator,\n" +
+                "    COUNT(hospitalNumber) AS lastPickDenominator,\n" +
+                "\tCOUNT(hospitalNumber) - COUNT(drug_visit_date) AS lastPickVariance,\n" +
+                "    ROUND((CAST(COUNT(drug_visit_date) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS lastPickPerformance\n" +
+                "   \tFROM\n" +
+                "   \tPatientClinic";
+    }
+
+    public class PatientDemographyQueries {
+        public static final String DEMOGRAPHIC_SUMMARY_QUERY = "WITH PatientSummary AS (\n" +
+                "SELECT e.unique_id AS patientId, p.hospital_number AS hospitalNumber,\n" +
+                "    INITCAP(p.sex) AS sex, CAST(EXTRACT(YEAR FROM AGE(NOW(), date_of_birth)) AS INTEGER) AS age,\n" +
+                "    p.date_of_birth AS dateOfBirth, p.marital_status, p.education,p.employment_status As employment,\n" +
+                "p.address    FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+                "LEFT JOIN ( SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac\n" +
+                "        WHERE hac.archived = 0 AND hac.is_commencement IS TRUE \n" +
+                "        GROUP BY hac.person_uuid ) ca ON p.uuid = ca.person_uuid\n" +
+                "LEFT JOIN base_application_codeset pc ON pc.id = e.status_at_registration_id\n" +
+                "WHERE p.archived = 0 AND p.facility_id = ?1\n" +
+                "GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth\n" +
+                "ORDER BY p.id DESC\n" +
+                ")\n" +
+                "SELECT\n" +
+                "COUNT(age) AS ageNumerator,\n" +
+                "COUNT(hospitalNumber) AS ageDenominator,\n" +
+                "COUNT(hospitalNumber) - COUNT(age) AS ageVariance,\n" +
+                "ROUND((CAST(COUNT(age) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS agePerformance,\n" +
+                "COUNT(sex) AS sexNumerator,\n" +
+                "COUNT(hospitalNumber) AS sexDenominator,\n" +
+                "COUNT(hospitalNumber) - COUNT(sex) AS sexVariance,\n" +
+                "ROUND((CAST(COUNT(sex) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS sexPerformance,\n" +
+                "COUNT(dateOfBirth) AS dobNumerator,\n" +
+                "COUNT(hospitalNumber) AS dobDenominator,\n" +
+                "COUNT(hospitalNumber) - COUNT(dateOfBirth) AS dobVariance,\n" +
+                "ROUND((CAST(COUNT(dateOfBirth) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS dobPerformance,\n" +
+                "COUNT(marital_status) AS maritalNumerator,\n" +
+                "COUNT(hospitalNumber) AS maritalDenominator,\n" +
+                "COUNT(hospitalNumber) - COUNT(marital_status) AS maritalVariance,\n" +
+                "ROUND((CAST(COUNT(marital_status) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS maritalPerformance,\n" +
+                "COUNT(education) AS eduNumerator,\n" +
+                "COUNT(hospitalNumber) AS eduDenominator,\n" +
+                "COUNT(hospitalNumber) - COUNT(education) AS eduVariance,\n" +
+                "ROUND((CAST(COUNT(education) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS eduPerformance,\n" +
+                "COUNT(employment) AS employNumerator,\n" +
+                "COUNT(hospitalNumber) AS employDenominator,\n" +
+                "COUNT(hospitalNumber) - COUNT(employment) AS employVariance,\n" +
+                "ROUND((CAST(COUNT(employment) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS employPerformance,\n" +
+                "COUNT(address) AS addressNumerator,\n" +
+                "COUNT(hospitalNumber) AS addressDenominator,\n" +
+                "COUNT(hospitalNumber) - COUNT(address) AS addressVariance, \n" +
+                "ROUND((CAST(COUNT(address) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS addressPerformance,\n" +
+                "COUNT(patientId) AS pIdNumerator,\n" +
+                "COUNT(hospitalNumber) AS pIdDenominator,\n" +
+                "COUNT(hospitalNumber) - COUNT(patientId) AS pIdVariance,\n" +
+                "ROUND((CAST(COUNT(patientId) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS pIdPerformance\n" +
+                "\n" +
+                "FROM\n" +
+                "PatientSummary";
+
+    }
 
     public class BiometricQUeries {
 

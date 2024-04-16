@@ -244,7 +244,7 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{prep[0]?.pofferredNumerator}</td>
                                 <td>{prep[0]?.pofferedDenominator}</td>
-                                <td> </td>
+                                <td>{prep[0]?.pofferedVariance} </td>
                                 <td style={{ backgroundColor: prep[0]?.pofferredPerformance >= 95 ? 'green' : prep[0]?.pofferredPerformance >= 90 ? 'yellow' : 'red', color: prep[0]?.pofferredPerformance >= 95 ? 'white' : prep[0]?.pofferredPerformance >= 90 ? 'black' : 'white',
                     textAlign: 'center', fontWeight: 'bold' }}>{prep[0]?.pofferredPerformance} %</td>
                                 <td>
@@ -264,7 +264,7 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{prep[0]?.pofferredNumerator}</td>
                                 <td>{prep[0]?.pacceptedDenominator}</td>
-                                <td> </td>
+                                <td>{prep[0]?.pacceptedVariance} </td>
                                 <td style={{ backgroundColor: prep[0]?.pacceptedPerformance >= 95 ? 'green' : prep[0]?.pacceptedPerformance >= 90 ? 'yellow' : 'red', color: prep[0]?.pacceptedPerformance >= 95 ? 'white' : prep[0]?.pacceptedPerformance >= 90 ? 'black' : 'white',
                                 textAlign: 'center', fontWeight: 'bold' }}>{prep[0]?.pacceptedPerformance} %</td>
                                 <td>
@@ -284,7 +284,7 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{prep[0]?.penrollNumerator}</td>
                                 <td>{prep[0]?.penrollDenominator}</td>
-                                <td> </td>
+                                <td>{prep[0]?.penrollVariance} </td>
                                 <td style={{ backgroundColor: prep[0]?.penrollPerformance >= 95 ? 'green' : prep[0]?.penrollPerformance >= 90 ? 'yellow' : 'red', color: prep[0]?.penrollPerformance >= 95 ? 'white' : prep[0]?.penrollPerformance >= 90 ? 'black' : 'white',
                                 textAlign: 'center', fontWeight: 'bold' }}>{prep[0]?.penrollPerformance} %</td>
                                 <td>
@@ -304,7 +304,7 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{prep[0]?.penrolledPrepUrinaNumerator}</td>
                                 <td>{prep[0]?.penrolledPrepUrinaDenominator}</td>
-                                <td> </td>
+                                <td>{prep[0]?.penrolledPrepUrinaVariance} </td>
                                 <td style={{ backgroundColor: prep[0]?.penrolledPrepUrinaPerformance >= 95 ? 'green' : prep[0]?.penrolledPrepUrinaPerformance >= 90 ? 'yellow' : 'red', color: prep[0]?.penrolledPrepUrinaPerformance >= 95 ? 'white' : prep[0]?.penrolledPrepUrinaPerformance >= 90 ? 'black' : 'white',
                                 textAlign: 'center', fontWeight: 'bold' }}>{prep[0]?.penrolledPrepUrinaPerformance} %</td>
                                 <td>
@@ -324,7 +324,7 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{prep[0]?.purinaGreaterEnrollNumerator}</td>
                                 <td>{prep[0]?.purinaGreaterEnrollDenominator}</td>
-                                <td> </td>
+                                <td>{prep[0]?.purinaGreaterEnrollVariance} </td>
                                 <td style={{ backgroundColor: prep[0]?.purinaGreaterEnrollPerformance >= 95 ? 'green' : prep[0]?.purinaGreaterEnrollPerformance >= 90 ? 'yellow' : 'red', color: prep[0]?.purinaGreaterEnrollPerformance >= 95 ? 'white' : prep[0]?.purinaGreaterEnrollPerformance >= 90 ? 'black' : 'white',
                                 textAlign: 'center', fontWeight: 'bold' }}>{prep[0]?.purinaGreaterEnrollPerformance} %</td>
                                 <td>
@@ -344,7 +344,7 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{prep[0]?.purinaGreaterStatusDateNumerator}</td>
                                 <td>{prep[0]?.purinaGreaterStatusDateDenominator}</td>
-                                <td> </td>
+                                <td>{prep[0]?.purinaGreaterStatusDateVariance} </td>
                                 <td style={{ backgroundColor: prep[0]?.purinaGreaterStatusDatePerformance >= 95 ? 'green' : prep[0]?.purinaGreaterStatusDatePerformance >= 90 ? 'yellow' : 'red', color: prep[0]?.purinaGreaterStatusDatePerformance >= 95 ? 'white' : prep[0]?.purinaGreaterStatusDatePerformance >= 90 ? 'black' : 'white',
                                 textAlign: 'center', fontWeight: 'bold' }}>{prep[0]?.purinaGreaterStatusDatePerformance} %</td>
                                 <td>
@@ -364,7 +364,7 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{prep[0]?.commencedNumerator}</td>
                                 <td>{prep[0]?.commencedDenominator}</td>
-                                <td> </td>
+                                <td>{prep[0]?.commencedVariance} </td>
                                 <td style={{ backgroundColor: prep[0]?.commencedPerformance >= 95 ? 'green' : prep[0]?.commencedPerformance >= 90 ? 'yellow' : 'red', color: prep[0]?.commencedPerformance >= 95 ? 'white' : prep[0]?.commencedPerformance >= 90 ? 'black' : 'white',
                                 textAlign: 'center', fontWeight: 'bold' }}>{prep[0]?.commencedPerformance} %</td>
                                 <td>

@@ -190,7 +190,7 @@ const DemographicsDQA = (props) => {
                   </td>
                   <td>{demographics[0]?.dobNumerator}</td>
                   <td>{demographics[0]?.dobDenominator}</td>
-                   <td></td>
+                   <td>{demographics[0]?.dobVariance}</td>
                    <td style={{ backgroundColor: demographics[0]?.dobPerformance  >= 95 ? 'green' : demographics[0]?.dobPerformance >= 90 ? 'yellow' : 'red', color: demographics[0]?.dobPerformance >= 95 ? 'white' : demographics[0]?.dobPerformance>= 90 ? 'black' : 'white',
                    textAlign: 'center', fontWeight: 'bold' }}>
                    {demographics[0]?.dobPerformance} % </td>
@@ -208,7 +208,7 @@ const DemographicsDQA = (props) => {
                   <td>Proportion of all active patients with Current Age</td>
                   <td>{demographics[0]?.ageNumerator}</td>
                    <td>{demographics[0]?.ageDenominator}</td>
-                   <td></td>
+                   <td>{demographics[0]?.ageVariance}</td>
                    <td style={{ backgroundColor: demographics[0]?.agePerformance >= 95 ? 'green' : demographics[0]?.agePerformance >= 90 ? 'yellow' : 'red', color: demographics[0]?.agePerformance >= 95 ? 'white' : demographics[0]?.agePerformance >= 90 ? 'black' : 'white',
                    textAlign: 'center', fontWeight: 'bold' }}>
                     {demographics[0]?.agePerformance} %
@@ -229,7 +229,7 @@ const DemographicsDQA = (props) => {
                   </td>
                   <td>{demographics[0]?.pidNumerator}</td>
                   <td>{demographics[0]?.pidDenominator}</td>
-                  <td></td>
+                  <td>{demographics[0]?.pidVariance}</td>
                   <td style={{ backgroundColor: demographics[0]?.pidPerformance >= 95 ? 'green' : demographics[0]?.pidPerformance >= 90 ? 'yellow' : 'red', color: demographics[0]?.pidPerformance >= 95 ? 'white' : demographics[0]?.pidPerformance >= 90 ? 'black' : 'white',
                    textAlign: 'center', fontWeight: 'bold' }}>
                     {demographics[0]?.pidPerformance} %
@@ -248,7 +248,7 @@ const DemographicsDQA = (props) => {
                   <td>Proportion of all active patients with Sex</td>
                   <td>{demographics[0]?.sexNumerator}</td>
                   <td>{demographics[0]?.sexDenominator}</td>
-                  <td></td>
+                  <td>{demographics[0]?.sexVariance}</td>
                   <td style={{ backgroundColor: demographics[0]?.sexPerformance >= 95 ? 'green' : demographics[0]?.sexPerformance >= 90 ? 'yellow' : 'red', color: demographics[0]?.sexPerformance >= 95 ? 'white' : demographics[0]?.sexPerformance >= 90 ? 'black' : 'white',
                    textAlign: 'center', fontWeight: 'bold' }}>
                     {demographics[0]?.sexPerformance} %
@@ -269,7 +269,7 @@ const DemographicsDQA = (props) => {
                   </td>
                   <td>{demographics[0]?.eduNumerator}</td>
                   <td>{demographics[0]?.eduDenominator}</td>
-                  <td></td>
+                  <td>{demographics[0]?.eduVariance}</td>
                   <td style={{ backgroundColor: demographics[0]?.eduPerformance >= 95 ? 'green' : demographics[0]?.eduPerformance >= 90 ? 'yellow' : 'red', color: demographics[0]?.eduPerformance >= 95 ? 'white' : demographics[0]?.eduPerformance >= 90 ? 'black' : 'white',
                    textAlign: 'center', fontWeight: 'bold' }}>
                     {demographics[0]?.eduPerformance} %
@@ -290,7 +290,7 @@ const DemographicsDQA = (props) => {
                   </td>
                   <td>{demographics[0]?.maritalNumerator}</td>
                   <td>{demographics[0]?.maritalDenominator}</td>
-                  <td></td>
+                  <td>{demographics[0]?.maritalVariance}</td>
                   <td style={{ backgroundColor: demographics[0]?.maritalPerformance >= 95 ? 'green' : demographics[0]?.maritalPerformance >= 90 ? 'yellow' : 'red', color: demographics[0]?.maritalPerformance >= 95 ? 'white' : demographics[0]?.maritalPerformance >= 90 ? 'black' : 'white',
                    textAlign: 'center', fontWeight: 'bold' }}>
                     {demographics[0]?.maritalPerformance} %
@@ -311,7 +311,7 @@ const DemographicsDQA = (props) => {
                   </td>
                   <td>{demographics[0]?.employNumerator}</td>
                   <td>{demographics[0]?.employDenominator}</td>
-                   <td></td>
+                   <td>{demographics[0]?.employVariance}</td>
                    <td style={{ backgroundColor: demographics[0]?.employPerformance >= 95 ? 'green' : demographics[0]?.employPerformance >= 90 ? 'yellow' : 'red', color: demographics[0]?.employPerformance >= 95 ? 'white' : demographics[0]?.employPerformance >= 90 ? 'black' : 'white',
                    textAlign: 'center', fontWeight: 'bold' }}>
                     {demographics[0]?.employPerformance} %
@@ -332,7 +332,7 @@ const DemographicsDQA = (props) => {
                   </td>
                   <td>{demographics[0]?.addressNumerator}</td>
                   <td>{demographics[0]?.addressDenominator}</td>
-                   <td></td>
+                   <td>{demographics[0]?.addressVariance}</td>
                    <td style={{ backgroundColor: demographics[0]?.addressPerformance >= 95 ? 'green' : demographics[0]?.addressPerformance >= 90 ? 'yellow' : 'red', color: demographics[0]?.addressPerformance >= 95 ? 'white' : demographics[0]?.addressPerformance >= 90 ? 'black' : 'white',
                    textAlign: 'center', fontWeight: 'bold' }}>
                     {demographics[0]?.addressPerformance} %

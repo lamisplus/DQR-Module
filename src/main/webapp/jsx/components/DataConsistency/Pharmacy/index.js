@@ -243,7 +243,7 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{pharmacy[0]?.refillNumerator}</td>
                                 <td>{pharmacy[0]?.refillDenominator}</td>
-                                <td> </td>
+                                <td>{pharmacy[0]?.refillVariance} </td>
                                 <td style={{ backgroundColor: pharmacy[0]?.refillPerformance >= 95 ? 'green' : pharmacy[0]?.refillPerformance >= 90 ? 'yellow' : 'red', color: pharmacy[0]?.refillPerformance >= 95 ? 'white' : pharmacy[0]?.refillPerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{pharmacy[0]?.refillPerformance} %</td>
                                 <td>
@@ -263,7 +263,7 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{pharmacy[0]?.regimenNumerator}</td>
                                 <td>{pharmacy[0]?.regimenDenominator}</td>
-                                <td> </td>
+                                <td>{pharmacy[0]?.regimenVariance} </td>
                                 <td style={{ backgroundColor: pharmacy[0]?.regimenPerformance >= 95 ? 'green' : pharmacy[0]?.regimenPerformance >= 90 ? 'yellow' : 'red', color: pharmacy[0]?.regimenPerformance >= 95 ? 'white' : pharmacy[0]?.regimenPerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{pharmacy[0]?.regimenPerformance} %</td>
                                 <td>

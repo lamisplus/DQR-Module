@@ -227,7 +227,7 @@ const EAC = (props) => {
                                 </td>
                                 <td>{eac[0]?.eacCommencedNumerator}</td>
                                 <td>{eac[0]?.eacCommencedDenominator}</td>
-                                <td> </td>
+                                <td>{eac[0]?.eacCommencedVariance} </td>
                                 <td style={{ backgroundColor: eac[0]?.eacCommencedPerformance >= 95 ? 'green' : eac[0]?.eacCommencedPerformance >= 90 ? 'yellow' : 'red', color: eac[0]?.eacCommencedPerformance >= 95 ? 'white' : eac[0]?.eacCommencedPerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{eac[0]?.eacCommencedPerformance} %</td>
                                 <td>
@@ -247,7 +247,7 @@ const EAC = (props) => {
                                 </td>
                                 <td>{eac[0]?.eacComDateNumerator}</td>
                                 <td>{eac[0]?.eacComDateDenominator}</td>
-                                <td> </td>
+                                <td>{eac[0]?.eacComDateVariance} </td>
                                 <td style={{ backgroundColor: eac[0]?.eacComDatePerformance >= 95 ? 'green' : eac[0]?.eacComDatePerformance >= 90 ? 'yellow' : 'red', color: eac[0]?.eacComDatePerformance >= 95 ? 'white' : eac[0]?.eacComDatePerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{eac[0]?.eacComDatePerformance} %</td>
                                 <td>
@@ -267,7 +267,7 @@ const EAC = (props) => {
                                 </td>
                                 <td>{eac[0]?.postEacNumerator}</td>
                                 <td>{eac[0]?.postEacDenominator}</td>
-                                <td> </td>
+                                <td>{eac[0]?.postEacVariance} </td>
                                 <td style={{ backgroundColor: eac[0]?.postEacPerformance >= 95 ? 'green' : eac[0]?.postEacPerformance >= 90 ? 'yellow' : 'red', color: eac[0]?.postEacPerformance >= 95 ? 'white' : eac[0]?.postEacPerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{eac[0]?.postEacPerformance} %</td>
                                 <td>
