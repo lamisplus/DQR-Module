@@ -2,11 +2,9 @@ package org.lamisplus.modules.dqr.util;
 
 public class DQRQueries {
 
+    public static class DataConsistency {
 
-
-    public class DataConsistency {
-
-        public static final  String CLINICALS_SUMMARY_QUERIES = "WITH dataConsistence AS (\n" +
+        public static final String CLINICALS_SUMMARY_QUERIES = "WITH dataConsistence AS (\n" +
                 "    SELECT\n" +
                 "        e.unique_id AS patientId,\n" +
                 "        p.hospital_number AS hospitalNumber,\n" +
@@ -628,7 +626,7 @@ public class DQRQueries {
 
     }
 
-    public  class ClinicalVariables {
+    public static class ClinicalVariables {
 
         public static final String CLINICAL_VARIABLE_SUMMARY_QUERIES = "WITH PatientClinic AS (\n" +
                 " SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex,p.date_of_birth AS dateOfBirth,\n" +
@@ -731,7 +729,7 @@ public class DQRQueries {
                 "   \tPatientClinic";
     }
 
-    public class PatientDemographyQueries {
+    public static class PatientDemographyQueries {
         public static final String DEMOGRAPHIC_SUMMARY_QUERY = "WITH PatientSummary AS (\n" +
                 "    SELECT \n" +
                 "        e.unique_id AS patientId, \n" +
@@ -891,7 +889,7 @@ public class DQRQueries {
 
     }
 
-    public class BiometricQUeries {
+    public static class BiometricQueries {
 
         public static final String BIOMETRIC_SUMMARY_QUERIES = "WITH PatientBiometrics AS (\n" +
                 "    SELECT  \n" +
@@ -1053,7 +1051,7 @@ public class DQRQueries {
         public static final String GET_PATIENTS_NOT_CAPTURE = "";
     }
 
-    public static class ClientVerificationQueries{
+    public static class ClientVerificationQueries {
 
         public static final String CLIENT_VERIFICATION = "WITH clientVerification AS (\n" +
                 "    SELECT  \n" +

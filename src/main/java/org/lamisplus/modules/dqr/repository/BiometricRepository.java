@@ -14,7 +14,7 @@ import java.util.List;
 public interface BiometricRepository extends JpaRepository<DQA, Long> {
 
 
-    @Query(value = DQRQueries.BiometricQUeries.BIOMETRIC_SUMMARY_QUERIES, nativeQuery = true)
+    @Query(value = DQRQueries.BiometricQueries.BIOMETRIC_SUMMARY_QUERIES, nativeQuery = true)
     List<BiometricSummaryDTOProjection> getBiometricSummary (Long facilityId);
 
     @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex\n" +
