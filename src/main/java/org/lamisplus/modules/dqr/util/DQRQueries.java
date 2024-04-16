@@ -440,8 +440,7 @@ public class DQRQueries {
                 "        eac1.visit_date AS eac_completion,\n" +
                 "        (CASE WHEN eac1.status is NOT NULL AND vl.dateSampleCollected IS NOT NULL THEN 1 ELSE NULL END) AS compleacdate,\n" +
                 "        (CASE WHEN eac1.status is NOT NULL AND eac1.visit_date IS NOT NULL THEN 1 ELSE NULL END) AS cmpleac,\n" +
-                "        (CASE WHEN eac1.status is NOT NULL AND eac1.visit_date IS NOT NULL AND eac1.date_of_last_viral_load IS NOT NULL THEN 1 ELSE NULL END) AS postEac,\n" +
-                "    \tst.status\n" +
+                "        (CASE WHEN eac1.status is NOT NULL AND eac1.visit_date IS NOT NULL AND eac1.date_of_last_viral_load IS NOT NULL THEN 1 ELSE NULL END) AS postEac\n" +
                 "\tFROM \n" +
                 "        patient_person p\n" +
                 "    INNER JOIN \n" +
@@ -552,79 +551,10 @@ public class DQRQueries {
                 "            person_uuid,\n" +
                 "            eac_session_date ASC\n" +
                 "    ) eac ON e.person_uuid = eac.person_uuid\n" +
-                "\tLEFT JOIN(\n" +
-                "\t\tSELECT personUuid, status FROM (\n" +
-                "\t\tSELECT\n" +
-                "\t DISTINCT ON (pharmacy.person_uuid) pharmacy.person_uuid AS personUuid,\n" +
-                "\t(\n" +
-                "\t\tCASE\n" +
-                "\t\t\tWHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%' THEN 'Died'\n" +
-                "\t\t\tWHEN(\n" +
-                "\t\t\tstat.status_date > pharmacy.maxdate\n" +
-                "\t\tAND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %' )\n" +
-                "\t)THEN stat.hiv_status\n" +
-                "\t\t\tELSE pharmacy.status\n" +
-                "\t\t\tEND\n" +
-                "\t\t) AS status,\n" +
-                "\n" +
-                "\tstat.cause_of_death, stat.va_cause_of_death\n" +
-                "\n" +
-                "\t\t\t FROM\n" +
-                "\t (\n" +
-                "\t\t SELECT\n" +
-                "\t\t\t (\n" +
-                "\t CASE\n" +
-                "\t\t WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < NOW() THEN 'IIT'\n" +
-                "\t\t ELSE 'Active'\n" +
-                "\t\t END\n" +
-                "\t ) status,\n" +
-                "\t\t\t (\n" +
-                "\t CASE\n" +
-                "\t\t WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < NOW()  THEN hp.visit_date + hp.refill_period + INTERVAL '29 day'\n" +
-                "\t\t ELSE hp.visit_date\n" +
-                "\t\t END\n" +
-                "\t ) AS visit_date,\n" +
-                "\t\t\t hp.person_uuid, MAXDATE\n" +
-                "\t\t FROM\n" +
-                "\t\t\t hiv_art_pharmacy hp\n" +
-                "\t INNER JOIN (\n" +
-                "\t\t\t SELECT hap.person_uuid, hap.visit_date AS  MAXDATE, ROW_NUMBER() OVER (PARTITION BY hap.person_uuid ORDER BY hap.visit_date DESC) as rnkkk3\n" +
-                "\t\t\t   FROM public.hiv_art_pharmacy hap \n" +
-                "\t\t\t\t\t\tINNER JOIN public.hiv_art_pharmacy_regimens pr \n" +
-                "\t\t\t\t\t\tON pr.art_pharmacy_id = hap.id \n" +
-                "\t\t\t\tINNER JOIN hiv_enrollment h ON h.person_uuid = hap.person_uuid AND h.archived = 0 \n" +
-                "\t\t\t\tINNER JOIN public.hiv_regimen r on r.id = pr.regimens_id \n" +
-                "\t\t\t\tINNER JOIN public.hiv_regimen_type rt on rt.id = r.regimen_type_id \n" +
-                "\t\t\t\tWHERE r.regimen_type_id in (1,2,3,4,14) \n" +
-                "\t\t\t\tAND hap.archived = 0                \n" +
-                "\t\t\t\t ) MAX ON MAX.MAXDATE = hp.visit_date AND MAX.person_uuid = hp.person_uuid \n" +
-                "\t\t  AND MAX.rnkkk3 = 1\n" +
-                "\t\t WHERE\n" +
-                "\t hp.archived = 0\n" +
-                "\t ) pharmacy\n" +
-                "\n" +
-                "\t\t LEFT JOIN (\n" +
-                "\t\t SELECT\n" +
-                "\t\t\t hst.hiv_status,\n" +
-                "\t\t\t hst.person_id,\n" +
-                "\t\t\t hst.status_date,\n" +
-                "\t\t\t hst.cause_of_death,\n" +
-                "\t\t\t hst.va_cause_of_death\n" +
-                "\t\t FROM\n" +
-                "\t\t\t (\n" +
-                "\t SELECT * FROM (SELECT DISTINCT (person_id) person_id, status_date, cause_of_death,va_cause_of_death,\n" +
-                "\t\t\thiv_status, ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC)\n" +
-                "\t\tFROM hiv_status_tracker WHERE archived=0 )s\n" +
-                "\t WHERE s.row_number=1\n" +
-                "\t\t\t ) hst\n" +
-                "\t INNER JOIN hiv_enrollment he ON he.person_uuid = hst.person_id\n" +
-                "\t ) stat ON stat.person_id = pharmacy.person_uuid --AND pharmacy.status = 'Active' \n" +
-                "\t) --st where status = 'Active'\n" +
-                "\t)st ON st.personUuid = e.person_uuid\n" +
                 "    LEFT JOIN base_application_codeset pc ON pc.id = e.status_at_registration_id\n" +
                 "    LEFT JOIN hiv_eac ha ON e.person_uuid = ha.person_uuid\n" +
                 "    WHERE \n" +
-                "        p.archived = 0 AND p.facility_id = ?1 AND st.status = 'Active'\n" +
+                "        p.archived = 0 AND p.facility_id = ?1\n" +
                 "    GROUP BY \n" +
                 "        e.id,\n" +
                 "        ca.commenced,\n" +
@@ -642,8 +572,7 @@ public class DQRQueries {
                 "        eac1.status,\n" +
                 "        eac1.last_viral_load,\n" +
                 "        eac1.date_of_last_viral_load,\n" +
-                "        eac1.visit_date,\n" +
-                "\t\tst.status\n" +
+                "        eac1.visit_date\n" +
                 "    ORDER BY \n" +
                 "        p.id DESC\n" +
                 ")\n" +
