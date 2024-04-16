@@ -674,71 +674,125 @@ public class DQRQueries {
 
 
         public static final String HTS_SUMMARY_QUERIES = "WITH htsSummary AS (\n" +
-                "SELECT person_uuid, client_code, date_visit, target_group, hts_client_uuid, hasindex, testing_setting, gender,date_of_birth, age, hiv_test_result, poscount, adultPos,\n" +
-                " (CASE WHEN adultPos =1 AND recency IS NOT NULL  THEN 1 ELSE NULL END) AS adPosRec,\n" +
-                " rita, order_date,\n" +
-                "(CASE WHEN rita ILIKE '%Recent%' ESCAPE ' ' THEN 1 ELSE NULL END) AS recentInfection,\n" +
-                "(CASE WHEN (rita ILIKE '%Recent%' ESCAPE ' '  AND order_date IS NOT NULL) THEN 1 ELSE NULL END) AS recentwitVL,\n" +
-                "(CASE WHEN (rita ILIKE '%Recent%' ESCAPE ' '  AND result_reported IS NOT NULL AND order_date IS NOT NULL) THEN 1 ELSE NULL END) AS recentwitVlResl,\n" +
-                "(CASE WHEN resultdate > order_date THEN 1 ELSE NULL END) AS rsGreaterThan, resultdate, recency, recencydate,\n" +
-                "(CASE WHEN (recencydate >= date_visit) AND recencydate IS NOT NULL AND date_visit IS NOT NULL THEN 1 ELSE NULL END) AS dateconfirm,\n" +
-                "(CASE WHEN testing_setting IS NOT NULL AND hasindex IS NOT NULL  THEN 1 ELSE NULL END) AS settings\n" +
-                "FROM \n" +
-                "(\n" +
-                "select DISTINCT ON (person_uuid) hc.person_uuid, hc.client_code, hc.date_visit,  hc.target_group,  hie.hts_client_uuid, (CASE WHEN hc.index_client = 'true' THEN 1 ELSE null END) hasIndex,\n" +
-                "hc.testing_setting,\n" +
-                "CAST((hc.extra->>'gender') AS VARCHAR(100)) AS gender, CAST((hc.extra->>'date_of_birth') AS DATE) AS date_of_birth, \n" +
-                "CAST(EXTRACT(YEAR FROM AGE(NOW(), CAST(hc.extra->>'date_of_birth' AS DATE))) AS INTEGER) AS age\n" +
-                ", hc.hiv_test_result,\n" +
-                "(CASE WHEN hc.hiv_test_result = 'Positive' THEN 1 ELSE null END) AS posCount,\n" +
-                "(CASE WHEN CAST(EXTRACT(YEAR FROM AGE(NOW(), CAST(hc.extra->>'date_of_birth' AS DATE))) AS INTEGER) > 15 THEN 1 ELSE null END) AS adultPos,\n" +
-                "recency->>'rencencyId' As recency,\n" +
-                "recency->>'rencencyInterpretation' AS RIta,CAST(lo.order_date AS DATE),\n" +
-                "lr.result_reported, CAST(lr.date_result_reported AS DATE) AS resultdate, (CASE   WHEN recency->>'optOutRTRITestDate' IS NOT NULL   AND recency->>'optOutRTRITestDate' <> '' \n" +
-                "  THEN CAST(recency->>'optOutRTRITestDate' AS DATE) \n" +
-                "  ELSE NULL \n" +
-                "END) AS recencydate\n" +
-                "from hts_client hc\n" +
-                "LEFT JOIN hts_index_elicitation hie on hc.uuid = hie.hts_client_uuid\n" +
-                "LEFT JOIN laboratory_order lo ON lo.patient_uuid = hc.person_uuid\n" +
-                "LEFT JOIN laboratory_result lr ON lr.patient_uuid = hc.person_uuid\n" +
-                "where hc.facility_id = ?1 ) pro\n" +
+                "    SELECT \n" +
+                "        person_uuid,\n" +
+                "        client_code,\n" +
+                "        date_visit,\n" +
+                "        target_group,\n" +
+                "        hts_client_uuid,\n" +
+                "        hasindex,\n" +
+                "        testing_setting,\n" +
+                "        gender,\n" +
+                "        date_of_birth,\n" +
+                "        age,\n" +
+                "        hiv_test_result,\n" +
+                "        poscount,\n" +
+                "        adultPos,\n" +
+                "        (CASE WHEN adultPos = 1 AND recency IS NOT NULL THEN 1 ELSE NULL END) AS adPosRec,\n" +
+                "        rita,\n" +
+                "        order_date,\n" +
+                "        (CASE WHEN rita ILIKE '%Recent%' ESCAPE ' ' THEN 1 ELSE NULL END) AS recentInfection,\n" +
+                "        (CASE WHEN (rita ILIKE '%Recent%' ESCAPE ' ' AND order_date IS NOT NULL) THEN 1 ELSE NULL END) AS recentwitVL,\n" +
+                "        (CASE WHEN (rita ILIKE '%Recent%' ESCAPE ' ' AND result_reported IS NOT NULL AND order_date IS NOT NULL) THEN 1 ELSE NULL END) AS recentwitVlResl,\n" +
+                "        (CASE WHEN resultdate > order_date THEN 1 ELSE NULL END) AS rsGreaterThan,\n" +
+                "        resultdate,\n" +
+                "        recency,\n" +
+                "        recencydate,\n" +
+                "        (CASE WHEN (recencydate >= date_visit) AND recencydate IS NOT NULL AND date_visit IS NOT NULL THEN 1 ELSE NULL END) AS dateconfirm,\n" +
+                "        (CASE WHEN testing_setting IS NOT NULL AND hasindex IS NOT NULL THEN 1 ELSE NULL END) AS settings\n" +
+                "    FROM \n" +
+                "    (\n" +
+                "        SELECT DISTINCT ON (person_uuid) \n" +
+                "            hc.person_uuid, \n" +
+                "            hc.client_code, \n" +
+                "            hc.date_visit, \n" +
+                "            hc.target_group, \n" +
+                "            hie.hts_client_uuid, \n" +
+                "            (CASE WHEN hc.index_client = 'true' THEN 1 ELSE null END) hasIndex,\n" +
+                "            hc.testing_setting,\n" +
+                "            CAST((hc.extra->>'gender') AS VARCHAR(100)) AS gender, \n" +
+                "            CAST((hc.extra->>'date_of_birth') AS DATE) AS date_of_birth, \n" +
+                "            CAST(EXTRACT(YEAR FROM AGE(NOW(), CAST(hc.extra->>'date_of_birth' AS DATE))) AS INTEGER) AS age,\n" +
+                "            hc.hiv_test_result,\n" +
+                "            (CASE WHEN hc.hiv_test_result = 'Positive' THEN 1 ELSE null END) AS posCount,\n" +
+                "            (CASE WHEN CAST(EXTRACT(YEAR FROM AGE(NOW(), CAST(hc.extra->>'date_of_birth' AS DATE))) AS INTEGER) > 15 THEN 1 ELSE null END) AS adultPos,\n" +
+                "            recency->>'rencencyId' AS recency,\n" +
+                "            recency->>'rencencyInterpretation' AS rita,\n" +
+                "            CAST(lo.order_date AS DATE),\n" +
+                "            lr.result_reported, \n" +
+                "            CAST(lr.date_result_reported AS DATE) AS resultdate, \n" +
+                "            (CASE WHEN recency->>'optOutRTRITestDate' IS NOT NULL AND recency->>'optOutRTRITestDate' <> '' THEN CAST(recency->>'optOutRTRITestDate' AS DATE) ELSE NULL END) AS recencydate\n" +
+                "        FROM \n" +
+                "            hts_client hc\n" +
+                "        LEFT JOIN \n" +
+                "            hts_index_elicitation hie ON hc.uuid = hie.hts_client_uuid\n" +
+                "        LEFT JOIN \n" +
+                "            laboratory_order lo ON lo.patient_uuid = hc.person_uuid\n" +
+                "        LEFT JOIN \n" +
+                "            laboratory_result lr ON lr.patient_uuid = hc.person_uuid\n" +
+                "        WHERE \n" +
+                "            hc.facility_id = ?1\n" +
+                "    ) pro\n" +
                 ")\n" +
                 "SELECT \n" +
-                "  COUNT(adPosRec) AS totalPosNumerator,\n" +
-                "  COUNT(adultpos) AS totalPosDenominator,\n" +
-                "  COUNT(adultpos) - COUNT(adPosRec) AS totalPosVariance,\n" +
-                "--   ROUND((CAST(COUNT(prep_offered) AS DECIMAL) / COUNT(person_uuid)) * 100, 2) AS pOfferredPerformance,\n" +
-                "  COUNT(recentwitVL) AS withVLNumerator,\n" +
-                "  COUNT(recentInfection) AS withVLDenominator,\n" +
-                "  COUNT(recentInfection) - COUNT(recentwitVL) AS withVLVariance, \n" +
-                "  ROUND((CAST(COUNT(recentwitVL) AS DECIMAL) / COUNT(recentInfection)) * 100, 2) AS withVLPerformance,\n" +
-                "  COUNT(recentwitVlResl) AS withVlResNumerator,\n" +
-                "  COUNT(recentwitVL) AS withVlResDenominator,\n" +
-                "  COUNT(recentwitVL) - COUNT(recentwitVlResl) AS withVlResVariance,\n" +
-                "  ROUND((CAST(COUNT(recentwitVlResl) AS DECIMAL) / COUNT(recentwitVL)) * 100, 2) AS withVlResPerformance,\n" +
-                "  COUNT(rsGreaterThan) AS rsGreaterNumerator,\n" +
-                "  COUNT(resultdate) AS rsGreaterDenominator,\n" +
-                "  COUNT(resultdate) - COUNT(rsGreaterThan) AS rsGreaterVariance,\n" +
-                "  ROUND((CAST(COUNT(rsGreaterThan) AS DECIMAL) / COUNT(resultdate)) * 100, 2) AS rsGreaterPerformance,\n" +
-                "  COUNT(dateconfirm) AS recencyNumerator,\n" +
-                "  COUNT(recency) AS recencyDenominator,\n" +
-                "  COUNT(recency) - COUNT(dateconfirm) AS recencyVariance,\n" +
-                "  ROUND((CAST(COUNT(dateconfirm) AS DECIMAL) / COUNT(recency)) * 100, 2) AS recencyPerformance,\n" +
-                "  COUNT(hts_client_uuid) AS elicitedNumerator,\n" +
-                "  COUNT(hasindex) AS elicitedDenominator,\n" +
-                "  COUNT(hasindex) - COUNT(hts_client_uuid) AS elicitedVariance,\n" +
-                "  ROUND((CAST(COUNT(dateconfirm) AS DECIMAL) / COUNT(hasindex)) * 100, 2) AS elicitedPerformance,\n" +
-                "  COUNT(settings) AS settingsNumerator,\n" +
-                "  COUNT(hasindex) AS settingsDenominator,\n" +
-                "  COUNT(hasindex) - COUNT(settings) AS settingsVariance,\n" +
-                "  ROUND((CAST(COUNT(settings) AS DECIMAL) / COUNT(hasindex)) * 100, 2) AS settingsPerformance,\n" +
-                "  COUNT(target_group) AS targNumerator,\n" +
-                "  COUNT(person_uuid) AS targDenominator,\n" +
-                "  COUNT(person_uuid) - COUNT(target_group) AS targVariance,\n" +
-                "  ROUND((CAST(COUNT(target_group) AS DECIMAL) / COUNT(person_uuid)) * 100, 2) AS targPerformance\n" +
-                "  FROM\n" +
-                "  htsSummary";
+                "    COUNT(adPosRec) AS totalPosNumerator,\n" +
+                "    COUNT(adultpos) AS totalPosDenominator,\n" +
+                "    COUNT(adultpos) - COUNT(adPosRec) AS totalPosVariance,\n" +
+                "    COALESCE(\n" +
+                "        ROUND((CAST(COUNT(adPosRec) AS DECIMAL) / NULLIF(COUNT(adultpos), 0)) * 100, 2),\n" +
+                "        0\n" +
+                "    ) AS totalPosPerformance,\n" +
+                "    COUNT(recentwitVL) AS withVLNumerator,\n" +
+                "    COUNT(recentInfection) AS withVLDenominator,\n" +
+                "    COUNT(recentInfection) - COUNT(recentwitVL) AS withVLVariance, \n" +
+                "    COALESCE(\n" +
+                "        ROUND((CAST(COUNT(recentwitVL) AS DECIMAL) / NULLIF(COUNT(recentInfection), 0)) * 100, 2),\n" +
+                "        0\n" +
+                "    ) AS withVLPerformance,\n" +
+                "    COUNT(recentwitVlResl) AS withVlResNumerator,\n" +
+                "    COUNT(recentwitVL) AS withVlResDenominator,\n" +
+                "    COUNT(recentwitVL) - COUNT(recentwitVlResl) AS withVlResVariance,\n" +
+                "    COALESCE(\n" +
+                "        ROUND((CAST(COUNT(recentwitVlResl) AS DECIMAL) / NULLIF(COUNT(recentwitVL), 0)) * 100, 2),\n" +
+                "        0\n" +
+                "    ) AS withVlResPerformance,\n" +
+                "    COUNT(rsGreaterThan) AS rsGreaterNumerator,\n" +
+                "    COUNT(resultdate) AS rsGreaterDenominator,\n" +
+                "    COUNT(resultdate) - COUNT(rsGreaterThan) AS rsGreaterVariance,\n" +
+                "    COALESCE(\n" +
+                "        ROUND((CAST(COUNT(rsGreaterThan) AS DECIMAL) / NULLIF(COUNT(resultdate), 0)) * 100, 2),\n" +
+                "        0\n" +
+                "    ) AS rsGreaterPerformance,\n" +
+                "    COUNT(dateconfirm) AS recencyNumerator,\n" +
+                "    COUNT(recency) AS recencyDenominator,\n" +
+                "    COUNT(recency) - COUNT(dateconfirm) AS recencyVariance,\n" +
+                "    COALESCE(\n" +
+                "        ROUND((CAST(COUNT(dateconfirm) AS DECIMAL) / NULLIF(COUNT(recency), 0)) * 100, 2),\n" +
+                "        0\n" +
+                "    ) AS recencyPerformance,\n" +
+                "    COUNT(hts_client_uuid) AS elicitedNumerator,\n" +
+                "    COUNT(hasindex) AS elicitedDenominator,\n" +
+                "    COUNT(hasindex) - COUNT(hts_client_uuid) AS elicitedVariance,\n" +
+                "    COALESCE(\n" +
+                "        ROUND((CAST(COUNT(hts_client_uuid) AS DECIMAL) / NULLIF(COUNT(hasindex), 0)) * 100, 2),\n" +
+                "        0\n" +
+                "    ) AS elicitedPerformance,\n" +
+                "    COUNT(settings) AS settingsNumerator,\n" +
+                "    COUNT(hasindex) AS settingsDenominator,\n" +
+                "    COUNT(hasindex) - COUNT(settings) AS settingsVariance,\n" +
+                "    COALESCE(\n" +
+                "        ROUND((CAST(COUNT(settings) AS DECIMAL) / NULLIF(COUNT(hasindex), 0)) * 100, 2),\n" +
+                "        0\n" +
+                "    ) AS settingsPerformance,\n" +
+                "    COUNT(target_group) AS targNumerator,\n" +
+                "    COUNT(person_uuid) AS targDenominator,\n" +
+                "    COUNT(person_uuid) - COUNT(target_group) AS targVariance,\n" +
+                "    COALESCE(\n" +
+                "        ROUND((CAST(COUNT(target_group) AS DECIMAL) / NULLIF(COUNT(person_uuid), 0)) * 100, 2),\n" +
+                "        0\n" +
+                "    ) AS targPerformance\n" +
+                "FROM \n" +
+                "    htsSummary;";
 
 
         public static final String PREP_SUMMARY_QUERIES = "WITH prepSummary AS (\n" +
