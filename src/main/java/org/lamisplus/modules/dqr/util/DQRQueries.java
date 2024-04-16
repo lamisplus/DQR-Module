@@ -304,35 +304,158 @@ public class DQRQueries {
                 "    dataConsistence;\n";
 
 
-        public static final String PHARMACY_SUMMARY_QUERIES = "With pharmacySummary AS (\n" +
-                "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex\n" +
-                ",p.date_of_birth AS dateOfBirth, pharm.refill_period as refillMonth, pharm.visit_date AS visit_date, pharm.extra AS regimen\n" +
-                "  FROM patient_person p \n" +
-                "  INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
-                "  LEFT JOIN\n" +
-                "  (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date, hac.pregnancy_status  FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
-                "  GROUP BY hac.person_uuid, hac.visit_date, hac.pregnancy_status)ca ON p.uuid = ca.person_uuid\n" +
-                "  LEFT JOIN\n" +
-                "  (SELECT DISTINCT ON (person_uuid)\n" +
-                "    person_uuid, visit_date, refill_period, extra\n" +
-                "FROM ( select person_uuid, refill_period, MAX(visit_date) AS visit_date, extra from hiv_art_pharmacy\n" +
-                "where archived = 0\n" +
-                "GROUP BY refill_period, person_uuid, extra ORDER BY person_uuid DESC ) fi ORDER BY\n" +
-                "    person_uuid DESC ) pharm ON pharm.person_uuid = p.uuid\n" +
-                "  LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-                "  WHERE p.archived=0 AND p.facility_id= ?1\n" +
-                "  GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ca.visit_date, pharm.refill_period, p.facility_id, pharm.visit_date, pharm.extra\n" +
-                "  ORDER BY p.id DESC )\n" +
+        public static final String PHARMACY_SUMMARY_QUERIES = "WITH pharmacySummary AS (\n" +
+                "    SELECT \n" +
+                "        e.unique_id AS patientId,\n" +
+                "        p.hospital_number AS hospitalNumber,\n" +
+                "        INITCAP(p.sex) AS sex,\n" +
+                "        p.date_of_birth AS dateOfBirth,\n" +
+                "        pharm.refill_period AS refillMonth,\n" +
+                "        pharm.visit_date AS visit_date,\n" +
+                "        pharm.extra AS regimen,\n" +
+                "\t    st.status\n" +
+                "    FROM \n" +
+                "        patient_person p\n" +
+                "    INNER JOIN \n" +
+                "        hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+                "    LEFT JOIN (\n" +
+                "        SELECT \n" +
+                "            TRUE as commenced, \n" +
+                "            hac.person_uuid, \n" +
+                "            hac.visit_date, \n" +
+                "            hac.pregnancy_status  \n" +
+                "        FROM \n" +
+                "            hiv_art_clinical hac \n" +
+                "        WHERE \n" +
+                "            hac.archived = 0 AND hac.is_commencement is TRUE\n" +
+                "        GROUP BY \n" +
+                "            hac.person_uuid, hac.visit_date, hac.pregnancy_status\n" +
+                "    ) ca ON p.uuid = ca.person_uuid\n" +
+                "    LEFT JOIN (\n" +
+                "        SELECT DISTINCT ON (person_uuid)\n" +
+                "            person_uuid, \n" +
+                "            visit_date, \n" +
+                "            refill_period, \n" +
+                "            extra\n" +
+                "        FROM (\n" +
+                "            SELECT \n" +
+                "                person_uuid, \n" +
+                "                refill_period, \n" +
+                "                MAX(visit_date) AS visit_date, \n" +
+                "                extra \n" +
+                "            FROM \n" +
+                "                hiv_art_pharmacy\n" +
+                "            WHERE \n" +
+                "                archived = 0\n" +
+                "            GROUP BY \n" +
+                "                refill_period, person_uuid, extra\n" +
+                "            ORDER BY \n" +
+                "                person_uuid DESC\n" +
+                "        ) fi \n" +
+                "        ORDER BY \n" +
+                "            person_uuid DESC\n" +
+                "    ) pharm ON pharm.person_uuid = p.uuid\n" +
+                "\tLEFT JOIN(\n" +
+                "\tSELECT personUuid, status FROM (\n" +
+                "\tSELECT\n" +
+                " DISTINCT ON (pharmacy.person_uuid) pharmacy.person_uuid AS personUuid,\n" +
+                "(\n" +
+                "    CASE\n" +
+                "        WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%' THEN 'Died'\n" +
+                "        WHEN(\n" +
+                "        stat.status_date > pharmacy.maxdate\n" +
+                "    AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %' )\n" +
+                ")THEN stat.hiv_status\n" +
+                "        ELSE pharmacy.status\n" +
+                "        END\n" +
+                "    ) AS status,\n" +
+                "\n" +
+                "stat.cause_of_death, stat.va_cause_of_death\n" +
+                "\n" +
+                "         FROM\n" +
+                " (\n" +
+                "     SELECT\n" +
+                "         (\n" +
+                " CASE\n" +
+                "     WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < NOW() THEN 'IIT'\n" +
+                "     ELSE 'Active'\n" +
+                "     END\n" +
+                " ) status,\n" +
+                "         (\n" +
+                " CASE\n" +
+                "     WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < NOW()  THEN hp.visit_date + hp.refill_period + INTERVAL '29 day'\n" +
+                "     ELSE hp.visit_date\n" +
+                "     END\n" +
+                " ) AS visit_date,\n" +
+                "         hp.person_uuid, MAXDATE\n" +
+                "     FROM\n" +
+                "         hiv_art_pharmacy hp\n" +
+                " INNER JOIN (\n" +
+                "         SELECT hap.person_uuid, hap.visit_date AS  MAXDATE, ROW_NUMBER() OVER (PARTITION BY hap.person_uuid ORDER BY hap.visit_date DESC) as rnkkk3\n" +
+                "           FROM public.hiv_art_pharmacy hap \n" +
+                "                    INNER JOIN public.hiv_art_pharmacy_regimens pr \n" +
+                "                    ON pr.art_pharmacy_id = hap.id \n" +
+                "            INNER JOIN hiv_enrollment h ON h.person_uuid = hap.person_uuid AND h.archived = 0 \n" +
+                "            INNER JOIN public.hiv_regimen r on r.id = pr.regimens_id \n" +
+                "            INNER JOIN public.hiv_regimen_type rt on rt.id = r.regimen_type_id \n" +
+                "            WHERE r.regimen_type_id in (1,2,3,4,14) \n" +
+                "            AND hap.archived = 0                \n" +
+                "             ) MAX ON MAX.MAXDATE = hp.visit_date AND MAX.person_uuid = hp.person_uuid \n" +
+                "      AND MAX.rnkkk3 = 1\n" +
+                "     WHERE\n" +
+                " hp.archived = 0\n" +
+                " ) pharmacy\n" +
+                "\n" +
+                "     LEFT JOIN (\n" +
+                "     SELECT\n" +
+                "         hst.hiv_status,\n" +
+                "         hst.person_id,\n" +
+                "\t\t hst.status_date,\n" +
+                "\t\t hst.cause_of_death,\n" +
+                "\t\t hst.va_cause_of_death\n" +
+                "     FROM\n" +
+                "         (\n" +
+                " SELECT * FROM (SELECT DISTINCT (person_id) person_id, status_date, cause_of_death,va_cause_of_death,\n" +
+                "        hiv_status, ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC)\n" +
+                "    FROM hiv_status_tracker WHERE archived=0 )s\n" +
+                " WHERE s.row_number=1\n" +
+                "         ) hst\n" +
+                " INNER JOIN hiv_enrollment he ON he.person_uuid = hst.person_id\n" +
+                " ) stat ON stat.person_id = pharmacy.person_uuid --AND pharmacy.status = 'Active' \n" +
+                ") st where status = 'Active'\n" +
+                "\t) st ON st.personUuid = e.person_uuid\n" +
+                "    LEFT JOIN \n" +
+                "        base_application_codeset pc ON pc.id = e.status_at_registration_id\n" +
+                "    WHERE \n" +
+                "        p.archived = 0 AND p.facility_id = ?1 AND st.status = 'Active'\n" +
+                "    GROUP BY \n" +
+                "        e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ca.visit_date, pharm.refill_period, p.facility_id, pharm.visit_date, pharm.extra, st.status\n" +
+                "    ORDER BY \n" +
+                "        p.id DESC\n" +
+                ")\n" +
                 "SELECT\n" +
                 "    COUNT(refillMonth) AS refillNumerator,\n" +
                 "    COUNT(hospitalNumber) AS refillDenominator,\n" +
-                "\tCOUNT(hospitalNumber) - COUNT(refillMonth) AS refillVariance,\n" +
-                "    ROUND((CAST(COUNT(refillMonth) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS refillPerformance,\n" +
+                "    CASE \n" +
+                "        WHEN COUNT(hospitalNumber) = 0 THEN 0\n" +
+                "        ELSE COUNT(hospitalNumber) - COUNT(refillMonth)\n" +
+                "    END AS refillVariance,\n" +
+                "    CASE \n" +
+                "        WHEN COUNT(hospitalNumber) = 0 THEN 0\n" +
+                "        ELSE ROUND((CAST(COUNT(refillMonth) AS DECIMAL) / NULLIF(COUNT(hospitalNumber), 0)) * 100, 2)\n" +
+                "    END AS refillPerformance,\n" +
                 "    COUNT(regimen) AS regimenNumerator,\n" +
                 "    COUNT(hospitalNumber) AS regimenDenominator,\n" +
-                "\tCOUNT(hospitalNumber) - COUNT(regimen) AS regimenVariance,\n" +
-                "    ROUND((CAST(COUNT(regimen) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS regimenPerformance\n" +
-                "FROM pharmacySummary";
+                "    CASE \n" +
+                "        WHEN COUNT(hospitalNumber) = 0 THEN 0\n" +
+                "        ELSE COUNT(hospitalNumber) - COUNT(regimen)\n" +
+                "    END AS regimenVariance,\n" +
+                "    CASE \n" +
+                "        WHEN COUNT(hospitalNumber) = 0 THEN 0\n" +
+                "        ELSE ROUND((CAST(COUNT(regimen) AS DECIMAL) / NULLIF(COUNT(hospitalNumber), 0)) * 100, 2)\n" +
+                "    END AS regimenPerformance\n" +
+                "FROM \n" +
+                "    pharmacySummary;\n";
 
 
         public static final String LABORATORY_SUMMARY_QUERIES = "WITH vlSummary AS ( \n" +
