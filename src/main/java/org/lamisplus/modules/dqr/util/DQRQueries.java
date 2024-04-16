@@ -894,45 +894,161 @@ public class DQRQueries {
     public class BiometricQUeries {
 
         public static final String BIOMETRIC_SUMMARY_QUERIES = "WITH PatientBiometrics AS (\n" +
-                "SELECT  e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex,\n" +
-                "p.date_of_birth AS dateOfBirth, b.person_uuid AS person_uuid1, b.biometric_valid_captured AS validcapture,\n" +
-                "b.person_uuid AS personId, bb.recapture, bb.person_uuid, bb.biometric_valid_captured AS validrecap\n" +
-                "   FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
-                "   LEFT JOIN\n" +
-                "   (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date, hac.pregnancy_status  FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
-                "   GROUP BY hac.person_uuid, hac.visit_date, hac.pregnancy_status)ca ON p.uuid = ca.person_uuid\n" +
-                "  LEFT JOIN (\n" +
-                " SELECT DISTINCT ON (person_uuid) person_uuid, COUNT(biometric_type) AS biometric_fingers_captured, COUNT(*) FILTER (WHERE ENCODE(CAST(template AS BYTEA), 'hex') LIKE '46%') AS biometric_valid_captured, recapture FROM biometric\n" +
-                "  WHERE archived != 1 GROUP BY person_uuid, recapture) b ON e.person_uuid = b.person_uuid\n" +
-                "LEFT JOIN (\n" +
-                "SELECT DISTINCT ON (person_uuid) person_uuid, COUNT(biometric_type) AS biometric_fingers_captured, COUNT(*) FILTER (WHERE ENCODE(CAST(template AS BYTEA), 'hex') LIKE '46%') AS biometric_valid_captured, recapture FROM biometric\n" +
-                " WHERE archived != 1 AND recapture != 0 GROUP BY person_uuid, recapture) bb ON e.person_uuid = bb.person_uuid\n" +
-                "   LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-                "   WHERE p.archived=0 AND p.facility_id= ?1 \n" +
-                "\tAND CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) > 12\n" +
-                "   GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ca.visit_date, ca.pregnancy_status, b.biometric_fingers_captured, b.biometric_valid_captured,bb.biometric_valid_captured, b.person_uuid,\n" +
-                "bb.recapture, bb.person_uuid\n" +
-                "   ORDER BY p.id DESC\n" +
+                "    SELECT  \n" +
+                "        e.unique_id AS patientId,\n" +
+                "        p.hospital_number AS hospitalNumber,\n" +
+                "        INITCAP(p.sex) AS sex,\n" +
+                "        p.date_of_birth AS dateOfBirth,\n" +
+                "        b.person_uuid AS person_uuid1,\n" +
+                "        b.biometric_valid_captured AS validcapture,\n" +
+                "        b.person_uuid AS personId,\n" +
+                "        bb.recapture,\n" +
+                "        bb.person_uuid,\n" +
+                "        bb.biometric_valid_captured AS validrecap,\n" +
+                "\t    st.status\n" +
+                "    FROM \n" +
+                "        patient_person p\n" +
+                "    INNER JOIN \n" +
+                "        hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+                "    LEFT JOIN (\n" +
+                "        SELECT TRUE as commenced, hac.person_uuid, hac.visit_date, hac.pregnancy_status  \n" +
+                "        FROM hiv_art_clinical hac \n" +
+                "        WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+                "        GROUP BY hac.person_uuid, hac.visit_date, hac.pregnancy_status\n" +
+                "    ) ca ON p.uuid = ca.person_uuid\n" +
+                "    LEFT JOIN (\n" +
+                "        SELECT DISTINCT ON (person_uuid) \n" +
+                "            person_uuid,\n" +
+                "            COUNT(biometric_type) AS biometric_fingers_captured,\n" +
+                "            COUNT(*) FILTER (WHERE ENCODE(CAST(template AS BYTEA), 'hex') LIKE '46%') AS biometric_valid_captured,\n" +
+                "            recapture \n" +
+                "        FROM biometric\n" +
+                "        WHERE archived != 1 \n" +
+                "        GROUP BY person_uuid, recapture\n" +
+                "    ) b ON e.person_uuid = b.person_uuid\n" +
+                "    LEFT JOIN (\n" +
+                "        SELECT DISTINCT ON (person_uuid) \n" +
+                "            person_uuid,\n" +
+                "            COUNT(biometric_type) AS biometric_fingers_captured,\n" +
+                "            COUNT(*) FILTER (WHERE ENCODE(CAST(template AS BYTEA), 'hex') LIKE '46%') AS biometric_valid_captured,\n" +
+                "            recapture \n" +
+                "        FROM biometric\n" +
+                "        WHERE archived != 1 AND recapture != 0 \n" +
+                "        GROUP BY person_uuid, recapture\n" +
+                "    ) bb ON e.person_uuid = bb.person_uuid\n" +
+                "\tLEFT JOIN (\n" +
+                "\tSELECT personUuid, status FROM (\n" +
+                "\tSELECT\n" +
+                " DISTINCT ON (pharmacy.person_uuid) pharmacy.person_uuid AS personUuid,\n" +
+                "(\n" +
+                "    CASE\n" +
+                "        WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%' THEN 'Died'\n" +
+                "        WHEN(\n" +
+                "        stat.status_date > pharmacy.maxdate\n" +
+                "    AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %' )\n" +
+                ")THEN stat.hiv_status\n" +
+                "        ELSE pharmacy.status\n" +
+                "        END\n" +
+                "    ) AS status,\n" +
+                "\n" +
+                "stat.cause_of_death, stat.va_cause_of_death\n" +
+                "\n" +
+                "         FROM\n" +
+                " (\n" +
+                "     SELECT\n" +
+                "         (\n" +
+                " CASE\n" +
+                "     WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < NOW() THEN 'IIT'\n" +
+                "     ELSE 'Active'\n" +
+                "     END\n" +
+                " ) status,\n" +
+                "         (\n" +
+                " CASE\n" +
+                "     WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < NOW()  THEN hp.visit_date + hp.refill_period + INTERVAL '29 day'\n" +
+                "     ELSE hp.visit_date\n" +
+                "     END\n" +
+                " ) AS visit_date,\n" +
+                "         hp.person_uuid, MAXDATE\n" +
+                "     FROM\n" +
+                "         hiv_art_pharmacy hp\n" +
+                " INNER JOIN (\n" +
+                "         SELECT hap.person_uuid, hap.visit_date AS  MAXDATE, ROW_NUMBER() OVER (PARTITION BY hap.person_uuid ORDER BY hap.visit_date DESC) as rnkkk3\n" +
+                "           FROM public.hiv_art_pharmacy hap \n" +
+                "                    INNER JOIN public.hiv_art_pharmacy_regimens pr \n" +
+                "                    ON pr.art_pharmacy_id = hap.id \n" +
+                "            INNER JOIN hiv_enrollment h ON h.person_uuid = hap.person_uuid AND h.archived = 0 \n" +
+                "            INNER JOIN public.hiv_regimen r on r.id = pr.regimens_id \n" +
+                "            INNER JOIN public.hiv_regimen_type rt on rt.id = r.regimen_type_id \n" +
+                "            WHERE r.regimen_type_id in (1,2,3,4,14) \n" +
+                "            AND hap.archived = 0                \n" +
+                "             ) MAX ON MAX.MAXDATE = hp.visit_date AND MAX.person_uuid = hp.person_uuid \n" +
+                "      AND MAX.rnkkk3 = 1\n" +
+                "     WHERE\n" +
+                " hp.archived = 0\n" +
+                " ) pharmacy\n" +
+                "\n" +
+                "     LEFT JOIN (\n" +
+                "     SELECT\n" +
+                "         hst.hiv_status,\n" +
+                "         hst.person_id,\n" +
+                "\t\t hst.status_date,\n" +
+                "\t\t hst.cause_of_death,\n" +
+                "\t\t hst.va_cause_of_death\n" +
+                "     FROM\n" +
+                "         (\n" +
+                " SELECT * FROM (SELECT DISTINCT (person_id) person_id, status_date, cause_of_death,va_cause_of_death,\n" +
+                "        hiv_status, ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC)\n" +
+                "    FROM hiv_status_tracker WHERE archived=0 )s\n" +
+                " WHERE s.row_number=1\n" +
+                "         ) hst\n" +
+                " INNER JOIN hiv_enrollment he ON he.person_uuid = hst.person_id\n" +
+                " ) stat ON stat.person_id = pharmacy.person_uuid --AND pharmacy.status = 'Active' \n" +
+                ") --st where status = 'Active'\n" +
+                "\t)st ON st.personUuid = e.person_uuid\n" +
+                "    LEFT JOIN base_application_codeset pc ON pc.id = e.status_at_registration_id\n" +
+                "    WHERE \n" +
+                "        p.archived=0 \n" +
+                "        AND p.facility_id = ?1 \n" +
+                "\t    AND st.status = 'Active'\n" +
+                "        AND CAST(EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) > 12\n" +
+                "    GROUP BY \n" +
+                "        e.id, \n" +
+                "        ca.commenced, \n" +
+                "        p.id, \n" +
+                "        pc.display, \n" +
+                "        p.hospital_number, \n" +
+                "        p.date_of_birth, \n" +
+                "        ca.visit_date, \n" +
+                "        ca.pregnancy_status, \n" +
+                "        b.biometric_fingers_captured, \n" +
+                "        b.biometric_valid_captured,\n" +
+                "        bb.biometric_valid_captured, \n" +
+                "        b.person_uuid,\n" +
+                "        bb.recapture, \n" +
+                "        bb.person_uuid,\n" +
+                "\t    st.status\n" +
+                "    ORDER BY \n" +
+                "        p.id DESC\n" +
                 ")\n" +
                 "SELECT\n" +
                 "    COUNT(person_uuid1) AS captureNumerator,\n" +
                 "    COUNT(hospitalNumber) AS captureDenominator,\n" +
-                "\tCOUNT(hospitalNumber) - COUNT(person_uuid1) AS captureVariance,\n" +
+                "    COUNT(hospitalNumber) - COUNT(person_uuid1) AS captureVariance,\n" +
                 "    ROUND((CAST(COUNT(person_uuid1) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS capturePerformance,\n" +
-                "\tCOUNT(validcapture) AS validcapNumerator,\n" +
+                "    COUNT(validcapture) AS validcapNumerator,\n" +
                 "    COUNT(person_uuid1) AS validcapDenominator,\n" +
-                "\tCOUNT(person_uuid1) - COUNT(validcapture) validcapVariance,\n" +
+                "    COUNT(person_uuid1) - COUNT(validcapture) AS validcapVariance,\n" +
                 "    ROUND((CAST(COUNT(validcapture) AS DECIMAL) / COUNT(person_uuid1)) * 100, 2) AS validcapPerformance,\n" +
-                "\tCOUNT(recapture) AS recapNumerator,\n" +
+                "    COUNT(recapture) AS recapNumerator,\n" +
                 "    COUNT(person_uuid1) AS recapDenominator,\n" +
-                "\tCOUNT(person_uuid1) - COUNT(recapture) AS recapVariance,\n" +
+                "    COUNT(person_uuid1) - COUNT(recapture) AS recapVariance,\n" +
                 "    ROUND((CAST(COUNT(recapture) AS DECIMAL) / COUNT(person_uuid1)) * 100, 2) AS recapPerformance,\n" +
-                "\tCOUNT(validrecap) AS validRecapNumerator,\n" +
+                "    COUNT(validrecap) AS validRecapNumerator,\n" +
                 "    COUNT(recapture) AS validRecapDenominator,\n" +
-                "\tCOUNT(recapture) - COUNT(validrecap) AS validRecapVariance,\n" +
+                "    COUNT(recapture) - COUNT(validrecap) AS validRecapVariance,\n" +
                 "    ROUND((CAST(COUNT(validrecap) AS DECIMAL) / COUNT(recapture)) * 100, 2) AS validRecapPerformance\n" +
-                "FROM\n" +
-                " PatientBiometrics;";
+                "FROM \n" +
+                "    PatientBiometrics;\n";
 
         public static final String GET_PATIENTS_NOT_CAPTURE = "";
     }
