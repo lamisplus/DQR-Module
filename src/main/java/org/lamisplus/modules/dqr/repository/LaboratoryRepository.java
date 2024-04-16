@@ -3,7 +3,7 @@ package org.lamisplus.modules.dqr.repository;
 import org.lamisplus.modules.dqr.domain.LaboratoryDTOProjection;
 import org.lamisplus.modules.dqr.domain.PatientDTOProjection;
 import org.lamisplus.modules.dqr.domain.entity.DQA;
-import org.lamisplus.modules.dqr.util.DQRQuerie;
+import org.lamisplus.modules.dqr.util.DQRQueries;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -592,7 +592,7 @@ public interface LaboratoryRepository extends JpaRepository<DQA, Long> {
     List<PatientDTOProjection> getWithinOneYearWithNoCD4 (Long facilityId);
 
 
-    @Query(value = DQRQuerie.DataConsistency.LABORATORY_SUMMARY_QUERIES, nativeQuery = true)
+    @Query(value = DQRQueries.DataConsistency.LABORATORY_SUMMARY_QUERIES, nativeQuery = true)
     List<LaboratoryDTOProjection> getLaboratorySummary(Long facilityId);
 
 }

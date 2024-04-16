@@ -3,7 +3,7 @@ package org.lamisplus.modules.dqr.repository;
 import org.lamisplus.modules.dqr.domain.PatientDTOProjection;
 import org.lamisplus.modules.dqr.domain.PharmacySummaryDTOProjection;
 import org.lamisplus.modules.dqr.domain.entity.DQA;
-import org.lamisplus.modules.dqr.util.DQRQuerie;
+import org.lamisplus.modules.dqr.util.DQRQueries;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -135,7 +135,7 @@ public interface PharmacyRepository extends JpaRepository<DQA, Long> {
 
 
 
-    @Query(value = DQRQuerie.DataConsistency.PHARMACY_SUMMARY_QUERIES, nativeQuery = true)
+    @Query(value = DQRQueries.DataConsistency.PHARMACY_SUMMARY_QUERIES, nativeQuery = true)
     List<PharmacySummaryDTOProjection> getPharmacySummary(Long facilityId);
 
 }

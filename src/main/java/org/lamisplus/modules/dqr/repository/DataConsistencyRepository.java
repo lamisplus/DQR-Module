@@ -3,7 +3,7 @@ package org.lamisplus.modules.dqr.repository;
 import org.lamisplus.modules.dqr.domain.ClinicalConsistencyDTOProjection;
 import org.lamisplus.modules.dqr.domain.PatientDTOProjection;
 import org.lamisplus.modules.dqr.domain.entity.DQA;
-import org.lamisplus.modules.dqr.util.DQRQuerie;
+import org.lamisplus.modules.dqr.util.DQRQueries;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -909,7 +909,7 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
     List<PatientDTOProjection> getFemalePatientsWithoutPregStatusLastVisit (Long facilityId);
 
 //                          Summary Of Data Consistency
-    @Query(value = DQRQuerie.DataConsistency.CLINICALS_SUMMARY_QUERIES, nativeQuery = true)
+    @Query(value = DQRQueries.DataConsistency.CLINICALS_SUMMARY_QUERIES, nativeQuery = true)
     List<ClinicalConsistencyDTOProjection> getClinicalConsistencySummary (Long facilityId);
 
 }
