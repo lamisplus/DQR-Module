@@ -1053,4 +1053,339 @@ public class DQRQueries {
         public static final String GET_PATIENTS_NOT_CAPTURE = "";
     }
 
+    public static class ClientVerificationQueries{
+
+        public static final String CLIENT_VERIFICATION = "WITH clientVerification AS (\n" +
+                "    SELECT  \n" +
+                "        e.unique_id AS patientId,\n" +
+                "        p.hospital_number AS hospitalNumber,\n" +
+                "        INITCAP(p.sex) AS sex,\n" +
+                "        p.date_of_birth AS dateOfBirth,\n" +
+                "        b.person_uuid AS person_uuid1,\n" +
+                "        b.enrollment_date,\n" +
+                "        b.biometric_valid_captured AS validcapture,\n" +
+                "        recap.person_uuid AS personUuid,\n" +
+                "        recap.enrollment_date,\n" +
+                "        CASE WHEN (lastVisit.visit_date > recap.enrollment_date) AND b.enrollment_date IS NOT NULL THEN 1 ELSE NULL END AS clinicNoRecapture,\n" +
+                "        recap.biometric_valid_captured AS recapture,\n" +
+                "        lastVisit.visit_date AS lastClinicVisit,\n" +
+                "        lastVisit.monthTillDate,\n" +
+                "        CASE WHEN lastVisit.monthTillDate >= 15 THEN 1 ELSE NULL END AS lastClinicMonth,\n" +
+                "        CASE WHEN pickUp.monthApart >= 12 THEN 1 ELSE NULL END AS pickUpOneYear,\n" +
+                "        CASE WHEN b.person_uuid IS NULL THEN 1 ELSE NULL END AS noBaseline,\n" +
+                "        CASE WHEN b.person_uuid IS NOT NULL AND recap.person_uuid IS NULL THEN 1 ELSE NULL END AS hasBaseLineNoRecapture,\n" +
+                "        sameDemographics.uuid AS sameDemographic,\n" +
+                "        sameClinical.person_uuid AS dupClinical,\n" +
+                "        incompleteEncounter.person_uuid AS incomplete,\n" +
+                "        sampleCol.dateOfViralLoadSampleCollection,\n" +
+                "        ca.visit_date,\n" +
+                "        CASE WHEN CAST(DATE_PART('year', AGE(NOW(), ca.visit_date)) * 12 + DATE_PART('month', AGE(NOW(), ca.visit_date)) AS INTEGER ) >= 6 AND sampleCol.dateOfViralLoadSampleCollection IS NULL THEN 1 ELSE NULL END AS vlPrior,\n" +
+                "\t\tst.status\n" +
+                "    FROM \n" +
+                "        patient_person p \n" +
+                "    INNER JOIN \n" +
+                "        hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+                "    INNER JOIN (\n" +
+                "        SELECT TRUE as commenced, hac.person_uuid, hac.visit_date \n" +
+                "        FROM hiv_art_clinical hac \n" +
+                "        WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+                "        GROUP BY hac.person_uuid, hac.visit_date, hac.pregnancy_status\n" +
+                "    ) ca ON p.uuid = ca.person_uuid\n" +
+                "    LEFT JOIN (\n" +
+                "        SELECT DISTINCT ON (person_uuid) \n" +
+                "            person_uuid, \n" +
+                "            COUNT(biometric_type) AS biometric_fingers_captured, \n" +
+                "            enrollment_date, \n" +
+                "            COUNT(*) FILTER (WHERE ENCODE(CAST(template AS BYTEA), 'hex') LIKE '46%') AS biometric_valid_captured, \n" +
+                "            recapture \n" +
+                "        FROM biometric\n" +
+                "        WHERE archived = 0 AND recapture = 0  \n" +
+                "        GROUP BY person_uuid, recapture, enrollment_date\n" +
+                "    ) b ON b.person_uuid = ca.person_uuid\n" +
+                "    LEFT JOIN (\n" +
+                "        SELECT DISTINCT ON (person_uuid) \n" +
+                "            person_uuid, \n" +
+                "            COUNT(biometric_type) AS biometric_fingers_captured, \n" +
+                "            enrollment_date, \n" +
+                "            COUNT(*) FILTER (WHERE ENCODE(CAST(template AS BYTEA), 'hex') LIKE '46%') AS biometric_valid_captured, \n" +
+                "            recapture \n" +
+                "        FROM biometric\n" +
+                "        WHERE archived = 0 AND recapture != 0  \n" +
+                "        GROUP BY person_uuid, recapture, enrollment_date\n" +
+                "    ) recap ON recap.person_uuid = ca.person_uuid\n" +
+                "    LEFT JOIN (\n" +
+                "        SELECT\n" +
+                "            DISTINCT ON (p1.HOSPITAL_NUMBER)\n" +
+                "            p1.HOSPITAL_NUMBER,\n" +
+                "            INITCAP(p1.sex) AS sex,\n" +
+                "            p1.date_of_birth,\n" +
+                "            p1.uuid,\n" +
+                "            ca1.person_uuid,\n" +
+                "            ca1.visit_date,\n" +
+                "            p2.HOSPITAL_NUMBER AS matching_hospital_number,\n" +
+                "            INITCAP(p2.sex) AS matching_sex,\n" +
+                "            p2.date_of_birth AS matching_date_of_birth,\n" +
+                "            ca2.visit_date AS matching_visit_date\n" +
+                "        FROM\n" +
+                "            PATIENT_PERSON p1\n" +
+                "        JOIN\n" +
+                "            PATIENT_PERSON p2 ON p1.HOSPITAL_NUMBER = p2.HOSPITAL_NUMBER\n" +
+                "            AND INITCAP(p1.sex) = INITCAP(p2.sex)\n" +
+                "            AND p1.date_of_birth = p2.date_of_birth\n" +
+                "            AND p1.uuid <> p2.uuid  -- Exclude the same row\n" +
+                "        INNER JOIN (\n" +
+                "            SELECT TRUE AS commenced, hac1.person_uuid, hac1.visit_date\n" +
+                "            FROM hiv_art_clinical hac1\n" +
+                "            WHERE hac1.archived = 0 AND hac1.is_commencement IS TRUE\n" +
+                "            GROUP BY hac1.person_uuid, hac1.visit_date\n" +
+                "        ) ca1 ON ca1.person_uuid = p1.uuid\n" +
+                "        INNER JOIN (\n" +
+                "            SELECT TRUE AS commenced, hac2.person_uuid, hac2.visit_date\n" +
+                "            FROM hiv_art_clinical hac2\n" +
+                "            WHERE hac2.archived = 0 AND hac2.is_commencement IS TRUE\n" +
+                "            GROUP BY hac2.person_uuid, hac2.visit_date\n" +
+                "        ) ca2 ON ca2.person_uuid = p2.uuid\n" +
+                "    ) sameDemographics ON ca.person_uuid = sameDemographics.uuid\n" +
+                "    LEFT JOIN (\n" +
+                "        SELECT * FROM (\n" +
+                "            SELECT \n" +
+                "                DISTINCT ON (person_uuid)\n" +
+                "                person_uuid, \n" +
+                "                visit_date,\n" +
+                "                next_appointment, \n" +
+                "                tb_status,\n" +
+                "                CAST(DATE_PART('year', AGE(now(), visit_date)) * 12 + DATE_PART('month', AGE(now(), visit_date)) AS INTEGER ) AS monthTillDate, \n" +
+                "                ROW_NUMBER() OVER ( PARTITION BY person_uuid ORDER BY visit_date DESC)\n" +
+                "            FROM HIV_ART_CLINICAL \n" +
+                "            WHERE archived = 0\n" +
+                "        ) visit \n" +
+                "        WHERE row_number = 1\n" +
+                "    ) lastVisit ON ca.person_uuid = lastVisit.person_uuid\n" +
+                "    LEFT JOIN (\n" +
+                "        SELECT \n" +
+                "            person_uuid, \n" +
+                "            visit_date, \n" +
+                "            previousPickUpDrugDate,\n" +
+                "            CAST(DATE_PART('year', AGE(visit_date, previousPickUpDrugDate)) * 12 + DATE_PART('month', AGE(visit_date, previousPickUpDrugDate)) AS INTEGER ) AS monthApart\n" +
+                "        FROM (\n" +
+                "            SELECT \n" +
+                "                person_uuid, \n" +
+                "                visit_date,\n" +
+                "                ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY visit_date DESC),\n" +
+                "                LEAD(visit_date) OVER (PARTITION BY person_uuid ORDER BY visit_date DESC) AS previousPickUpDrugDate\n" +
+                "            FROM hiv_art_pharmacy\n" +
+                "        ) pharm \n" +
+                "        WHERE row_number = 1\n" +
+                "    ) pickUp ON ca.person_uuid = pickUP.person_uuid\n" +
+                "    LEFT JOIN (\n" +
+                "        SELECT\n" +
+                "            DISTINCT ON (person_uuid)\n" +
+                "            person_uuid,\n" +
+                "            visit_date,\n" +
+                "            next_appointment\n" +
+                "        FROM\n" +
+                "            HIV_ART_CLINICAL\n" +
+                "        WHERE\n" +
+                "            archived = 0\n" +
+                "            AND (person_uuid, visit_date, next_appointment) IN (\n" +
+                "                SELECT\n" +
+                "                    person_uuid,\n" +
+                "                    visit_date,\n" +
+                "                    next_appointment\n" +
+                "                FROM\n" +
+                "                    HIV_ART_CLINICAL\n" +
+                "                WHERE\n" +
+                "                    archived = 0\n" +
+                "                GROUP BY\n" +
+                "                    person_uuid,\n" +
+                "                    visit_date,\n" +
+                "                    next_appointment\n" +
+                "                HAVING\n" +
+                "                    COUNT(*) > 1\n" +
+                "            )\n" +
+                "    ) sameClinical ON ca.person_uuid = sameClinical.person_uuid\n" +
+                "    LEFT JOIN (\n" +
+                "        SELECT DISTINCT ON (hap.person_uuid) \n" +
+                "            hap.person_uuid,\n" +
+                "            hac.pregnancy_status,\n" +
+                "            hac.next_appointment, \n" +
+                "            hac.tb_status,\n" +
+                "            hap.next_appointment, \n" +
+                "            hap.extra IS, \n" +
+                "            hap.refill_period \n" +
+                "        FROM \n" +
+                "            hiv_art_clinical hac\n" +
+                "        LEFT JOIN \n" +
+                "            HIV_ART_PHARMACY hap ON hap.person_uuid = hac.person_uuid\n" +
+                "        WHERE \n" +
+                "            hap.archived = 0 \n" +
+                "            AND hac.archived = 0 \n" +
+                "            AND (hac.pregnancy_status IS NULL OR hac.next_appointment IS NULL OR hac.tb_status IS NULL OR\n" +
+                "                 hap.next_appointment IS NULL OR hap.extra IS NULL OR hap.refill_period IS NULL)\n" +
+                "    ) incompleteEncounter ON ca.person_uuid = incompleteEncounter.person_uuid\n" +
+                "    LEFT JOIN (\n" +
+                "\t\t\tSELECT \n" +
+                "\t\t\t\tCAST(sample.date_sample_collected AS DATE ) as dateOfViralLoadSampleCollection, \n" +
+                "\t\t\t\tpatient_uuid as person_uuid1  \n" +
+                "\t\t\tFROM (\n" +
+                "\t\t\t\tSELECT \n" +
+                "\t\t\t\t\tlt.viral_load_indication, \n" +
+                "\t\t\t\t\tsm.facility_id, \n" +
+                "\t\t\t\t\tsm.date_sample_collected, \n" +
+                "\t\t\t\t\tsm.patient_uuid, \n" +
+                "\t\t\t\t\tsm.archived, \n" +
+                "\t\t\t\t\tROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_sample_collected DESC) as rnkk\n" +
+                "\t\t\t\tFROM \n" +
+                "\t\t\t\t\tpublic.laboratory_sample sm\n" +
+                "\t\t\t\tINNER JOIN \n" +
+                "\t\t\t\t\tpublic.laboratory_test lt ON lt.id = sm.test_id\n" +
+                "\t\t\t\tWHERE \n" +
+                "\t\t\t\t\tlt.lab_test_id=16\n" +
+                "\t\t\t\t\tAND lt.viral_load_indication !=719\n" +
+                "\t\t\t\t\tAND date_sample_collected IS NOT null\n" +
+                "\t\t\t)as sample\n" +
+                "\t\t\tWHERE \n" +
+                "\t\t\t\tsample.rnkk = 1\n" +
+                "\t\t\t\tAND (sample.archived is null OR sample.archived = 0)\n" +
+                "\t\t) sampleCol ON ca.person_uuid = sampleCol.person_uuid1\n" +
+                "\t\tLEFT JOIN (\n" +
+                "\t\tSELECT personUuid, status FROM (\n" +
+                "\t\tSELECT\n" +
+                "\t DISTINCT ON (pharmacy.person_uuid) pharmacy.person_uuid AS personUuid,\n" +
+                "\t(\n" +
+                "\t\tCASE\n" +
+                "\t\t\tWHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%' THEN 'Died'\n" +
+                "\t\t\tWHEN(\n" +
+                "\t\t\tstat.status_date > pharmacy.maxdate\n" +
+                "\t\tAND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %' )\n" +
+                "\t)THEN stat.hiv_status\n" +
+                "\t\t\tELSE pharmacy.status\n" +
+                "\t\t\tEND\n" +
+                "\t\t) AS status,\n" +
+                "\n" +
+                "\tstat.cause_of_death, stat.va_cause_of_death\n" +
+                "\n" +
+                "\t\t\t FROM\n" +
+                "\t (\n" +
+                "\t\t SELECT\n" +
+                "\t\t\t (\n" +
+                "\t CASE\n" +
+                "\t\t WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < NOW() THEN 'IIT'\n" +
+                "\t\t ELSE 'Active'\n" +
+                "\t\t END\n" +
+                "\t ) status,\n" +
+                "\t\t\t (\n" +
+                "\t CASE\n" +
+                "\t\t WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < NOW()  THEN hp.visit_date + hp.refill_period + INTERVAL '29 day'\n" +
+                "\t\t ELSE hp.visit_date\n" +
+                "\t\t END\n" +
+                "\t ) AS visit_date,\n" +
+                "\t\t\t hp.person_uuid, MAXDATE\n" +
+                "\t\t FROM\n" +
+                "\t\t\t hiv_art_pharmacy hp\n" +
+                "\t INNER JOIN (\n" +
+                "\t\t\t SELECT hap.person_uuid, hap.visit_date AS  MAXDATE, ROW_NUMBER() OVER (PARTITION BY hap.person_uuid ORDER BY hap.visit_date DESC) as rnkkk3\n" +
+                "\t\t\t   FROM public.hiv_art_pharmacy hap \n" +
+                "\t\t\t\t\t\tINNER JOIN public.hiv_art_pharmacy_regimens pr \n" +
+                "\t\t\t\t\t\tON pr.art_pharmacy_id = hap.id \n" +
+                "\t\t\t\tINNER JOIN hiv_enrollment h ON h.person_uuid = hap.person_uuid AND h.archived = 0 \n" +
+                "\t\t\t\tINNER JOIN public.hiv_regimen r on r.id = pr.regimens_id \n" +
+                "\t\t\t\tINNER JOIN public.hiv_regimen_type rt on rt.id = r.regimen_type_id \n" +
+                "\t\t\t\tWHERE r.regimen_type_id in (1,2,3,4,14) \n" +
+                "\t\t\t\tAND hap.archived = 0                \n" +
+                "\t\t\t\t ) MAX ON MAX.MAXDATE = hp.visit_date AND MAX.person_uuid = hp.person_uuid \n" +
+                "\t\t  AND MAX.rnkkk3 = 1\n" +
+                "\t\t WHERE\n" +
+                "\t hp.archived = 0\n" +
+                "\t ) pharmacy\n" +
+                "\n" +
+                "\t\t LEFT JOIN (\n" +
+                "\t\t SELECT\n" +
+                "\t\t\t hst.hiv_status,\n" +
+                "\t\t\t hst.person_id,\n" +
+                "\t\t\t hst.status_date,\n" +
+                "\t\t\t hst.cause_of_death,\n" +
+                "\t\t\t hst.va_cause_of_death\n" +
+                "\t\t FROM\n" +
+                "\t\t\t (\n" +
+                "\t SELECT * FROM (SELECT DISTINCT (person_id) person_id, status_date, cause_of_death,va_cause_of_death,\n" +
+                "\t\t\thiv_status, ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC)\n" +
+                "\t\tFROM hiv_status_tracker WHERE archived=0 )s\n" +
+                "\t WHERE s.row_number=1\n" +
+                "\t\t\t ) hst\n" +
+                "\t INNER JOIN hiv_enrollment he ON he.person_uuid = hst.person_id\n" +
+                "\t ) stat ON stat.person_id = pharmacy.person_uuid --AND pharmacy.status = 'Active' \n" +
+                "\t) --st where status = 'Active'\n" +
+                "\t)st ON st.personUuid = e.person_uuid\n" +
+                "    WHERE \n" +
+                "        p.archived=0 \n" +
+                "        AND p.facility_id= ?1\n" +
+                "\t    AND st.status = 'Active'\n" +
+                "    GROUP BY \n" +
+                "        e.id, \n" +
+                "        p.id, \n" +
+                "        p.hospital_number, \n" +
+                "        p.date_of_birth, \n" +
+                "        b.biometric_valid_captured, \n" +
+                "        b.person_uuid, \n" +
+                "        recap.biometric_valid_captured, \n" +
+                "        recap.person_uuid, \n" +
+                "        sameDemographics.uuid, \n" +
+                "        lastVisit.visit_date,\n" +
+                "        lastVisit.monthTillDate, \n" +
+                "        pickUp.visit_date,\n" +
+                "        pickUp.monthApart, \n" +
+                "        pickUp.previousPickUpDrugDate, \n" +
+                "        b.enrollment_date, \n" +
+                "        recap.enrollment_date,\n" +
+                "        sameClinical.person_uuid, \n" +
+                "        incompleteEncounter.person_uuid, \n" +
+                "        sampleCol.dateOfViralLoadSampleCollection, \n" +
+                "        ca.visit_date,\n" +
+                "\t\tst.status\n" +
+                "    ORDER BY \n" +
+                "        p.id DESC\n" +
+                ")\n" +
+                "SELECT\n" +
+                "COUNT(noBaseline) AS noBaseLineNumerator,\n" +
+                "    COUNT(hospitalNumber) AS noBaseLineDenominator,\n" +
+                "\tCOUNT(hospitalNumber) - COUNT(noBaseline) AS noBaselineVariance,\n" +
+                "    ROUND((CAST(COUNT(noBaseline) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS noBaseLinePerformance,\n" +
+                "\tCOUNT(hasBaseLineNoRecapture) AS hasBaseLineNoRecaptureNumerator,\n" +
+                "    COUNT(person_uuid1) AS hasBaseLineNoRecaptureDenominator,\n" +
+                "\tCOUNT(hospitalNumber) - COUNT(hasBaseLineNoRecapture) AS hasBaseLineNoRecaptureVariance,\n" +
+                "    ROUND((CAST(COUNT(hasBaseLineNoRecapture) AS DECIMAL) / COUNT(person_uuid1)) * 100, 2) AS hasBaseLineNoRecapturePerformance,\n" +
+                "\tCOUNT(sameDemographic) AS sameDemographicsNumerator,\n" +
+                "    COUNT(hospitalNumber) AS sameDemographicsDenominator,\n" +
+                "\tCOUNT(hospitalNumber) - COUNT(sameDemographic) AS sameDemographicsVariance,\n" +
+                "    ROUND((CAST(COUNT(sameDemographic) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS sameDemographicsPerformance,\n" +
+                "\tCOUNT(lastClinicMonth) AS clinicMoreThanOneYearNumerator,\n" +
+                "    COUNT(hospitalNumber) AS clinicMoreThanOneYearDenominator,\n" +
+                "\tCOUNT(hospitalNumber) - COUNT(lastClinicMonth) AS clinicMoreThanOneYearVariance,\n" +
+                "    ROUND((CAST(COUNT(lastClinicMonth) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS clinicMoreThanOneYearPerformance,\n" +
+                "\tCOUNT(pickUpOneYear) AS pickUpOneYearNumerator,\n" +
+                "    COUNT(hospitalNumber) AS pickUpOneYearDenominator,\n" +
+                "\tCOUNT(hospitalNumber) - COUNT(pickUpOneYear) AS pickUpOneYearVariance,\n" +
+                "    ROUND((CAST(COUNT(pickUpOneYear) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS pickUpOneYearPerformance,\n" +
+                "\tCOUNT(clinicNoRecapture) AS clinicNoRecaptureNumerator,\n" +
+                "    COUNT(person_uuid1) AS clinicNoRecaptureDenominator,\n" +
+                "\tCOUNT(hospitalNumber) - COUNT(clinicNoRecapture) AS clinicNoRecaptureVariance,\n" +
+                "    ROUND((CAST(COUNT(clinicNoRecapture) AS DECIMAL) / COUNT(person_uuid1)) * 100, 2) AS clinicNoRecapturePerformance,\n" +
+                "\tCOUNT(dupClinical) AS sameClinicalNumerator,\n" +
+                "    COUNT(hospitalNumber) AS sameClinicalDenominator,\n" +
+                "\tCOUNT(hospitalNumber) - COUNT(dupClinical) AS sameClinicalVariance,\n" +
+                "    ROUND((CAST(COUNT(dupClinical) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS sameClinicalPerformance, \n" +
+                "\tCOUNT(incomplete) AS incompleteNumerator,\n" +
+                "    COUNT(hospitalNumber) AS incompleteDenominator,\n" +
+                "\tCOUNT(hospitalNumber) - COUNT(incomplete) AS incompleteVariance,\n" +
+                "    ROUND((CAST(COUNT(incomplete) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS incompletePerformance,\n" +
+                "\tCOUNT(vlPrior) AS labNumerator,\n" +
+                "    COUNT(hospitalNumber) AS labDenominator,\n" +
+                "\tCOUNT(hospitalNumber) - COUNT(vlPrior) AS labVariance,\n" +
+                "    ROUND((CAST(COUNT(vlPrior) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS labPerformance\n" +
+                "FROM\n" +
+                "    clientVerification";
+
+    }
+
 }
