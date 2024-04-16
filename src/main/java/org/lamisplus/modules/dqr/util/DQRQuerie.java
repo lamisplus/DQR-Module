@@ -573,54 +573,161 @@ public class DQRQuerie {
 
     public class PatientDemographyQueries {
         public static final String DEMOGRAPHIC_SUMMARY_QUERY = "WITH PatientSummary AS (\n" +
-                "SELECT e.unique_id AS patientId, p.hospital_number AS hospitalNumber,\n" +
-                "    INITCAP(p.sex) AS sex, CAST(EXTRACT(YEAR FROM AGE(NOW(), date_of_birth)) AS INTEGER) AS age,\n" +
-                "    p.date_of_birth AS dateOfBirth, p.marital_status, p.education,p.employment_status As employment,\n" +
-                "p.address    FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
-                "LEFT JOIN ( SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac\n" +
-                "        WHERE hac.archived = 0 AND hac.is_commencement IS TRUE \n" +
-                "        GROUP BY hac.person_uuid ) ca ON p.uuid = ca.person_uuid\n" +
-                "LEFT JOIN base_application_codeset pc ON pc.id = e.status_at_registration_id\n" +
-                "WHERE p.archived = 0 AND p.facility_id = ?1\n" +
-                "GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth\n" +
-                "ORDER BY p.id DESC\n" +
+                "    SELECT \n" +
+                "        e.unique_id AS patientId, \n" +
+                "        p.hospital_number AS hospitalNumber,\n" +
+                "        INITCAP(p.sex) AS sex, \n" +
+                "        CAST(EXTRACT(YEAR FROM AGE(NOW(), date_of_birth)) AS INTEGER) AS age,\n" +
+                "        p.date_of_birth AS dateOfBirth, \n" +
+                "        p.marital_status, \n" +
+                "        p.education,\n" +
+                "        p.employment_status AS employment,\n" +
+                "        p.address, \n" +
+                "\t    st.status\n" +
+                "    FROM \n" +
+                "        patient_person p \n" +
+                "    INNER JOIN \n" +
+                "        hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+                "    LEFT JOIN \n" +
+                "        (SELECT TRUE as commenced, hac.person_uuid \n" +
+                "         FROM hiv_art_clinical hac\n" +
+                "         WHERE hac.archived = 0 AND hac.is_commencement IS TRUE \n" +
+                "         GROUP BY hac.person_uuid\n" +
+                "        ) ca ON p.uuid = ca.person_uuid\n" +
+                "    LEFT JOIN \n" +
+                "        (\n" +
+                "            SELECT \n" +
+                "                personUuid, \n" +
+                "                status \n" +
+                "            FROM \n" +
+                "                (\n" +
+                "                    SELECT DISTINCT ON (pharmacy.person_uuid) \n" +
+                "                        pharmacy.person_uuid AS personUuid,\n" +
+                "                        (\n" +
+                "                            CASE\n" +
+                "                                WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%' THEN 'Died'\n" +
+                "                                WHEN (stat.status_date > pharmacy.maxdate AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %')) THEN stat.hiv_status\n" +
+                "                                ELSE pharmacy.status\n" +
+                "                            END\n" +
+                "                        ) AS status,\n" +
+                "                        stat.cause_of_death, \n" +
+                "                        stat.va_cause_of_death\n" +
+                "                    FROM \n" +
+                "                        (\n" +
+                "                            SELECT\n" +
+                "                                (\n" +
+                "                                    CASE\n" +
+                "                                        WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < NOW() THEN 'IIT'\n" +
+                "                                        ELSE 'Active'\n" +
+                "                                    END\n" +
+                "                                ) status,\n" +
+                "                                (\n" +
+                "                                    CASE\n" +
+                "                                        WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < NOW()  THEN hp.visit_date + hp.refill_period + INTERVAL '29 day'\n" +
+                "                                        ELSE hp.visit_date\n" +
+                "                                    END\n" +
+                "                                ) AS visit_date,\n" +
+                "                                hp.person_uuid, \n" +
+                "                                MAXDATE\n" +
+                "                            FROM \n" +
+                "                                hiv_art_pharmacy hp\n" +
+                "                            INNER JOIN \n" +
+                "                                (\n" +
+                "                                    SELECT \n" +
+                "                                        hap.person_uuid, \n" +
+                "                                        hap.visit_date AS MAXDATE, \n" +
+                "                                        ROW_NUMBER() OVER (PARTITION BY hap.person_uuid ORDER BY hap.visit_date DESC) as rnkkk3\n" +
+                "                                    FROM \n" +
+                "                                        public.hiv_art_pharmacy hap \n" +
+                "                                    INNER JOIN \n" +
+                "                                        public.hiv_art_pharmacy_regimens pr ON pr.art_pharmacy_id = hap.id \n" +
+                "                                    INNER JOIN \n" +
+                "                                        hiv_enrollment h ON h.person_uuid = hap.person_uuid AND h.archived = 0 \n" +
+                "                                    INNER JOIN \n" +
+                "                                        public.hiv_regimen r ON r.id = pr.regimens_id \n" +
+                "                                    INNER JOIN \n" +
+                "                                        public.hiv_regimen_type rt ON rt.id = r.regimen_type_id \n" +
+                "                                    WHERE \n" +
+                "                                        r.regimen_type_id IN (1,2,3,4,14) \n" +
+                "                                        AND hap.archived = 0                \n" +
+                "                                ) MAX ON MAX.MAXDATE = hp.visit_date AND MAX.person_uuid = hp.person_uuid AND MAX.rnkkk3 = 1\n" +
+                "                            WHERE\n" +
+                "                                hp.archived = 0\n" +
+                "                        ) pharmacy\n" +
+                "                    LEFT JOIN \n" +
+                "                        (\n" +
+                "                            SELECT \n" +
+                "                                hst.hiv_status,\n" +
+                "                                hst.person_id,\n" +
+                "                                hst.status_date,\n" +
+                "                                hst.cause_of_death,\n" +
+                "                                hst.va_cause_of_death\n" +
+                "                            FROM \n" +
+                "                                (\n" +
+                "                                    SELECT * FROM \n" +
+                "                                        (\n" +
+                "                                            SELECT \n" +
+                "                                                DISTINCT (person_id) person_id, \n" +
+                "                                                status_date, \n" +
+                "                                                cause_of_death, \n" +
+                "                                                va_cause_of_death,\n" +
+                "                                                hiv_status, \n" +
+                "                                                ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC)\n" +
+                "                                            FROM \n" +
+                "                                                hiv_status_tracker \n" +
+                "                                            WHERE \n" +
+                "                                                archived = 0 \n" +
+                "                                        ) s\n" +
+                "                                    WHERE \n" +
+                "                                        s.row_number = 1\n" +
+                "                                ) hst\n" +
+                "                            INNER JOIN \n" +
+                "                                hiv_enrollment he ON he.person_uuid = hst.person_id\n" +
+                "                        ) stat ON stat.person_id = pharmacy.person_uuid\n" +
+                "                ) st\n" +
+                "        ) st ON st.personUuid = e.person_uuid\n" +
+                "    LEFT JOIN \n" +
+                "        base_application_codeset pc ON pc.id = e.status_at_registration_id\n" +
+                "    WHERE \n" +
+                "        p.archived = 0 AND p.facility_id = ?1 AND st.status = 'Active'\n" +
+                "    GROUP BY \n" +
+                "        e.id, \n" +
+                "        ca.commenced, \n" +
+                "        p.id, \n" +
+                "        pc.display, \n" +
+                "        p.hospital_number, \n" +
+                "        p.date_of_birth,\n" +
+                "\t    st.status\n" +
+                "    ORDER BY \n" +
+                "        p.id DESC\n" +
                 ")\n" +
                 "SELECT\n" +
-                "COUNT(age) AS ageNumerator,\n" +
-                "COUNT(hospitalNumber) AS ageDenominator,\n" +
-                "COUNT(hospitalNumber) - COUNT(age) AS ageVariance,\n" +
-                "ROUND((CAST(COUNT(age) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS agePerformance,\n" +
-                "COUNT(sex) AS sexNumerator,\n" +
-                "COUNT(hospitalNumber) AS sexDenominator,\n" +
-                "COUNT(hospitalNumber) - COUNT(sex) AS sexVariance,\n" +
-                "ROUND((CAST(COUNT(sex) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS sexPerformance,\n" +
-                "COUNT(dateOfBirth) AS dobNumerator,\n" +
-                "COUNT(hospitalNumber) AS dobDenominator,\n" +
-                "COUNT(hospitalNumber) - COUNT(dateOfBirth) AS dobVariance,\n" +
-                "ROUND((CAST(COUNT(dateOfBirth) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS dobPerformance,\n" +
-                "COUNT(marital_status) AS maritalNumerator,\n" +
-                "COUNT(hospitalNumber) AS maritalDenominator,\n" +
-                "COUNT(hospitalNumber) - COUNT(marital_status) AS maritalVariance,\n" +
-                "ROUND((CAST(COUNT(marital_status) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS maritalPerformance,\n" +
-                "COUNT(education) AS eduNumerator,\n" +
-                "COUNT(hospitalNumber) AS eduDenominator,\n" +
-                "COUNT(hospitalNumber) - COUNT(education) AS eduVariance,\n" +
-                "ROUND((CAST(COUNT(education) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS eduPerformance,\n" +
-                "COUNT(employment) AS employNumerator,\n" +
-                "COUNT(hospitalNumber) AS employDenominator,\n" +
-                "COUNT(hospitalNumber) - COUNT(employment) AS employVariance,\n" +
-                "ROUND((CAST(COUNT(employment) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS employPerformance,\n" +
-                "COUNT(address) AS addressNumerator,\n" +
-                "COUNT(hospitalNumber) AS addressDenominator,\n" +
-                "COUNT(hospitalNumber) - COUNT(address) AS addressVariance, \n" +
-                "ROUND((CAST(COUNT(address) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS addressPerformance,\n" +
-                "COUNT(patientId) AS pIdNumerator,\n" +
-                "COUNT(hospitalNumber) AS pIdDenominator,\n" +
-                "COUNT(hospitalNumber) - COUNT(patientId) AS pIdVariance,\n" +
-                "ROUND((CAST(COUNT(patientId) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS pIdPerformance\n" +
-                "\n" +
+                "    COUNT(age) AS ageNumerator,\n" +
+                "    COUNT(hospitalNumber) AS ageDenominator,\n" +
+                "    ROUND((CAST(COUNT(age) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS agePerformance,\n" +
+                "    COUNT(sex) AS sexNumerator,\n" +
+                "    COUNT(hospitalNumber) AS sexDenominator,\n" +
+                "    ROUND((CAST(COUNT(sex) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS sexPerformance,\n" +
+                "    COUNT(dateOfBirth) AS dobNumerator,\n" +
+                "    COUNT(hospitalNumber) AS dobDenominator,\n" +
+                "    ROUND((CAST(COUNT(dateOfBirth) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS dobPerformance,\n" +
+                "    COUNT(marital_status) AS maritalNumerator,\n" +
+                "    COUNT(hospitalNumber) AS maritalDenominator,\n" +
+                "    ROUND((CAST(COUNT(marital_status) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS maritalPerformance,\n" +
+                "    COUNT(education) AS eduNumerator,\n" +
+                "    COUNT(hospitalNumber) AS eduDenominator,\n" +
+                "    ROUND((CAST(COUNT(education) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS eduPerformance,\n" +
+                "    COUNT(employment) AS employNumerator,\n" +
+                "    COUNT(hospitalNumber) AS employDenominator,\n" +
+                "    ROUND((CAST(COUNT(employment) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS employPerformance,\n" +
+                "    COUNT(address) AS addressNumerator,\n" +
+                "    COUNT(hospitalNumber) AS addressDenominator,\n" +
+                "    ROUND((CAST(COUNT(address) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS addressPerformance,\n" +
+                "    COUNT(patientId) AS pIdNumerator,\n" +
+                "    COUNT(hospitalNumber) AS pIdDenominator,\n" +
+                "    ROUND((CAST(COUNT(patientId) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS pIdPerformance\n" +
                 "FROM\n" +
-                "PatientSummary";
+                "    PatientSummary;\n";
 
     }
 
