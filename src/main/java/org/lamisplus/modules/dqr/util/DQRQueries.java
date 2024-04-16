@@ -1437,27 +1437,35 @@ public class DQRQueries {
                 "SELECT\n" +
                 "    COUNT(age) AS ageNumerator,\n" +
                 "    COUNT(hospitalNumber) AS ageDenominator,\n" +
+                "    COUNT(hospitalNumber) - COUNT(age) AS ageVariance,\n" +
                 "    ROUND((CAST(COUNT(age) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS agePerformance,\n" +
                 "    COUNT(sex) AS sexNumerator,\n" +
                 "    COUNT(hospitalNumber) AS sexDenominator,\n" +
+                "    COUNT(hospitalNumber) - COUNT(sex) AS sexVariance,\n" +
                 "    ROUND((CAST(COUNT(sex) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS sexPerformance,\n" +
                 "    COUNT(dateOfBirth) AS dobNumerator,\n" +
                 "    COUNT(hospitalNumber) AS dobDenominator,\n" +
+                "    COUNT(hospitalNumber) - COUNT(dateOfBirth) AS dobVariance,\n" +
                 "    ROUND((CAST(COUNT(dateOfBirth) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS dobPerformance,\n" +
                 "    COUNT(marital_status) AS maritalNumerator,\n" +
                 "    COUNT(hospitalNumber) AS maritalDenominator,\n" +
+                "    COUNT(hospitalNumber) - COUNT(marital_status) AS maritalVariance,\n" +
                 "    ROUND((CAST(COUNT(marital_status) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS maritalPerformance,\n" +
                 "    COUNT(education) AS eduNumerator,\n" +
                 "    COUNT(hospitalNumber) AS eduDenominator,\n" +
+                "    COUNT(hospitalNumber) - COUNT(education) AS eduVariance,\n" +
                 "    ROUND((CAST(COUNT(education) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS eduPerformance,\n" +
                 "    COUNT(employment) AS employNumerator,\n" +
                 "    COUNT(hospitalNumber) AS employDenominator,\n" +
+                "    COUNT(hospitalNumber) - COUNT(employment) AS employVariance,\n" +
                 "    ROUND((CAST(COUNT(employment) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS employPerformance,\n" +
                 "    COUNT(address) AS addressNumerator,\n" +
                 "    COUNT(hospitalNumber) AS addressDenominator,\n" +
+                "    COUNT(hospitalNumber) - COUNT(address) AS addressVariance,\n" +
                 "    ROUND((CAST(COUNT(address) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS addressPerformance,\n" +
                 "    COUNT(patientId) AS pIdNumerator,\n" +
                 "    COUNT(hospitalNumber) AS pIdDenominator,\n" +
+                "    COUNT(hospitalNumber) - COUNT(patientId) AS pIdVariance,\n" +
                 "    ROUND((CAST(COUNT(patientId) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS pIdPerformance\n" +
                 "FROM\n" +
                 "    PatientSummary;\n";
@@ -2184,6 +2192,315 @@ public class DQRQueries {
                 "    ROUND((CAST(COUNT(normalDob) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS normalDobPerformance\n" +
                 "FROM\n" +
                 "    validitySummary;\n";
+
+    }
+
+    public static class TBQueries{
+
+        public static final String TB_SUMMARY_QUERY = "WITH tbSummary AS (\n" +
+                "    SELECT\n" +
+                "        e.unique_id AS patientId,\n" +
+                "        p.hospital_number AS hospitalNumber,\n" +
+                "        INITCAP(p.sex) AS sex,\n" +
+                "        CAST(EXTRACT(YEAR FROM AGE(NOW(), p.date_of_birth)) AS INTEGER) AS age,\n" +
+                "        p.date_of_birth AS dateOfBirth,\n" +
+                "        tpt.date_of_observation,\n" +
+                "        tpt.data->'tptMonitoring'->> 'date' AS tptDate,\n" +
+                "        tpt.data->'tbIptScreening'->>'fever' AS doctb,\n" +
+                "        tpt.data->'tbIptScreening'->>'outcome' AS tboutcome,\n" +
+                "        tpt.data->'tbIptScreening'->>'tbTreatment' AS tbtreat,\n" +
+                "        tpt.data->'tbIptScreening'->>'completionDate' AS sampleDate,\n" +
+                "        tpt.data->'tbIptScreening'->>'treatementType' AS treatmenttype,\n" +
+                "        tpt.data->'tbIptScreening'->>'eligibleForTPT' AS tptEligible,\n" +
+                "        tpt.data->'tbIptScreening'->>'completionDate' AS tptcompletionDate,\n" +
+                "        tpt.data->'tbIptScreening'->>'treatmentOutcome' AS tbstatus,\n" +
+                "        (CASE WHEN \n" +
+                "            tpt.data->'tbIptScreening'->>'outcome' IS NOT NULL AND tpt.data->'tbIptScreening'->>'outcome' <> '' AND\n" +
+                "            tpt.data->'tbIptScreening'->>'fever' IS NOT NULL AND tpt.data->'tbIptScreening'->>'fever' <> ''\n" +
+                "        THEN 1 ELSE NULL END) AS completeAnddoc,\n" +
+                "        (CASE WHEN tpt.data->'tbIptScreening'->>'outcome' ILIKE '%Presumptive TB case%' THEN 1 ELSE NULL END) AS presumptivetb,\n" +
+                "        (CASE WHEN  (tpt.data->'tbIptScreening'->>'outcome' ILIKE '%Presumptive TB case%' \n" +
+                "            AND (tpt.data->'tbIptScreening'->>'completionDate'  IS NOT NULL OR tpt.data->'tbIptScreening'->>'completionDate' <> '')) THEN 1 ELSE NULL END) AS prsmptivecollection,\n" +
+                "        (CASE WHEN  (tpt.data->'tbIptScreening'->>'outcome' ILIKE '%Presumptive TB case%' \n" +
+                "            AND (tpt.data->'tbIptScreening'->>'completionDate'  IS NOT NULL OR tpt.data->'tbIptScreening'->>'completionDate' <> '') AND \n" +
+                "            tpt.data->'tbIptScreening'->>'treatementType' IS NOT NULL) THEN 1 ELSE NULL END) AS prsmptivectionsamp,\n" +
+                "        (CASE WHEN tpt.data->'tbIptScreening'->>'tbTreatment' = 'Yes' THEN 1 ELSE NULL END) AS tbtreatyes,\n" +
+                "        (CASE WHEN tpt.data->'tbIptScreening'->>'tbTreatment' = 'Yes' AND (tpt.data->'tbIptScreening'->>'outcome' IS NOT NULL OR tpt.data->'tbIptScreening'->>'outcome' <>'') THEN 1 ELSE NULL END) AS tbtreatwithoutcome,\n" +
+                "        (CASE WHEN tpt.data->'tbIptScreening'->>'eligibleForTPT' = 'Yes' THEN 1 ELSE NULL END) AS eligibeipt,\n" +
+                "        (CASE WHEN tpt.data->'tbIptScreening'->>'eligibleForTPT' = 'Yes' AND (tpt.data->'tptMonitoring'->> 'date' IS NOT NULL OR\n" +
+                "            tpt.data->'tptMonitoring'->> 'date' <> '') THEN 1 ELSE NULL END) AS iptStartDate,\n" +
+                "        (CASE WHEN hap.lastV >= NOW() - INTERVAL '6 MONTH' AND hap.lastV <= NOW() THEN 1 ELSE null END) AS hadVl6month,\n" +
+                "        ipt.iptType, ipt.dateOfIptStart, ipt.iptCompletionDate,\n" +
+                "        (CASE WHEN tpt.data->'tbIptScreening'->>'eligibleForTPT' = 'Yes' AND ipt.dateOfIptStart IS NOT NULL THEN 1 ELSE NULL END) AS iptEliStart,\n" +
+                "        (CASE WHEN ipt.dateOfIptStart >= NOW() - INTERVAL '6 MONTH' AND ipt.dateOfIptStart <= NOW() THEN 1 ELSE null END) AS ipt6month,\n" +
+                "        (CASE WHEN (ipt.dateOfIptStart >= NOW() - INTERVAL '6 MONTH' AND ipt.dateOfIptStart <= NOW()) AND ipt.iptCompletionDate IS NOT NULL THEN 1 ELSE null END) AS ipt6monthCompl,\n" +
+                "        ipt.iptCompletionStatus,\n" +
+                "        (CASE WHEN (ipt.dateOfIptStart >= NOW() - INTERVAL '6 MONTH' AND ipt.dateOfIptStart <= NOW()) AND ipt.iptCompletionStatus IS NOT NULL THEN 1 ELSE null END) AS iptStatus,\n" +
+                "        (CASE WHEN (ipt.dateOfIptStart >= NOW() - INTERVAL '6 MONTH' AND ipt.dateOfIptStart <= NOW()) AND ipt.iptType IS NOT NULL THEN 1 ELSE null END) AS iptTypeStatus,\n" +
+                "\t\tst.status\n" +
+                "\n" +
+                "    FROM\n" +
+                "        patient_person p\n" +
+                "    INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+                "    LEFT JOIN (\n" +
+                "        SELECT DISTINCT ON (person_uuid) PERSON_UUID, MAX(VISIT_DATE) AS lastV FROM HIV_ART_PHARMACY\n" +
+                "        GROUP BY PERSON_UUID, visit_date ORDER BY person_uuid, visit_date DESC\n" +
+                "    ) hap ON p.uuid = hap.person_uuid\n" +
+                "    LEFT JOIN (\n" +
+                "        SELECT DISTINCT ON (person_uuid)\n" +
+                "            person_uuid,\n" +
+                "            MAX(date_of_observation) AS date_of_observation,\n" +
+                "            data\n" +
+                "        FROM\n" +
+                "            hiv_observation\n" +
+                "        WHERE\n" +
+                "            type = 'Chronic Care'\n" +
+                "        GROUP BY\n" +
+                "            person_uuid,\n" +
+                "            date_of_observation,\n" +
+                "            type,\n" +
+                "            data\n" +
+                "    ) AS tpt ON e.person_uuid = tpt.person_uuid\n" +
+                "    LEFT JOIN (\n" +
+                "        SELECT\n" +
+                "            TRUE AS commenced,\n" +
+                "            hac.person_uuid\n" +
+                "        FROM\n" +
+                "            hiv_art_clinical hac\n" +
+                "        WHERE\n" +
+                "            hac.archived = 0\n" +
+                "            AND hac.is_commencement IS TRUE\n" +
+                "        GROUP BY\n" +
+                "            hac.person_uuid\n" +
+                "    ) ca ON p.uuid = ca.person_uuid\n" +
+                "    LEFT JOIN (\n" +
+                "        SELECT\n" +
+                "            DISTINCT ON (hap.person_uuid) hap.person_uuid AS personUuid80,\n" +
+                "            ipt_type.regimen_name AS iptType,\n" +
+                "            hap.visit_date AS dateOfIptStart,\n" +
+                "            COALESCE(NULLIF(CAST(hap.ipt->>'completionStatus' AS text), ''), '') as iptCompletionStatus,\n" +
+                "            (\n" +
+                "                CASE\n" +
+                "                WHEN MAX(CAST(complete.date_completed AS DATE)) > NOW() THEN NULL\n" +
+                "                WHEN MAX(CAST(complete.date_completed AS DATE)) IS NULL\n" +
+                "                    AND CAST((hap.visit_date + 168) AS DATE) < NOW() THEN CAST((hap.visit_date + 168) AS DATE)\n" +
+                "                ELSE MAX(CAST(complete.date_completed AS DATE))\n" +
+                "                END\n" +
+                "            ) AS iptCompletionDate\n" +
+                "        FROM\n" +
+                "            hiv_art_pharmacy hap\n" +
+                "            INNER JOIN (\n" +
+                "                SELECT\n" +
+                "                    DISTINCT person_uuid,\n" +
+                "                    MAX(visit_date) AS MAXDATE\n" +
+                "                FROM\n" +
+                "                    hiv_art_pharmacy\n" +
+                "                WHERE\n" +
+                "                    (ipt ->> 'type' ilike '%INITIATION%' or ipt ->> 'type' ilike 'START_REFILL')\n" +
+                "                    AND archived = 0\n" +
+                "                GROUP BY\n" +
+                "                    person_uuid\n" +
+                "                ORDER BY\n" +
+                "                    MAXDATE ASC\n" +
+                "            ) AS max_ipt ON max_ipt.MAXDATE = hap.visit_date\n" +
+                "                AND max_ipt.person_uuid = hap.person_uuid\n" +
+                "            INNER JOIN (\n" +
+                "                SELECT\n" +
+                "                    DISTINCT h.person_uuid,\n" +
+                "                    h.visit_date,\n" +
+                "                    CAST(pharmacy_object ->> 'regimenName' AS VARCHAR) AS regimen_name,\n" +
+                "                    CAST(pharmacy_object ->> 'duration' AS VARCHAR) AS duration,\n" +
+                "                    hrt.description\n" +
+                "                FROM\n" +
+                "                    hiv_art_pharmacy h,\n" +
+                "                    jsonb_array_elements(h.extra -> 'regimens') WITH ORDINALITY p(pharmacy_object)\n" +
+                "                    RIGHT JOIN hiv_regimen hr ON hr.description = CAST(pharmacy_object ->> 'regimenName' AS VARCHAR)\n" +
+                "                    RIGHT JOIN hiv_regimen_type hrt ON hrt.id = hr.regimen_type_id\n" +
+                "                WHERE\n" +
+                "                    hrt.id IN (15)\n" +
+                "            ) AS ipt_type ON ipt_type.person_uuid = max_ipt.person_uuid\n" +
+                "                AND ipt_type.visit_date = max_ipt.MAXDATE\n" +
+                "            LEFT JOIN (\n" +
+                "                SELECT\n" +
+                "                    hap.person_uuid,\n" +
+                "                    hap.visit_date,\n" +
+                "                    TO_DATE(NULLIF(NULLIF(TRIM(hap.ipt->>'dateCompleted'), ''), 'null'), 'YYYY-MM-DD') AS date_completed\n" +
+                "                FROM\n" +
+                "                    hiv_art_pharmacy hap\n" +
+                "                    INNER JOIN (\n" +
+                "                        SELECT\n" +
+                "                            DISTINCT person_uuid,\n" +
+                "                            MAX(visit_date) AS MAXDATE\n" +
+                "                        FROM\n" +
+                "                            hiv_art_pharmacy\n" +
+                "                        WHERE\n" +
+                "                            ipt ->> 'dateCompleted' IS NOT NULL\n" +
+                "                        GROUP BY\n" +
+                "                            person_uuid\n" +
+                "                        ORDER BY\n" +
+                "                            MAXDATE ASC\n" +
+                "                    ) AS complete_ipt ON CAST(complete_ipt.MAXDATE AS DATE) = hap.visit_date\n" +
+                "                        AND complete_ipt.person_uuid = hap.person_uuid\n" +
+                "            ) complete ON complete.person_uuid = hap.person_uuid\n" +
+                "        WHERE\n" +
+                "            hap.archived = 0\n" +
+                "            AND hap.visit_date < CAST (NOW() AS DATE)\n" +
+                "        GROUP BY\n" +
+                "            hap.person_uuid,\n" +
+                "            ipt_type.regimen_name,\n" +
+                "            hap.ipt,\n" +
+                "            hap.visit_date\n" +
+                "    ) ipt ON e.person_uuid = ipt.personuuid80\n" +
+                "\t LEFT JOIN (\n" +
+                "        SELECT DISTINCT ON (person_uuid) \n" +
+                "            person_uuid,\n" +
+                "            COUNT(biometric_type) AS biometric_fingers_captured,\n" +
+                "            COUNT(*) FILTER (WHERE ENCODE(CAST(template AS BYTEA), 'hex') LIKE '46%') AS biometric_valid_captured,\n" +
+                "            recapture \n" +
+                "        FROM biometric\n" +
+                "        WHERE archived != 1 \n" +
+                "        GROUP BY person_uuid, recapture\n" +
+                "    ) b ON e.person_uuid = b.person_uuid\n" +
+                "    LEFT JOIN (\n" +
+                "        SELECT DISTINCT ON (person_uuid) \n" +
+                "            person_uuid,\n" +
+                "            COUNT(biometric_type) AS biometric_fingers_captured,\n" +
+                "            COUNT(*) FILTER (WHERE ENCODE(CAST(template AS BYTEA), 'hex') LIKE '46%') AS biometric_valid_captured,\n" +
+                "            recapture \n" +
+                "        FROM biometric\n" +
+                "        WHERE archived != 1 AND recapture != 0 \n" +
+                "        GROUP BY person_uuid, recapture\n" +
+                "    ) bb ON e.person_uuid = bb.person_uuid\n" +
+                "\tLEFT JOIN (\n" +
+                "\tSELECT personUuid, status FROM (\n" +
+                "\tSELECT\n" +
+                " DISTINCT ON (pharmacy.person_uuid) pharmacy.person_uuid AS personUuid,\n" +
+                "(\n" +
+                "    CASE\n" +
+                "        WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%' THEN 'Died'\n" +
+                "        WHEN(\n" +
+                "        stat.status_date > pharmacy.maxdate\n" +
+                "    AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %' )\n" +
+                ")THEN stat.hiv_status\n" +
+                "        ELSE pharmacy.status\n" +
+                "        END\n" +
+                "    ) AS status,\n" +
+                "\n" +
+                "stat.cause_of_death, stat.va_cause_of_death\n" +
+                "\n" +
+                "         FROM\n" +
+                " (\n" +
+                "     SELECT\n" +
+                "         (\n" +
+                " CASE\n" +
+                "     WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < NOW() THEN 'IIT'\n" +
+                "     ELSE 'Active'\n" +
+                "     END\n" +
+                " ) status,\n" +
+                "         (\n" +
+                " CASE\n" +
+                "     WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < NOW()  THEN hp.visit_date + hp.refill_period + INTERVAL '29 day'\n" +
+                "     ELSE hp.visit_date\n" +
+                "     END\n" +
+                " ) AS visit_date,\n" +
+                "         hp.person_uuid, MAXDATE\n" +
+                "     FROM\n" +
+                "         hiv_art_pharmacy hp\n" +
+                " INNER JOIN (\n" +
+                "         SELECT hap.person_uuid, hap.visit_date AS  MAXDATE, ROW_NUMBER() OVER (PARTITION BY hap.person_uuid ORDER BY hap.visit_date DESC) as rnkkk3\n" +
+                "           FROM public.hiv_art_pharmacy hap \n" +
+                "                    INNER JOIN public.hiv_art_pharmacy_regimens pr \n" +
+                "                    ON pr.art_pharmacy_id = hap.id \n" +
+                "            INNER JOIN hiv_enrollment h ON h.person_uuid = hap.person_uuid AND h.archived = 0 \n" +
+                "            INNER JOIN public.hiv_regimen r on r.id = pr.regimens_id \n" +
+                "            INNER JOIN public.hiv_regimen_type rt on rt.id = r.regimen_type_id \n" +
+                "            WHERE r.regimen_type_id in (1,2,3,4,14) \n" +
+                "            AND hap.archived = 0                \n" +
+                "             ) MAX ON MAX.MAXDATE = hp.visit_date AND MAX.person_uuid = hp.person_uuid \n" +
+                "      AND MAX.rnkkk3 = 1\n" +
+                "     WHERE\n" +
+                " hp.archived = 0\n" +
+                " ) pharmacy\n" +
+                "\n" +
+                "     LEFT JOIN (\n" +
+                "     SELECT\n" +
+                "         hst.hiv_status,\n" +
+                "         hst.person_id,\n" +
+                "\t\t hst.status_date,\n" +
+                "\t\t hst.cause_of_death,\n" +
+                "\t\t hst.va_cause_of_death\n" +
+                "     FROM\n" +
+                "         (\n" +
+                " SELECT * FROM (SELECT DISTINCT (person_id) person_id, status_date, cause_of_death,va_cause_of_death,\n" +
+                "        hiv_status, ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC)\n" +
+                "    FROM hiv_status_tracker WHERE archived=0 )s\n" +
+                " WHERE s.row_number=1\n" +
+                "         ) hst\n" +
+                " INNER JOIN hiv_enrollment he ON he.person_uuid = hst.person_id\n" +
+                " ) stat ON stat.person_id = pharmacy.person_uuid --AND pharmacy.status = 'Active' \n" +
+                ") --st where status = 'Active'\n" +
+                "\t)st ON st.personUuid = e.person_uuid\n" +
+                "    LEFT JOIN base_application_codeset pc ON pc.id = e.status_at_registration_id\n" +
+                "    WHERE\n" +
+                "        p.archived = 0\n" +
+                "        AND p.facility_id = 1678 AND st.status = 'Active'\n" +
+                "    GROUP BY\n" +
+                "        e.id,\n" +
+                "        ca.commenced,\n" +
+                "        p.id,\n" +
+                "        pc.display,\n" +
+                "        p.hospital_number,\n" +
+                "        p.date_of_birth,\n" +
+                "        tpt.data,\n" +
+                "        tpt.date_of_observation,\n" +
+                "        hap.lastv, ipt.iptType, ipt.dateOfIptStart, ipt.iptCompletionDate, ipt.iptCompletionStatus,\n" +
+                "\t\tst.status\n" +
+                "    ORDER BY\n" +
+                "        p.id DESC\n" +
+                ")\n" +
+                "SELECT\n" +
+                "    COUNT(doctb) AS tbScreenNumerator,\n" +
+                "    COUNT(hospitalNumber) AS tbScreenDenominator,\n" +
+                "\tCOUNT(hospitalNumber) - COUNT(doctb) AS tbScreenVariance,\n" +
+                "    ROUND((CAST(COUNT(doctb) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS tbScreenPerformance,\n" +
+                "    COUNT(completeAnddoc) AS docAndCompletedNumerator,\n" +
+                "    COUNT(doctb) AS docAndCompletedDenominator,\n" +
+                "\tCOUNT(doctb) - COUNT(completeAnddoc) AS docAndCompletedVariance,\n" +
+                "    ROUND((CAST(COUNT(completeAnddoc) AS DECIMAL) / COUNT(doctb)) * 100, 2) AS docAndCompletedPerformance,\n" +
+                "    COUNT(tboutcome) AS tbstatusNumerator,\n" +
+                "    COUNT(hospitalNumber) AS tbstatusDenominator,\n" +
+                "\tCOUNT(hospitalNumber) - COUNT(tboutcome) AS tbStatusVariance,\n" +
+                "    ROUND((CAST(COUNT(tboutcome) AS DECIMAL) / COUNT(hospitalNumber)) * 100, 2) AS tbstatusPerformance,\n" +
+                "    COUNT(prsmptivecollection) AS preSampleNumerator,\n" +
+                "    COUNT(tboutcome) AS preSampleDenominator,\n" +
+                "\tCOUNT(tboutcome) - COUNT(prsmptivecollection) AS preSampleVariance,\n" +
+                "    ROUND((CAST(COUNT(prsmptivecollection) AS DECIMAL) / COUNT(tboutcome)) * 100, 2) AS preSamplePerformance,\n" +
+                "    COUNT(prsmptivectionsamp) AS preSampleTypeNumerator,\n" +
+                "    COUNT(prsmptivecollection) AS preSampleTypeDenominator,\n" +
+                "\tCOUNT(prsmptivecollection) - COUNT(prsmptivectionsamp) AS preSampleTypeVariance,\n" +
+                "    ROUND((CAST(COUNT(prsmptivectionsamp) AS DECIMAL) / COUNT(prsmptivecollection)) * 100, 2) AS preSampleTypePerformance,\n" +
+                "    COUNT(iptStartDate) AS tptstartNumerator,\n" +
+                "    COUNT(eligibeipt) AS tptstartDenominator,\n" +
+                "\tCOUNT(eligibeipt) - COUNT(iptStartDate) AS tptStartVariance,\n" +
+                "    ROUND((CAST(COUNT(iptStartDate) AS DECIMAL) / COUNT(eligibeipt)) * 100, 2) AS tptstartPerformance,\n" +
+                "    COUNT(iptEliStart) AS iptEliStartNumerator,\n" +
+                "    COUNT(eligibeipt) AS iptEliStartDenominator,\n" +
+                "\tCOUNT(eligibeipt) - COUNT(iptEliStart) AS iptEliStartVariance,\n" +
+                "    ROUND((CAST(COUNT(iptEliStart) AS DECIMAL) / COUNT(eligibeipt)) * 100, 2) AS iptEliStartPerformance,\n" +
+                "    COUNT(ipt6monthCompl) AS ipt6monthComplNumerator,\n" +
+                "    COUNT(ipt6month) AS ipt6monthComplDenominator,\n" +
+                "\tCOUNT(ipt6month) - COUNT(ipt6monthCompl) AS ipt6monthComplVariance,\n" +
+                "    ROUND((CAST(COUNT(ipt6monthCompl) AS DECIMAL) / COUNT(ipt6month)) * 100, 2) AS ipt6monthComplPerformance,\n" +
+                "    COUNT(iptStatus) AS iptComplStatususNumerator,\n" +
+                "    COUNT(ipt6month) AS iptComplStatususDenominator,\n" +
+                "\tCOUNT(ipt6month) - COUNT(iptStatus) AS iptComplStatususVariance,\n" +
+                "    ROUND((CAST(COUNT(iptStatus) AS DECIMAL) / COUNT(ipt6month)) * 100, 2) AS iptComplStatususPerformance,\n" +
+                "    COUNT(iptTypeStatus) AS iptTypeStatusNumerator,\n" +
+                "    COUNT(ipt6month) AS iptTypeStatusDenominator,\n" +
+                "\tCOUNT(ipt6month) - COUNT(iptTypeStatus) AS iptTypeStatusVariance,\n" +
+                "    ROUND((CAST(COUNT(iptTypeStatus) AS DECIMAL) / COUNT(ipt6month)) * 100, 2) AS iptTypeStatusPerformance\n" +
+                "FROM\n" +
+                "    tbSummary;\n";
 
     }
 
