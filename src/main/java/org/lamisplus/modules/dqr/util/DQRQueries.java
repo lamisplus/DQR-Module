@@ -336,90 +336,229 @@ public class DQRQueries {
 
 
         public static final String LABORATORY_SUMMARY_QUERIES = "WITH vlSummary AS ( \n" +
-                "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex,\n" +
-                "CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) AS age,\n" +
-                "         p.date_of_birth AS dateOfBirth, vl.dateSampleCollected, vl.lastViralLoad, vl.dateOfLastViralLoad, pharm.visit_date,\n" +
-                " (CASE WHEN pharm.visit_date >= NOW() - INTERVAL '1 YEAR' AND pharm.visit_date <= NOW() THEN 1 ELSE null END) AS eligibleVl1year,\n" +
-                "(CASE WHEN vl.dateOfLastViralLoad >= NOW() - INTERVAL '1 YEAR' AND vl.dateOfLastViralLoad <= NOW() THEN 1 ELSE null END) AS hadvl1year,\n" +
-                "(CASE WHEN vl.dateOfLastViralLoad IS NOT NULL AND vl.dateSampleCollected IS NOT NULL THEN 1 ELSE NULL END) AS hadvlAndSampleDate,\n" +
-                "(CASE WHEN vl.dateOfLastViralLoad IS NOT NULL AND vl.pcrDate IS NOT NULL THEN 1 ELSE NULL END) AS hadvlAndpcrDate,\n" +
-                "(CASE WHEN vl.viralLoadType IS NOT NULL AND vl.dateSampleCollected IS NOT NULL THEN 1 ELSE NULL END) AS hadVlIndicator,\n" +
-                "(CASE WHEN vl.dateOfLastViralLoad > vl.dateSampleCollected THEN 1 ELSE NULL END) AS vlDateGsDate,\n" +
-                "(CASE WHEN cd4.cd4date >= NOW() - INTERVAL '1 YEAR' AND cd4.cd4date <= NOW() THEN 1 ELSE null END) AS hadcd4vl1year\n" +
+                "    SELECT \n" +
+                "        e.unique_id AS patientId,\n" +
+                "        p.hospital_number AS hospitalNumber,\n" +
+                "        INITCAP(p.sex) AS sex,\n" +
+                "        CAST(EXTRACT(YEAR FROM AGE(NOW(), date_of_birth)) AS INTEGER) AS age,\n" +
+                "        p.date_of_birth AS dateOfBirth,\n" +
+                "        vl.dateSampleCollected,\n" +
+                "        vl.lastViralLoad,\n" +
+                "        vl.dateOfLastViralLoad,\n" +
+                "        pharm.visit_date,\n" +
+                "        (CASE WHEN pharm.visit_date >= NOW() - INTERVAL '1 YEAR' AND pharm.visit_date <= NOW() THEN 1 ELSE NULL END) AS eligibleVl1year,\n" +
+                "        (CASE WHEN vl.dateOfLastViralLoad >= NOW() - INTERVAL '1 YEAR' AND vl.dateOfLastViralLoad <= NOW() THEN 1 ELSE NULL END) AS hadvl1year,\n" +
+                "        (CASE WHEN vl.dateOfLastViralLoad IS NOT NULL AND vl.dateSampleCollected IS NOT NULL THEN 1 ELSE NULL END) AS hadvlAndSampleDate,\n" +
+                "        (CASE WHEN vl.dateOfLastViralLoad IS NOT NULL AND vl.pcrDate IS NOT NULL THEN 1 ELSE NULL END) AS hadvlAndpcrDate,\n" +
+                "        (CASE WHEN vl.viralLoadType IS NOT NULL AND vl.dateSampleCollected IS NOT NULL THEN 1 ELSE NULL END) AS hadVlIndicator,\n" +
+                "        (CASE WHEN vl.dateOfLastViralLoad > vl.dateSampleCollected THEN 1 ELSE NULL END) AS vlDateGsDate,\n" +
+                "        (CASE WHEN cd4.cd4date >= NOW() - INTERVAL '1 YEAR' AND cd4.cd4date <= NOW() THEN 1 ELSE NULL END) AS hadcd4vl1year\n" +
+                "    FROM \n" +
+                "        patient_person p \n" +
+                "    INNER JOIN \n" +
+                "        hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+                "    LEFT JOIN (\n" +
+                "        SELECT \n" +
+                "            TRUE as commenced, \n" +
+                "            hac.person_uuid \n" +
+                "        FROM \n" +
+                "            hiv_art_clinical hac \n" +
+                "        WHERE \n" +
+                "            hac.archived = 0 \n" +
+                "            AND hac.is_commencement is true\n" +
+                "        GROUP BY \n" +
+                "            hac.person_uuid\n" +
+                "    ) ca ON p.uuid = ca.person_uuid\n" +
+                "    LEFT JOIN (\n" +
+                "        SELECT DISTINCT ON (lo.patient_uuid) \n" +
+                "            lo.patient_uuid as person_uuid, \n" +
+                "            ll.lab_test_name as test,\n" +
+                "            bac_viral_load.display AS viralLoadType, \n" +
+                "            ls.date_sample_collected as dateSampleCollected,\n" +
+                "            lr.result_reported AS lastViralLoad,\n" +
+                "            lr.date_sample_received_at_pcr_lab AS pcrDate,\n" +
+                "            lr.date_result_reported as dateOfLastViralLoad\n" +
+                "        FROM \n" +
+                "            laboratory_order lo\n" +
+                "        LEFT JOIN (\n" +
+                "            SELECT \n" +
+                "                patient_uuid, \n" +
+                "                MAX(order_date) AS MAXDATE \n" +
+                "            FROM \n" +
+                "                laboratory_order lo\n" +
+                "            GROUP BY \n" +
+                "                patient_uuid \n" +
+                "            ORDER BY \n" +
+                "                MAXDATE ASC \n" +
+                "        ) AS current_lo ON current_lo.patient_uuid=lo.patient_uuid AND current_lo.MAXDATE=lo.order_date\n" +
+                "        LEFT JOIN laboratory_test lt ON lt.lab_order_id=lo.id AND lt.patient_uuid = lo.patient_uuid\n" +
+                "        LEFT JOIN base_application_codeset bac_viral_load ON bac_viral_load.id=lt.viral_load_indication\n" +
+                "        LEFT JOIN laboratory_labtest ll ON ll.id=lt.lab_test_id\n" +
+                "        INNER JOIN hiv_enrollment h ON h.person_uuid=current_lo.patient_uuid\n" +
+                "        LEFT JOIN laboratory_sample ls ON ls.test_id=lt.id AND ls.patient_uuid = lo.patient_uuid\n" +
+                "        LEFT JOIN laboratory_result lr ON lr.test_id=lt.id AND lr.patient_uuid = lo.patient_uuid\n" +
+                "        WHERE  \n" +
+                "            lo.archived = 0\n" +
+                "    ) vl ON e.person_uuid = vl.person_uuid\n" +
+                "    LEFT JOIN (\n" +
+                "        SELECT DISTINCT ON (patient_uuid) \n" +
+                "            patient_uuid, \n" +
+                "            MAX(date_sample_collected) AS cd4date \n" +
+                "        FROM \n" +
+                "            laboratory_sample\n" +
+                "        WHERE \n" +
+                "            test_id = 1\n" +
+                "        GROUP BY \n" +
+                "            patient_uuid, \n" +
+                "            date_sample_collected \n" +
+                "        ORDER BY \n" +
+                "            patient_uuid, \n" +
+                "            date_sample_collected DESC \n" +
+                "    ) cd4 ON e.person_uuid = cd4.patient_uuid\n" +
+                "    LEFT JOIN (\n" +
+                "        SELECT DISTINCT ON (person_uuid)\n" +
+                "            person_uuid, \n" +
+                "            visit_date, \n" +
+                "            refill_period\n" +
+                "        FROM \n" +
+                "            ( \n" +
+                "                SELECT \n" +
+                "                    person_uuid, \n" +
+                "                    refill_period, \n" +
+                "                    MAX(visit_date) AS visit_date \n" +
+                "                FROM \n" +
+                "                    hiv_art_pharmacy\n" +
+                "                WHERE \n" +
+                "                    archived != 1\n" +
+                "                GROUP BY \n" +
+                "                    refill_period, \n" +
+                "                    person_uuid \n" +
+                "                ORDER BY \n" +
+                "                    person_uuid DESC \n" +
+                "            ) fi \n" +
+                "        ORDER BY \n" +
+                "            person_uuid DESC \n" +
+                "    ) pharm ON e.person_uuid = pharm.person_uuid\n" +
+                "\tLEFT JOIN(\n" +
+                "\tSELECT personUuid, status FROM (\n" +
+                "\tSELECT\n" +
+                " DISTINCT ON (pharmacy.person_uuid) pharmacy.person_uuid AS personUuid,\n" +
+                "(\n" +
+                "    CASE\n" +
+                "        WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%' THEN 'Died'\n" +
+                "        WHEN(\n" +
+                "        stat.status_date > pharmacy.maxdate\n" +
+                "    AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %' )\n" +
+                ")THEN stat.hiv_status\n" +
+                "        ELSE pharmacy.status\n" +
+                "        END\n" +
+                "    ) AS status,\n" +
                 "\n" +
+                "stat.cause_of_death, stat.va_cause_of_death\n" +
                 "\n" +
-                "        FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
-                "        LEFT JOIN\n" +
-                "        (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
-                "        GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
-                "LEFT JOIN (\n" +
-                "SELECT DISTINCT ON(lo.patient_uuid) lo.patient_uuid as person_uuid, ll.lab_test_name as test,\n" +
-                "bac_viral_load.display AS viralLoadType, ls.date_sample_collected as dateSampleCollected,\n" +
-                "-- CASE WHEN lr.result_reported ~ E'^\\\\\\\\d+(\\\\\\\\.\\\\\\\\d+)?$' THEN CAST(lr.result_reported AS DECIMAL)\n" +
-                "--            ELSE NULL END AS lastViralLoad, \n" +
-                "lr.result_reported AS lastViralLoad,\n" +
-                "lr.date_sample_received_at_pcr_lab AS pcrDate,\n" +
-                "lr.date_result_reported as dateOfLastViralLoad\n" +
-                "FROM laboratory_order lo\n" +
-                "LEFT JOIN ( SELECT patient_uuid, MAX(order_date) AS MAXDATE FROM laboratory_order lo\n" +
-                "GROUP BY patient_uuid ORDER BY MAXDATE ASC ) AS current_lo\n" +
-                "ON current_lo.patient_uuid=lo.patient_uuid AND current_lo.MAXDATE=lo.order_date\n" +
-                "LEFT JOIN laboratory_test lt ON lt.lab_order_id=lo.id AND lt.patient_uuid = lo.patient_uuid\n" +
-                "LEFT JOIN base_application_codeset bac_viral_load ON bac_viral_load.id=lt.viral_load_indication\n" +
-                "LEFT JOIN laboratory_labtest ll ON ll.id=lt.lab_test_id\n" +
-                "INNER JOIN hiv_enrollment h ON h.person_uuid=current_lo.patient_uuid\n" +
-                "LEFT JOIN laboratory_sample ls ON ls.test_id=lt.id AND ls.patient_uuid = lo.patient_uuid\n" +
-                "LEFT JOIN laboratory_result lr ON lr.test_id=lt.id AND lr.patient_uuid = lo.patient_uuid\n" +
-                "WHERE  lo.archived=0\n" +
-                ") vl ON e.person_uuid = vl.person_uuid\n" +
-                "LEFT JOIN(\n" +
-                "select DISTINCT ON (patient_uuid) patient_uuid, MAX(date_sample_collected) AS cd4date \n" +
-                "from laboratory_sample\n" +
-                "WHERE test_id = 1\n" +
-                "GROUP BY patient_uuid, date_sample_collected ORDER BY patient_uuid, date_sample_collected DESC )\n" +
-                "cd4 ON e.person_uuid = cd4.patient_uuid\n" +
-                "LEFT JOIN\n" +
-                "  (SELECT DISTINCT ON (person_uuid)\n" +
-                "    person_uuid, visit_date, refill_period\n" +
-                "FROM ( select person_uuid, refill_period, MAX(visit_date) AS visit_date from hiv_art_pharmacy\n" +
-                "  where archived !=1\n" +
-                "GROUP BY refill_period, person_uuid ORDER BY person_uuid DESC ) fi ORDER BY\n" +
-                "    person_uuid DESC ) pharm ON e.person_uuid = pharm.person_uuid\n" +
-                "        WHERE p.archived=0 AND p.facility_id= ?1 \n" +
-                "        GROUP BY e.id, ca.commenced, p.id, p.hospital_number, p.date_of_birth, vl.dateSampleCollected, \n" +
-                "vl.lastViralLoad, vl.dateOfLastViralLoad, pharm.visit_date, vl.pcrDate, vl.viralLoadType, cd4.cd4date\n" +
-                "        ORDER BY p.id DESC )\n" +
+                "         FROM\n" +
+                " (\n" +
+                "     SELECT\n" +
+                "         (\n" +
+                " CASE\n" +
+                "     WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < NOW() THEN 'IIT'\n" +
+                "     ELSE 'Active'\n" +
+                "     END\n" +
+                " ) status,\n" +
+                "         (\n" +
+                " CASE\n" +
+                "     WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < NOW()  THEN hp.visit_date + hp.refill_period + INTERVAL '29 day'\n" +
+                "     ELSE hp.visit_date\n" +
+                "     END\n" +
+                " ) AS visit_date,\n" +
+                "         hp.person_uuid, MAXDATE\n" +
+                "     FROM\n" +
+                "         hiv_art_pharmacy hp\n" +
+                " INNER JOIN (\n" +
+                "         SELECT hap.person_uuid, hap.visit_date AS  MAXDATE, ROW_NUMBER() OVER (PARTITION BY hap.person_uuid ORDER BY hap.visit_date DESC) as rnkkk3\n" +
+                "           FROM public.hiv_art_pharmacy hap \n" +
+                "                    INNER JOIN public.hiv_art_pharmacy_regimens pr \n" +
+                "                    ON pr.art_pharmacy_id = hap.id \n" +
+                "            INNER JOIN hiv_enrollment h ON h.person_uuid = hap.person_uuid AND h.archived = 0 \n" +
+                "            INNER JOIN public.hiv_regimen r on r.id = pr.regimens_id \n" +
+                "            INNER JOIN public.hiv_regimen_type rt on rt.id = r.regimen_type_id \n" +
+                "            WHERE r.regimen_type_id in (1,2,3,4,14) \n" +
+                "            AND hap.archived = 0                \n" +
+                "             ) MAX ON MAX.MAXDATE = hp.visit_date AND MAX.person_uuid = hp.person_uuid \n" +
+                "      AND MAX.rnkkk3 = 1\n" +
+                "     WHERE\n" +
+                " hp.archived = 0\n" +
+                " ) pharmacy\n" +
+                "\n" +
+                "     LEFT JOIN (\n" +
+                "     SELECT\n" +
+                "         hst.hiv_status,\n" +
+                "         hst.person_id,\n" +
+                "\t\t hst.status_date,\n" +
+                "\t\t hst.cause_of_death,\n" +
+                "\t\t hst.va_cause_of_death\n" +
+                "     FROM\n" +
+                "         (\n" +
+                " SELECT * FROM (SELECT DISTINCT (person_id) person_id, status_date, cause_of_death,va_cause_of_death,\n" +
+                "        hiv_status, ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC)\n" +
+                "    FROM hiv_status_tracker WHERE archived=0 )s\n" +
+                " WHERE s.row_number=1\n" +
+                "         ) hst\n" +
+                " INNER JOIN hiv_enrollment he ON he.person_uuid = hst.person_id\n" +
+                " ) stat ON stat.person_id = pharmacy.person_uuid --AND pharmacy.status = 'Active' \n" +
+                ")) st ON st.personUuid = e.person_uuid --st where status = 'Active'\t\t\n" +
+                "  WHERE \n" +
+                "        p.archived = 0 \n" +
+                "        AND p.facility_id = ?1 \n" +
+                "\t\tAND st.status = 'Active'\n" +
+                "    GROUP BY \n" +
+                "        e.id, \n" +
+                "        ca.commenced, \n" +
+                "        p.id, \n" +
+                "        p.hospital_number, \n" +
+                "        p.date_of_birth, \n" +
+                "        vl.dateSampleCollected, \n" +
+                "        vl.lastViralLoad, \n" +
+                "        vl.dateOfLastViralLoad, \n" +
+                "        pharm.visit_date, \n" +
+                "        vl.pcrDate, \n" +
+                "        vl.viralLoadType, \n" +
+                "        cd4.cd4date,\n" +
+                "\t    st.status\n" +
+                "    ORDER BY \n" +
+                "        p.id DESC \n" +
+                ")\n" +
                 "SELECT \n" +
-                "  COUNT(hadvl1year) AS eligibleVlNumerator,\n" +
-                "  COUNT(eligibleVl1year) AS eligibleVlDenominator,\n" +
-                "  COUNT(eligibleVl1year) - COUNT(hadvl1year) AS eligibleVlVariance,\n" +
-                "  ROUND((CAST(COUNT(hadvl1year) AS DECIMAL) / COUNT(eligibleVl1year)) * 100, 2) AS eligibleVlPerformance,\n" +
-                "  COUNT(hadvlAndSampleDate) AS hadVlNumerator,\n" +
-                "  COUNT(dateOfLastViralLoad) AS hadVlDenominator,\n" +
-                "  COUNT(dateOfLastViralLoad) - COUNT(hadvlAndSampleDate) AS hadVlVariance,\n" +
-                "  ROUND((CAST(COUNT(hadvlAndSampleDate) AS DECIMAL) / COUNT(dateOfLastViralLoad)) * 100, 2) AS hadVlPerformance,\n" +
-                "  COUNT(hadvlAndpcrDate) AS hadPcrDateNumerator,\n" +
-                "  COUNT(dateSampleCollected) AS hadPcrDateDenominator,\n" +
-                "  COUNT(dateSampleCollected) - COUNT(hadvlAndpcrDate) AS hadPcrDateVariance,\n" +
-                "  ROUND((CAST(COUNT(hadvlAndpcrDate) AS DECIMAL) / COUNT(dateSampleCollected)) * 100, 2) AS hadPcrDatePerformance,\n" +
-                "  COUNT(hadVlIndicator) AS  hadIndicatorNumerator,\n" +
-                "  COUNT(dateSampleCollected) AS  hadIndicatorDenominator,\n" +
-                "  COUNT(dateSampleCollected) - COUNT(hadVlIndicator) AS hadIndicatorVariance,\n" +
-                "  ROUND((CAST(COUNT(hadVlIndicator) AS DECIMAL) / COUNT(dateSampleCollected)) * 100, 2) AS hadIndicatorPerformance,\n" +
-                "  COUNT(vlDateGsDate) AS vlDateGsDateNumerator,\n" +
-                "  COUNT(dateOfLastViralLoad) AS vlDateGsDateDenominator,\n" +
-                "  COUNT(dateOfLastViralLoad) - COUNT(vlDateGsDate) AS vlDateGsDateVariance,\n" +
-                "  ROUND((CAST(COUNT(vlDateGsDate) AS DECIMAL) / COUNT(dateOfLastViralLoad)) * 100, 2) AS vlDateGsDatePerformance,\n" +
-                "  COUNT(hadcd4vl1year) AS treatmentCd4Numerator,\n" +
-                "  COUNT(eligibleVl1year) AS treatmentCd4Denominator,\n" +
-                "  COUNT(eligibleVl1year) - COUNT(hadcd4vl1year) AS treatmentCd4Variance,\n" +
-                "  ROUND((CAST(COUNT(hadcd4vl1year) AS DECIMAL) / COUNT(eligibleVl1year)) * 100, 2) AS treatmentCd4Performance,\n" +
-                "  COUNT(hadcd4vl1year) AS cd4WithinYearNumerator,\n" +
-                "  COUNT(eligibleVl1year) AS cd4WithinYearDenominator,\n" +
-                "  COUNT(eligibleVl1year) - COUNT(hadcd4vl1year) AS cd4WithinYearVariance,\n" +
-                "  ROUND((CAST(COUNT(hadcd4vl1year) AS DECIMAL) / COUNT(eligibleVl1year)) * 100, 2) AS cd4WithinYearPerformance\n" +
-                "  FROM \n" +
-                "vlSummary";
+                "    COUNT(hadvl1year) AS eligibleVlNumerator,\n" +
+                "    COUNT(eligibleVl1year) AS eligibleVlDenominator,\n" +
+                "    COUNT(eligibleVl1year) - COUNT(hadvl1year) AS eligibleVlVariance,\n" +
+                "    CASE WHEN COUNT(eligibleVl1year) = 0 THEN 0 ELSE ROUND((CAST(COUNT(hadvl1year) AS DECIMAL) / COUNT(eligibleVl1year)) * 100, 2) END AS eligibleVlPerformance,\n" +
+                "    COUNT(hadvlAndSampleDate) AS hadVlNumerator,\n" +
+                "    COUNT(dateOfLastViralLoad) AS hadVlDenominator,\n" +
+                "    COUNT(dateOfLastViralLoad) - COUNT(hadvlAndSampleDate) AS hadVlVariance,\n" +
+                "    CASE WHEN COUNT(dateOfLastViralLoad) = 0 THEN 0 ELSE ROUND((CAST(COUNT(hadvlAndSampleDate) AS DECIMAL) / COUNT(dateOfLastViralLoad)) * 100, 2) END AS hadVlPerformance,\n" +
+                "    COUNT(hadvlAndpcrDate) AS hadPcrDateNumerator,\n" +
+                "    COUNT(dateSampleCollected) AS hadPcrDateDenominator,\n" +
+                "    COUNT(dateSampleCollected) - COUNT(hadvlAndpcrDate) AS hadPcrDateVariance,\n" +
+                "    CASE WHEN COUNT(dateSampleCollected) = 0 THEN 0 ELSE ROUND((CAST(COUNT(hadvlAndpcrDate) AS DECIMAL) / COUNT(dateSampleCollected)) * 100, 2) END AS hadPcrDatePerformance,\n" +
+                "    COUNT(hadVlIndicator) AS hadIndicatorNumerator,\n" +
+                "    COUNT(dateSampleCollected) AS hadIndicatorDenominator,\n" +
+                "    COUNT(dateSampleCollected) - COUNT(hadVlIndicator) AS hadIndicatorVariance,\n" +
+                "    CASE WHEN COUNT(dateSampleCollected) = 0 THEN 0 ELSE ROUND((CAST(COUNT(hadVlIndicator) AS DECIMAL) / COUNT(dateSampleCollected)) * 100, 2) END AS hadIndicatorPerformance,\n" +
+                "    COUNT(vlDateGsDate) AS vlDateGsDateNumerator,\n" +
+                "    COUNT(dateOfLastViralLoad) AS vlDateGsDateDenominator,\n" +
+                "    COUNT(dateOfLastViralLoad) - COUNT(vlDateGsDate) AS vlDateGsDateVariance,\n" +
+                "    CASE WHEN COUNT(dateOfLastViralLoad) = 0 THEN 0 ELSE ROUND((CAST(COUNT(vlDateGsDate) AS DECIMAL) / COUNT(dateOfLastViralLoad)) * 100, 2) END AS vlDateGsDatePerformance,\n" +
+                "    COUNT(hadcd4vl1year) AS treatmentCd4Numerator,\n" +
+                "    COUNT(eligibleVl1year) AS treatmentCd4Denominator,\n" +
+                "    COUNT(eligibleVl1year) - COUNT(hadcd4vl1year) AS treatmentCd4Variance,\n" +
+                "    CASE WHEN COUNT(eligibleVl1year) = 0 THEN 0 ELSE ROUND((CAST(COUNT(hadcd4vl1year) AS DECIMAL) / COUNT(eligibleVl1year)) * 100, 2) END AS treatmentCd4Performance,\n" +
+                "    COUNT(hadcd4vl1year) AS cd4WithinYearNumerator,\n" +
+                "    COUNT(eligibleVl1year) AS cd4WithinYearDenominator,\n" +
+                "    COUNT(eligibleVl1year) - COUNT(hadcd4vl1year) AS cd4WithinYearVariance,\n" +
+                "    CASE WHEN COUNT(eligibleVl1year) = 0 THEN 0 ELSE ROUND((CAST(COUNT(hadcd4vl1year) AS DECIMAL) / COUNT(eligibleVl1year)) * 100, 2) END AS cd4WithinYearPerformance\n" +
+                "FROM \n" +
+                "    vlSummary;\n";
 
         public static final String EAC_SUMMARY_QUERIES = "WITH eacSummary AS (\n" +
                 "    SELECT \n" +
