@@ -190,7 +190,7 @@ const useStyles = makeStyles((theme) => ({
                   </td>
                   <td>{validity[0]?.normalDobNumerator}</td>
                   <td>{validity[0]?.normalDobDenominator}</td>
-                  <td> </td>
+                  <td>{validity[0]?.normalDobVariance} </td>
                   <td style={{ backgroundColor: validity[0]?.normalDobPerformance >= 95 ? 'green' : validity[0]?.normalDobPerformance >= 90 ? 'yellow' : 'red', color: validity[0]?.normalDobPerformance >= 95 ? 'white' : validity[0]?.normalDobPerformance >= 90 ? 'black' : 'white',
                     textAlign: 'center', fontWeight: 'bold' }}>{validity[0]?.normalDobPerformance} %</td>
                   <td>
@@ -208,7 +208,7 @@ const useStyles = makeStyles((theme) => ({
                   </td>
                   <td>{validity[0]?.ageInitiatedNumerator}</td>
                    <td>{validity[0]?.ageInitiatedDenominator}</td>
-                   <td> </td>
+                   <td>{validity[0]?.ageInitiatedVariance} </td>
                    <td style={{ backgroundColor: validity[0]?.ageInitiatedPerformance >= 95 ? 'green' : validity[0]?.ageInitiatedPerformance >= 90 ? 'yellow' : 'red', color: validity[0]?.ageInitiatedPerformance >= 95 ? 'white' : validity[0]?.ageInitiatedPerformance >= 90 ? 'black' : 'white',
                     textAlign: 'center', fontWeight: 'bold' }}>{validity[0]?.ageInitiatedPerformance} %</td>
                   <td>
@@ -226,7 +226,7 @@ const useStyles = makeStyles((theme) => ({
                   </td>
                   <td>{validity[0]?.startDateNumerator}</td>
                   <td>{validity[0]?.startDateDenominator}</td>
-                  <td> </td>
+                  <td>{validity[0]?.startDateVariance} </td>
                   <td style={{ backgroundColor: validity[0]?.startDatePerformance >= 95 ? 'green' : validity[0]?.startDatePerformance >= 90 ? 'yellow' : 'red', color: validity[0]?.startDatePerformance >= 95 ? 'white' : validity[0]?.startDatePerformance >= 90 ? 'black' : 'white',
                     textAlign: 'center', fontWeight: 'bold' }}>{validity[0]?.startDatePerformance} %</td>
                   <td>
@@ -242,7 +242,7 @@ const useStyles = makeStyles((theme) => ({
                   <td>Proportion of eligible patient with First confirmed HIV test date (from 1985 to current calendar year)</td>
                   <td>{validity[0]?.hivDateNumerator}</td>
                   <td>{validity[0]?.hivDateDenominator}</td>
-                  <td> </td>
+                  <td>{validity[0]?.hivDateVariance} </td>
                   <td style={{ backgroundColor: validity[0]?.hivDatePerformance >= 95 ? 'green' : validity[0]?.hivDatePerformance >= 90 ? 'yellow' : 'red', color: validity[0]?.hivDatePerformance >= 95 ? 'white' : validity[0]?.hivDatePerformance >= 90 ? 'black' : 'white',
                     textAlign: 'center', fontWeight: 'bold' }}>{validity[0]?.hivDatePerformance} %</td>
                   <td>
@@ -260,7 +260,7 @@ const useStyles = makeStyles((theme) => ({
                   </td>
                   <td>{validity[0]?.vlDateNumerator}</td>
                   <td>{validity[0]?.vlDateDenominator}</td>
-                  <td> </td>
+                  <td>{validity[0]?.vlDateVariance} </td>
                   <td style={{ backgroundColor: validity[0]?.vlDatePerformance >= 95 ? 'green' : validity[0]?.vlDatePerformance >= 90 ? 'yellow' : 'red', color: validity[0]?.vlDatePerformance >= 95 ? 'white' : validity[0]?.vlDatePerformance >= 90 ? 'black' : 'white',
                     textAlign: 'center', fontWeight: 'bold' }}>{validity[0]?.vlDatePerformance} %</td>
                   <td>
@@ -278,7 +278,7 @@ const useStyles = makeStyles((theme) => ({
                   </td>
                   <td>{validity[0]?.bioNumerator}</td>
                   <td>{validity[0]?.bioDenominator}</td>
-                  <td> </td>
+                  <td>{validity[0]?.bioVariance} </td>
                   <td style={{ backgroundColor: validity[0]?.bioPerformance >= 95 ? 'green' : validity[0]?.bioPerformance >= 90 ? 'yellow' : 'red', color: validity[0]?.bioPerformance >= 95 ? 'white' : validity[0]?.bioPerformance >= 90 ? 'black' : 'white',
                     textAlign: 'center', fontWeight: 'bold' }}>{validity[0]?.bioPerformance} %</td>
                   <td>
@@ -296,7 +296,7 @@ const useStyles = makeStyles((theme) => ({
                   </td>
                   <td>{validity[0]?.regimenNumerator}</td>
                   <td>{validity[0]?.regimenDenominator}</td>
-                  <td> </td>
+                  <td>{validity[0]?.regimenVariance} </td>
                   <td style={{ backgroundColor: validity[0]?.regimenPerformance >= 95 ? 'green' : validity[0]?.regimenPerformance >= 90 ? 'yellow' : 'red', color: validity[0]?.regimenPerformance >= 95 ? 'white' : validity[0]?.regimenPerformance >= 90 ? 'black' : 'white',
                     textAlign: 'center', fontWeight: 'bold' }}>{validity[0]?.regimenPerformance} %</td>
                   <td>

@@ -227,7 +227,7 @@ const TbScreening = (props) => {
                                 </td>
                                 <td>{tbScreening[0]?.tbScreenNumerator}</td>
                                 <td>{tbScreening[0]?.tbScreenDenominator}</td>
-                                <td> </td>
+                                <td>{tbScreening[0]?.tbScreenVariance} </td>
                                 <td style={{ backgroundColor: tbScreening[0]?.tbScreenPerformance >= 95 ? 'green' : tbScreening[0]?.tbScreenPerformance >= 90 ? 'yellow' : 'red', color: tbScreening[0]?.tbScreenPerformance >= 95 ? 'white' : tbScreening[0]?.tbScreenPerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{tbScreening[0]?.tbScreenPerformance} %</td>
                                 <td>
@@ -248,7 +248,7 @@ const TbScreening = (props) => {
                                 </td>
                                 <td>{tbScreening[0]?.docAndCompletedNumerator}</td>
                                 <td>{tbScreening[0]?.docAndCompletedDenominator}</td>
-                                <td> </td>
+                                <td>{tbScreening[0]?.docAndCompletedVariance} </td>
                                 <td style={{ backgroundColor: tbScreening[0]?.docAndCompletedPerformance >= 95 ? 'green' : tbScreening[0]?.docAndCompletedPerformance >= 90 ? 'yellow' : 'red', color: tbScreening[0]?.docAndCompletedPerformance >= 95 ? 'white' : tbScreening[0]?.docAndCompletedPerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{tbScreening[0]?.docAndCompletedPerformance} %</td>
                                 <td>
@@ -268,7 +268,7 @@ const TbScreening = (props) => {
                                 </td>
                                 <td>{tbScreening[0]?.tbstatusNumerator}</td>
                                 <td>{tbScreening[0]?.tbstatusDenominator}</td>
-                                <td> </td>
+                                <td>{tbScreening[0]?.tbStatusVariance} </td>
                                 <td style={{ backgroundColor: tbScreening[0]?.tbstatusPerformance >= 95 ? 'green' : tbScreening[0]?.tbstatusPerformance >= 90 ? 'yellow' : 'red', color: tbScreening[0]?.tbstatusPerformance >= 95 ? 'white' : tbScreening[0]?.tbstatusPerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{tbScreening[0]?.tbstatusPerformance} %</td>
                                 <td>
@@ -288,7 +288,7 @@ const TbScreening = (props) => {
                                 </td>
                                 <td>{tbScreening[0]?.preSampleNumerator}</td>
                                 <td>{tbScreening[0]?.preSampleDenominator}</td>
-                                <td> </td>
+                                <td>{tbScreening[0]?.preSampleVariance} </td>
                                 <td style={{ backgroundColor: tbScreening[0]?.preSamplePerformance >= 95 ? 'green' : tbScreening[0]?.preSamplePerformance >= 90 ? 'yellow' : 'red', color: tbScreening[0]?.preSamplePerformance >= 95 ? 'white' : tbScreening[0]?.preSamplePerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{tbScreening[0]?.preSamplePerformance} %</td>
                                 <td>
@@ -308,7 +308,7 @@ const TbScreening = (props) => {
                                 </td>
                                <td>{tbScreening[0]?.preSampleTypeNumerator}</td>
                                <td>{tbScreening[0]?.preSampleTypeDenominator}</td>
-                               <td> </td>
+                               <td>{tbScreening[0]?.preSampleTypeVariance} </td>
                                <td style={{ backgroundColor: tbScreening[0]?.preSampleTypePerformance >= 95 ? 'green' : tbScreening[0]?.preSampleTypePerformance >= 90 ? 'yellow' : 'red', color: tbScreening[0]?.preSampleTypePerformance >= 95 ? 'white' : tbScreening[0]?.preSampleTypePerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{tbScreening[0]?.preSampleTypePerformance} %</td>
                                 <td>
@@ -328,7 +328,7 @@ const TbScreening = (props) => {
                                 </td>
                                 <td>{tbScreening[0]?.ipt6monthComplNumerator}</td>
                                 <td>{tbScreening[0]?.ipt6monthComplDenominator}</td>
-                                <td> </td>
+                                <td> {tbScreening[0]?.ipt6monthComplVariance}</td>
                                 <td style={{ backgroundColor: tbScreening[0]?.ipt6monthComplPerformance >= 95 ? 'green' : tbScreening[0]?.ipt6monthComplPerformance >= 90 ? 'yellow' : 'red', color: tbScreening[0]?.ipt6monthComplPerformance >= 95 ? 'white' : tbScreening[0]?.ipt6monthComplPerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{tbScreening[0]?.ipt6monthComplPerformance} %</td>
                                 <td>
@@ -348,7 +348,7 @@ const TbScreening = (props) => {
                                 </td>
                                 <td>{tbScreening[0]?.ipt6monthComplNumerator}</td>
                                 <td>{tbScreening[0]?.ipt6monthComplDenominator}</td>
-                                <td> </td>
+                                <td>{tbScreening[0]?.ipt6monthComplVariance} </td>
                                 <td style={{ backgroundColor: tbScreening[0]?.ipt6monthComplPerformance >= 95 ? 'green' : tbScreening[0]?.ipt6monthComplPerformance >= 90 ? 'yellow' : 'red', color: tbScreening[0]?.ipt6monthComplPerformance >= 95 ? 'white' : tbScreening[0]?.ipt6monthComplPerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{tbScreening[0]?.ipt6monthComplPerformance} %</td>
                                 <td>
@@ -368,7 +368,7 @@ const TbScreening = (props) => {
                                 </td>
                                 <td>{tbScreening[0]?.tptstartNumerator}</td>
                                 <td>{tbScreening[0]?.tptstartDenominator}</td>
-                                <td> </td>
+                                <td>{tbScreening[0]?.tptStartVariance} </td>
                                 <td style={{ backgroundColor: tbScreening[0]?.tptstartPerformance >= 95 ? 'green' : tbScreening[0]?.tptstartPerformance >= 90 ? 'yellow' : 'red', color: tbScreening[0]?.tptstartPerformance >= 95 ? 'white' : tbScreening[0]?.tptstartPerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{tbScreening[0]?.tptstartPerformance} %</td>
                                 <td>
@@ -388,7 +388,7 @@ const TbScreening = (props) => {
                                </td>
                                <td>{tbScreening[0]?.iptComplStatususNumerator}</td>
                                 <td>{tbScreening[0]?.iptComplStatususDenominator}</td>
-                                <td> </td>
+                                <td>{tbScreening[0]?.iptComplStatususVariance} </td>
                                 <td style={{ backgroundColor: tbScreening[0]?.iptComplStatususPerformance >= 95 ? 'green' : tbScreening[0]?.iptComplStatususPerformance >= 90 ? 'yellow' : 'red', color: tbScreening[0]?.iptComplStatususPerformance >= 95 ? 'white' : tbScreening[0]?.iptComplStatususPerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{tbScreening[0]?.iptComplStatususPerformance} %</td>
                                 <td>
@@ -408,7 +408,7 @@ const TbScreening = (props) => {
                                 </td>
                                 <td>{tbScreening[0]?.iptTypeStatusNumerator}</td>
                                 <td>{tbScreening[0]?.iptTypeStatusDenominator}</td>
-                                <td> </td>
+                                <td>{tbScreening[0]?.iptTypeStatusVariance} </td>
                                 <td style={{ backgroundColor: tbScreening[0]?.iptTypeStatusPerformance >= 95 ? 'green' : tbScreening[0]?.iptTypeStatusPerformance >= 90 ? 'yellow' : 'red', color: tbScreening[0]?.iptTypeStatusPerformance >= 95 ? 'white' : tbScreening[0]?.iptTypeStatusPerformance >= 90 ? 'black' : 'white',
                                     textAlign: 'center', fontWeight: 'bold' }}>{tbScreening[0]?.iptTypeStatusPerformance} %</td>
                                 <td>
