@@ -244,7 +244,7 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{prep[0]?.pofferredNumerator}</td>
                                 <td>{prep[0]?.pofferedDenominator}</td>
-                                <td>{prep[0]?.pOfferedVariance} </td>
+                                <td>{prep[0]?.pofferedVariance} </td>
                                 <td style={{ backgroundColor: prep[0]?.pofferredPerformance >= 95 ? 'green' : prep[0]?.pofferredPerformance >= 90 ? 'yellow' : 'red', color: prep[0]?.pofferredPerformance >= 95 ? 'white' : prep[0]?.pofferredPerformance >= 90 ? 'black' : 'white',
                     textAlign: 'center', fontWeight: 'bold' }}>{prep[0]?.pofferredPerformance} %</td>
                                 <td>

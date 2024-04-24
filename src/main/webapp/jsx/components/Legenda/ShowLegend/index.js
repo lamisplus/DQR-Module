@@ -82,54 +82,35 @@ const useStyles = makeStyles((theme) => ({
     <>
       <Card className={classes.root}>
         <CardContent>
-          <h3> Legend </h3>
           <div className="col-xl-12 col-lg-12">
             <Table bordered>
               <tbody>
-                <tr>
-                  <td> 95% and Above Score </td>
-                  <td>
-                  <div>
-                                <span style={{ backgroundColor: "rgb(0,255,100)", color: "white",
-                                  border: "2px solid", margin: "2px", padding: "8px", fontWeight: "bold"
-                              }}
-                                    > Very Good </span>
-                                </div>
+                <tr >
+                  <td style={{ backgroundColor: "rgb(0,255,100)", color: "white", alignItems: "center",
+                                                        border: "2px solid", margin: "2px", padding: "8px", fontWeight: "bold"
+                                                    }}> 95% and Above Score       --  Very Good
+
                     </td>
-                </tr>
-                <tr>
-                  <td>
-                    90% - 94% Score
-                  </td>
-                  <td>
-                  <div>
-                    <span style={{ backgroundColor: "rgb(255,255,0)", color: "white",
-                     border: "2px solid", margin: "2px", padding: "8px", fontWeight: "bold",
-                     boxSizing: "border-box"
-                     }}
-                     > Good </span>
-                     </div>
+
+                  <td style={{ backgroundColor: "rgb(255,255,0)", color: "white",
+                                           border: "2px solid", margin: "2px", padding: "8px", fontWeight: "bold",
+                                           boxSizing: "border-box"
+                                           }}>
+                    90% - 94% Score -- Good
                      </td>
-                </tr>
-                <tr>
-                  <td>
-                      89% and Below Score
-                  </td>
-                  <td>
-                  <div>
-                    <span style={{ backgroundColor: "rgb(255,0,100)", color: "white",
-                     border: "2px solid", margin: "2px", padding: "8px", fontWeight: "bold",
-                     boxSizing: "border-box"
-                     }}
-                     > Poor </span>
-                     </div>
+
+                  <td style={{ backgroundColor: "rgb(255,0,100)", color: "white",
+                                           border: "2px solid", margin: "2px", padding: "8px", fontWeight: "bold",
+                                           boxSizing: "border-box"
+                                           }}>
+                      89% and Below Score -- Poor
                      </td>
                   
                 </tr>
                 
                 
               </tbody>
-            </Table>           
+            </Table>
           </div>
         </CardContent>
       </Card>
