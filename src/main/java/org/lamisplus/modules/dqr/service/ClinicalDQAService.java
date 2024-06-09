@@ -79,4 +79,9 @@ public class ClinicalDQAService {
         return cWithoutLastClinicDate;
     }
 
+    public List <PatientDTOProjection> getNoMonthRefill (Long facilityId) {
+        List<PatientDTOProjection> cWithouMonthRefill = clinicalRepository.getClientWithNoMonthRefill(currentUserOrganizationService.getCurrentUserOrganization());
+        return cWithouMonthRefill;
+    }
+
 }

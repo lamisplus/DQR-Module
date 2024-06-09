@@ -169,7 +169,7 @@ const useStyles = makeStyles((theme) => ({
     setGetHeaderInfo(headerTitle)
     const htsDemo =patientDemoObj
     axios
-          .get(`${baseUrl}dqr/hts-data=${htsDemo}`, {
+          .get(`${baseUrl}dqr/hts-data?indicator=${htsDemo}`, {
             headers: { Authorization: `Bearer ${token}` },
           })
           .then((response) => {
@@ -206,6 +206,7 @@ const useStyles = makeStyles((theme) => ({
                                 <th>
                                   Denominator
                                 </th>
+                                <th> Variance </th>
                                 <th>
                                   Performance
                                 </th>
@@ -224,10 +225,13 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{hts[0]?.totalPosNumerator}</td>
                                 <td>{hts[0]?.totalPosDenominator}</td>
+                                <td>{hts[0]?.totalPosVariance} </td>
                                 <td> </td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of HIV Positive patients (15yrs and above) who had recency test", "hts0" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of HIV Positive patients (15yrs and above) who had recency test", "hts0" )}
+                                    >View</Button>
                                 </div>
                                 </td>
                             </tr>
@@ -240,10 +244,14 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{hts[0]?.withVLNumerator}</td>
                                 <td>{hts[0]?.withVLDenominator}</td>
-                                <td>{hts[0]?.withVLPerformance} %</td>
+                                <td>{hts[0]?.withVLVariance} </td>
+                                <td style={{ backgroundColor: hts[0]?.withVLPerformance >= 95 ? 'green' : hts[0]?.withVLPerformance >= 90 ? 'yellow' : 'red', color: hts[0]?.withVLPerformance >= 95 ? 'white' : hts[0]?.withVLPerformance >= 90 ? 'black' : 'white',
+                                    textAlign: 'center', fontWeight: 'bold' }}>{hts[0]?.withVLPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of HIV Positive patients with recency test (RECENT) done who have documented viral load sample collection date", "hts1" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of HIV Positive patients with recency test (RECENT) done who have documented viral load sample collection date", "hts1" )}
+                                    >View</Button>
                                 </div>
                                 </td>
                             </tr>
@@ -256,10 +264,14 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{hts[0]?.withVlResNumerator}</td>
                                 <td>{hts[0]?.withVlResDenominator}</td>
-                                <td>{hts[0]?.withVlResPerformance} %</td>
+                                <td>{hts[0]?.withVlResVariance} </td>
+                                <td style={{ backgroundColor: hts[0]?.withVlResPerformance >= 95 ? 'green' : hts[0]?.withVlResPerformance >= 90 ? 'yellow' : 'red', color: hts[0]?.withVlResPerformance >= 95 ? 'white' : hts[0]?.withVlResPerformance >= 90 ? 'black' : 'white',
+                                    textAlign: 'center', fontWeight: 'bold' }}>{hts[0]?.withVlResPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of HIV Positive patients with recency test (RECENT) done who have documented viral load confirmation result date", "hts2" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of HIV Positive patients with recency test (RECENT) done who have documented viral load confirmation result date", "hts2" )}
+                                    >View</Button>
                                 </div>            
                                 </td>
                             </tr>
@@ -271,11 +283,15 @@ const useStyles = makeStyles((theme) => ({
                                 Proportion of HIV Positive patients with recency test (RECENT) done whose VL confirmation result date {">"} VL sample collection date
                                 </td>
                                 <td>{hts[0]?.rsGreaterNumerator}</td>
-                                <td>{hts[0]?.rsGreaterPerformance}</td>
-                                <td>{hts[0]?.rsGreaterPerformance} %</td>
+                                <td>{hts[0]?.rsGreaterDenominator}</td>
+                                <td>{hts[0]?.rsGreaterVariance} </td>
+                                <td style={{ backgroundColor: hts[0]?.rsGreaterPerformance >= 95 ? 'green' : hts[0]?.rsGreaterPerformance >= 90 ? 'yellow' : 'red', color: hts[0]?.rsGreaterPerformance >= 95 ? 'white' : hts[0]?.rsGreaterPerformance >= 90 ? 'black' : 'white',
+                                    textAlign: 'center', fontWeight: 'bold' }}>{hts[0]?.rsGreaterPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of HIV Positive patients with recency test (RECENT) done whose VL confirmation result date > VL sample collection date", "hts3" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of HIV Positive patients with recency test (RECENT) done whose VL confirmation result date > VL sample collection date", "hts3" )}
+                                    >View</Button>
                                 </div>  
                                 </td>
                             </tr>
@@ -288,10 +304,14 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                <td>{hts[0]?.recencyNumerator}</td>
                                <td>{hts[0]?.recencyDenominator}</td>
-                               <td>{hts[0]?.recencyPerformance} %</td>
+                               <td>{hts[0]?.recencyVariance} </td>
+                               <td style={{ backgroundColor: hts[0]?.recencyPerformance >= 95 ? 'green' : hts[0]?.recencyPerformance >= 90 ? 'yellow' : 'red', color: hts[0]?.recencyPerformance >= 95 ? 'white' : hts[0]?.recencyPerformance >= 90 ? 'black' : 'white',
+                                    textAlign: 'center', fontWeight: 'bold' }}>{hts[0]?.recencyPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patients whose date of recency is equal or greater than date of HIV testing", "hts4" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of patients whose date of recency is equal or greater than date of HIV testing", "hts4" )}
+                                    >View</Button>
                                 </div>
                                 </td>
                             </tr>
@@ -304,10 +324,14 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{hts[0]?.elicitedNumerator}</td>
                                 <td>{hts[0]?.elicitedDenominator}</td>
-                                <td>{hts[0]?.elicitedPerformance} %</td>
+                                <td>{hts[0]?.elicitedVariance} </td>
+                                <td style={{ backgroundColor: hts[0]?.elicitedPerformance >= 95 ? 'green' : hts[0]?.elicitedPerformance >= 90 ? 'yellow' : 'red', color: hts[0]?.elicitedPerformance >= 95 ? 'white' : hts[0]?.elicitedPerformance >= 90 ? 'black' : 'white',
+                                    textAlign: 'center', fontWeight: 'bold' }}>{hts[0]?.elicitedPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patients elicited/enumerated who are tested for HIV", "hts5" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of patients elicited/enumerated who are tested for HIV", "hts5" )}
+                                    >View</Button>
                                 </div>
                                 </td>
                             </tr>
@@ -320,10 +344,14 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{hts[0]?.settingsNumerator}</td>
                                 <td>{hts[0]?.settingsDenominator}</td>
-                                <td>{hts[0]?.settingsPerformance} %</td>
+                                <td>{hts[0]?.settingsVariance} </td>
+                                <td style={{ backgroundColor: hts[0]?.settingsPerformance >= 95 ? 'green' : hts[0]?.settingsPerformance >= 90 ? 'yellow' : 'red', color: hts[0]?.settingsPerformance >= 95 ? 'white' : hts[0]?.settingsPerformance >= 90 ? 'black' : 'white',
+                                    textAlign: 'center', fontWeight: 'bold' }}>{hts[0]?.settingsPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of index patients with documented Testing Setting", "hts6" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of index patients with documented Testing Setting", "hts6" )}
+                                    >View</Button>
                                 </div>
                                 </td>
                             </tr>
@@ -336,10 +364,14 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{hts[0]?.targNumerator}</td>
                                 <td>{hts[0]?.targDenominator}</td>
-                                <td>{hts[0]?.targPerformance} %</td>
+                                <td>{hts[0]?.targVariance} </td>
+                                <td style={{ backgroundColor: hts[0]?.targPerformance >= 95 ? 'green' : hts[0]?.targPerformance >= 90 ? 'yellow' : 'red', color: hts[0]?.targPerformance >= 95 ? 'white' : hts[0]?.targPerformance >= 90 ? 'black' : 'white',
+                                    textAlign: 'center', fontWeight: 'bold' }}>{hts[0]?.targPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with documented target group", "hts7" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of all active patients with documented target group", "hts7" )}
+                                    >View</Button>
                                 </div>
                                 </td>
                             </tr>

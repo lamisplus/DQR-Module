@@ -224,6 +224,7 @@ const useStyles = makeStyles((theme) => ({
                                 <th>
                                   Denominator
                                 </th>
+                                <th> Variance </th>
                                 <th>
                                   Performance
                                 </th>
@@ -242,10 +243,14 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{pharmacy[0]?.refillNumerator}</td>
                                 <td>{pharmacy[0]?.refillDenominator}</td>
-                                <td>{pharmacy[0]?.refillPerformance} %</td>
+                                <td>{pharmacy[0]?.refillVariance} </td>
+                                <td style={{ backgroundColor: pharmacy[0]?.refillPerformance >= 95 ? 'green' : pharmacy[0]?.refillPerformance >= 90 ? 'yellow' : 'red', color: pharmacy[0]?.refillPerformance >= 95 ? 'white' : pharmacy[0]?.refillPerformance >= 90 ? 'black' : 'white',
+                                    textAlign: 'center', fontWeight: 'bold' }}>{pharmacy[0]?.refillPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with a documented ART regimen duration in the last refill visit", "pharm0" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of all active patients with a documented ART regimen duration in the last refill visit", "pharm0" )}
+                                    >View</Button>
                                     </div>
                                 </td>
                             </tr>
@@ -258,10 +263,14 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{pharmacy[0]?.regimenNumerator}</td>
                                 <td>{pharmacy[0]?.regimenDenominator}</td>
-                                <td>{pharmacy[0]?.regimenPerformance} %</td>
+                                <td>{pharmacy[0]?.regimenVariance} </td>
+                                <td style={{ backgroundColor: pharmacy[0]?.regimenPerformance >= 95 ? 'green' : pharmacy[0]?.regimenPerformance >= 90 ? 'yellow' : 'red', color: pharmacy[0]?.regimenPerformance >= 95 ? 'white' : pharmacy[0]?.regimenPerformance >= 90 ? 'black' : 'white',
+                                    textAlign: 'center', fontWeight: 'bold' }}>{pharmacy[0]?.regimenPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with documented ART regimen in the last drug refill visit", "pharm0" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of all active patients with documented ART regimen in the last drug refill visit", "pharm0" )}
+                                    >View</Button>
                                     </div>                                    
                                 </td>
                             </tr>

@@ -225,6 +225,7 @@ const useStyles = makeStyles((theme) => ({
                                 <th>
                                   Denominator
                                 </th>
+                                <th> Variance </th>
                                 <th>
                                   Performance
                                 </th>
@@ -243,10 +244,14 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{prep[0]?.pofferredNumerator}</td>
                                 <td>{prep[0]?.pofferedDenominator}</td>
-                                <td>{prep[0]?.pofferredPerformance} %</td>
+                                <td>{prep[0]?.pofferedVariance} </td>
+                                <td style={{ backgroundColor: prep[0]?.pofferredPerformance >= 95 ? 'green' : prep[0]?.pofferredPerformance >= 90 ? 'yellow' : 'red', color: prep[0]?.pofferredPerformance >= 95 ? 'white' : prep[0]?.pofferredPerformance >= 90 ? 'black' : 'white',
+                    textAlign: 'center', fontWeight: 'bold' }}>{prep[0]?.pofferredPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of eligible patients who were offered PrEP", "prep0" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of eligible patients who were offered PrEP", "prep0" )}
+                                    >View</Button>
                                     </div>
                                 </td>
                             </tr>
@@ -259,10 +264,14 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{prep[0]?.pofferredNumerator}</td>
                                 <td>{prep[0]?.pacceptedDenominator}</td>
-                                <td>{prep[0]?.pacceptedPerformance} %</td>
+                                <td>{prep[0]?.pacceptedVariance} </td>
+                                <td style={{ backgroundColor: prep[0]?.pacceptedPerformance >= 95 ? 'green' : prep[0]?.pacceptedPerformance >= 90 ? 'yellow' : 'red', color: prep[0]?.pacceptedPerformance >= 95 ? 'white' : prep[0]?.pacceptedPerformance >= 90 ? 'black' : 'white',
+                                textAlign: 'center', fontWeight: 'bold' }}>{prep[0]?.pacceptedPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of eligible patients who accepted PrEP ", "prep1" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of eligible patients who accepted PrEP ", "prep1" )}
+                                    >View</Button>
                                     </div>
                                 </td>
                             </tr>
@@ -275,10 +284,14 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{prep[0]?.penrollNumerator}</td>
                                 <td>{prep[0]?.penrollDenominator}</td>
-                                <td>{prep[0]?.penrollPerformance} %</td>
+                                <td>{prep[0]?.penrollVariance} </td>
+                                <td style={{ backgroundColor: prep[0]?.penrollPerformance >= 95 ? 'green' : prep[0]?.penrollPerformance >= 90 ? 'yellow' : 'red', color: prep[0]?.penrollPerformance >= 95 ? 'white' : prep[0]?.penrollPerformance >= 90 ? 'black' : 'white',
+                                textAlign: 'center', fontWeight: 'bold' }}>{prep[0]?.penrollPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patients who accepted PrEP who are initiated on PrEP ", "prep2" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of patients who accepted PrEP who are initiated on PrEP ", "prep2" )}
+                                    >View</Button>
                                     </div>
                                 </td>
                             </tr>
@@ -291,10 +304,14 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{prep[0]?.penrolledPrepUrinaNumerator}</td>
                                 <td>{prep[0]?.penrolledPrepUrinaDenominator}</td>
-                                <td>{prep[0]?.penrolledPrepUrinaPerformance} %</td>
+                                <td>{prep[0]?.penrolledPrepUrinaVariance} </td>
+                                <td style={{ backgroundColor: prep[0]?.penrolledPrepUrinaPerformance >= 95 ? 'green' : prep[0]?.penrolledPrepUrinaPerformance >= 90 ? 'yellow' : 'red', color: prep[0]?.penrolledPrepUrinaPerformance >= 95 ? 'white' : prep[0]?.penrolledPrepUrinaPerformance >= 90 ? 'black' : 'white',
+                                textAlign: 'center', fontWeight: 'bold' }}>{prep[0]?.penrolledPrepUrinaPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patients who were initiated on PrEP and had urinalysis done", "prep3" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                     onClick={() => viewDetail("Proportion of patients who were initiated on PrEP and had urinalysis done", "prep3" )}
+                                    >View</Button>
                                     </div>
                                 </td>
                             </tr>
@@ -307,10 +324,14 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{prep[0]?.purinaGreaterEnrollNumerator}</td>
                                 <td>{prep[0]?.purinaGreaterEnrollDenominator}</td>
-                                <td>{prep[0]?.purinaGreaterEnrollPerformance} %</td>
+                                <td>{prep[0]?.purinaGreaterEnrollVariance} </td>
+                                <td style={{ backgroundColor: prep[0]?.purinaGreaterEnrollPerformance >= 95 ? 'green' : prep[0]?.purinaGreaterEnrollPerformance >= 90 ? 'yellow' : 'red', color: prep[0]?.purinaGreaterEnrollPerformance >= 95 ? 'white' : prep[0]?.purinaGreaterEnrollPerformance >= 90 ? 'black' : 'white',
+                                textAlign: 'center', fontWeight: 'bold' }}>{prep[0]?.purinaGreaterEnrollPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patients with date of current urinalysis > date of enrolment", "prep5" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of patients with date of current urinalysis > date of enrolment", "prep5" )}
+                                    >View</Button>
                                     </div>
                                 </td>
                             </tr>
@@ -323,10 +344,14 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{prep[0]?.purinaGreaterStatusDateNumerator}</td>
                                 <td>{prep[0]?.purinaGreaterStatusDateDenominator}</td>
-                                <td>{prep[0]?.purinaGreaterStatusDatePerformance} %</td>
+                                <td>{prep[0]?.purinaGreaterStatusDateVariance} </td>
+                                <td style={{ backgroundColor: prep[0]?.purinaGreaterStatusDatePerformance >= 95 ? 'green' : prep[0]?.purinaGreaterStatusDatePerformance >= 90 ? 'yellow' : 'red', color: prep[0]?.purinaGreaterStatusDatePerformance >= 95 ? 'white' : prep[0]?.purinaGreaterStatusDatePerformance >= 90 ? 'black' : 'white',
+                                textAlign: 'center', fontWeight: 'bold' }}>{prep[0]?.purinaGreaterStatusDatePerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patients with date of current urinalysis > date of HIV status", "prep6" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of patients with date of current urinalysis > date of HIV status", "prep6" )}
+                                    >View</Button>
                                     </div>
                                 </td>
                             </tr>
@@ -339,10 +364,14 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{prep[0]?.commencedNumerator}</td>
                                 <td>{prep[0]?.commencedDenominator}</td>
-                                <td>{prep[0]?.commencedPerformance} %</td>
+                                <td>{prep[0]?.commencedVariance} </td>
+                                <td style={{ backgroundColor: prep[0]?.commencedPerformance >= 95 ? 'green' : prep[0]?.commencedPerformance >= 90 ? 'yellow' : 'red', color: prep[0]?.commencedPerformance >= 95 ? 'white' : prep[0]?.commencedPerformance >= 90 ? 'black' : 'white',
+                                textAlign: 'center', fontWeight: 'bold' }}>{prep[0]?.commencedPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patients with date of registration Less than date of PrEP commencement", "prep4" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of patients with date of registration Less than date of PrEP commencement", "prep4" )}
+                                    >View</Button>
                                     </div>
                                 </td>
                             </tr>

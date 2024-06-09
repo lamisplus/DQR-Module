@@ -21,6 +21,7 @@ public class DQAService {
     private final DataConsistencyRepository dataConsistencyRepository;
     private final  PrepRepository prepRepository;
     private final HtsRepository htsRepository;
+    private final ClientVerificationRepository verificationRepository;
 
 
     public List<PatientDTOProjection> getPatient(Long facilityId) {
@@ -106,5 +107,9 @@ public class DQAService {
         return htsSummary;
     }
 
+    public List<ClientVerificationDTOProjection> getClientVerificationSummary(Long facility) {
+        List<ClientVerificationDTOProjection> clientVerificationSummary = verificationRepository.getClientVerificationSummary(currentUserOrganizationService.getCurrentUserOrganization());
+        return clientVerificationSummary;
+    }
 
 }

@@ -225,6 +225,7 @@ const useStyles = makeStyles((theme) => ({
                                 <th>
                                   Denominator
                                 </th>
+                                <th>Variance </th>
                                 <th>
                                   Performance
                                 </th>
@@ -243,10 +244,14 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{biometrics[0]?.captureNumerator}</td>
                                 <td>{biometrics[0]?.captureDenominator}</td>
-                                <td>{biometrics[0]?.capturePerformance} %</td>
+                                <td> {biometrics[0]?.captureVariance}</td>
+                                <td style={{ backgroundColor: biometrics[0]?.capturePerformance >= 95 ? 'green' : biometrics[0]?.capturePerformance >= 90 ? 'yellow' : 'red', color: biometrics[0]?.capturePerformance >= 95 ? 'white' : biometrics[0]?.capturePerformance >= 90 ? 'black' : 'white',
+                                    textAlign: 'center', fontWeight: 'bold' }}>{biometrics[0]?.capturePerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Biometric fingerprint captured", "bioDemo0" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                 onClick={() => viewDetail("Proportion of all active patients with Biometric fingerprint captured", "bioDemo0" )}
+                                    >View</Button>
                                     </div>
                                 </td>
                             </tr>
@@ -259,10 +264,14 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{biometrics[0]?.validCapNumerator}</td>
                                 <td>{biometrics[0]?.validCapDenominator}</td>
-                                <td>{biometrics[0]?.validCapPerformance} %</td>
+                                 <td> {biometrics[0]?.validCapVariance}</td>
+                                 <td style={{ backgroundColor: biometrics[0]?.validCapPerformance >= 95 ? 'green' : biometrics[0]?.validCapPerformance >= 90 ? 'yellow' : 'red', color: biometrics[0]?.validCapPerformance >= 95 ? 'white' : biometrics[0]?.validCapPerformance >= 90 ? 'black' : 'white',
+                                    textAlign: 'center', fontWeight: 'bold' }}>{biometrics[0]?.validCapPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with valid Biometric fingerprint captured", "bioDemo1" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                 onClick={() => viewDetail("Proportion of all active patients with valid Biometric fingerprint captured", "bioDemo1" )}
+                                    >View</Button>
                                     </div>
                                     
                                 </td>
@@ -276,10 +285,14 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{biometrics[0]?.recapNumerator}</td>
                                 <td>{biometrics[0]?.recapDenominator}</td>
-                                <td>{biometrics[0]?.recapPerformance} %</td>
+                                 <td>{biometrics[0]?.recapVariance} </td>
+                                 <td style={{ backgroundColor: biometrics[0]?.recapPerformance >= 95 ? 'green' : biometrics[0]?.recapPerformance >= 90 ? 'yellow' : 'red', color: biometrics[0]?.recapPerformance >= 95 ? 'white' : biometrics[0]?.recapPerformance >= 90 ? 'black' : 'white',
+                                    textAlign: 'center', fontWeight: 'bold' }}>{biometrics[0]?.recapPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Biometric fingerprint (recapture)", "bioDemo2" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                 onClick={() => viewDetail("Proportion of all active patients with Biometric fingerprint (recapture)", "bioDemo2" )}
+                                    >View</Button>
                                     </div>   
                                 </td>
                             </tr>
@@ -292,10 +305,14 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{biometrics[0]?.validRecapNumerator}</td>
                                 <td>{biometrics[0]?.validRecapDenominator}</td>
-                                <td>{biometrics[0]?.validRecapPerformance} %</td>
+                                 <td>{biometrics[0]?.validRecapVariance} </td>
+                                 <td style={{ backgroundColor: biometrics[0]?.validRecapPerformance >= 95 ? 'green' : biometrics[0]?.validRecapPerformance >= 90 ? 'yellow' : 'red', color: biometrics[0]?.validRecapPerformance >= 95 ? 'white' : biometrics[0]?.validRecapPerformance >= 90 ? 'black' : 'white',
+                                    textAlign: 'center', fontWeight: 'bold' }}>{biometrics[0]?.validRecapPerformance} %</td>
                                 <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patients with valid Biometric fingerprint (recapture)", "bioDemo3" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                 onClick={() => viewDetail("Proportion of patients with valid Biometric fingerprint (recapture)", "bioDemo3" )}
+                                    >View</Button>
                                     </div> 
                                 </td>
                             </tr>
