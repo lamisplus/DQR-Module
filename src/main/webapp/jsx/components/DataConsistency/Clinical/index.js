@@ -1,14 +1,10 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import MaterialTable from 'material-table';
 import { token, url as baseUrl } from "../../../../api";
-import { Form, Table } from "reactstrap";
+import {  Table } from "reactstrap";
 import { makeStyles } from "@material-ui/core/styles";
 import { Card, CardContent } from "@material-ui/core";
-import "semantic-ui-css/semantic.min.css";
-import { Dropdown, Button as Buuton2, Menu, Icon } from "semantic-ui-react";
-
-import "react-toastify/dist/ReactToastify.css";
-import "react-widgets/dist/css/react-widgets.css";
 import "semantic-ui-css/semantic.min.css";
 import {  Button, } from "semantic-ui-react";
 
@@ -129,7 +125,7 @@ const useStyles = makeStyles((theme) => ({
     const [clinicals, setClinical] = useState({});
     const [showPatientDetail, setPatientDetail] = useState(false);
     const [getHeaderInfo, setGetHeaderInfo] = useState("");
-    const [demographicsPatientsView, setDemographicsPatientsView] = useState([])
+    const [clinicalsPatientsView, setClinicalsPatientsView] = useState([])
 
     useEffect(() => {
         loadClinical();
@@ -154,11 +150,11 @@ const useStyles = makeStyles((theme) => ({
     setGetHeaderInfo(headerTitle)
     const patientDemo =patientDemoObj
     axios
-          .get(`${baseUrl}dqr/patient-demo?indicator=${patientDemo}`, {
+          .get(`${baseUrl}dqr/patient-consistency?indicator=${patientDemo}`, {
             headers: { Authorization: `Bearer ${token}` },
           })
           .then((response) => {
-            setDemographicsPatientsView(response.data);
+            setClinicalsPatientsView(response.data);
             //console.log(response.data[0])
           })
           .catch((error) => {
@@ -193,6 +189,7 @@ const useStyles = makeStyles((theme) => ({
                                 <th>
                                   Denominator
                                 </th>
+                                <th> Variance </th>
                                 <th>
                                   Performance
                                 </th>
@@ -211,10 +208,16 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                  <td>{clinicals[0]?.targNumerator}</td>
                                  <td>{clinicals[0]?.targDenominator}</td>
-                                 <td>{clinicals[0]?.targPerformance} %</td>
+                                 <td>{clinicals[0]?.targVariance} </td>
+                                 <td style={{ backgroundColor: clinicals[0]?.targPerformance >= 95 ? 'green' : clinicals[0]?.targPerformance >= 90 ? 'yellow' : 'red', color: clinicals[0]?.targPerformance >= 95 ? 'white' : clinicals[0]?.targPerformance >= 90 ? 'black' : 'white',
+                                    textAlign: 'center', fontWeight: 'bold' }}>
+                                        {clinicals[0]?.targPerformance} %
+                                    </td>
                                 <td>
                                     <div>
-                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients without documented target group", "dataCon0" )}> View</p>
+                                    <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of all active patients without documented target group", "dataCon0" )}
+                                    >View</Button>
                                     </div>
                                 </td>
                             </tr>
@@ -223,14 +226,18 @@ const useStyles = makeStyles((theme) => ({
                                     2
                                 </th>
                                 <td>
-                                    Proportion of all active patients with a documented care entry point
+                                    Proportion of all active patients without a documented care entry point
                                 </td>
                                 <td>{clinicals[0]?.entryNumerator}</td>
                                 <td>{clinicals[0]?.entryDenominator}</td>
-                                <td>{clinicals[0]?.entryPerformance} %</td>
+                                <td>{clinicals[0]?.entryVariance} </td>
+                                <td style={{ backgroundColor: clinicals[0]?.entryPerformance >= 95 ? 'green' : clinicals[0]?.entryPerformance >= 90 ? 'yellow' : 'red', color: clinicals[0]?.entryPerformance >= 95 ? 'white' : clinicals[0]?.entryPerformance >= 90 ? 'black' : 'white',
+                                    textAlign: 'center', fontWeight: 'bold' }}> {clinicals[0]?.entryPerformance} %</td>
                                 <td>
                                 <div>
-                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with a documented care entry point", "dataCon1" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of all active patients with a documented care entry point", "dataCon1" )}
+                                    >View</Button>
                                     </div>
                                 </td>
                             </tr>
@@ -239,14 +246,18 @@ const useStyles = makeStyles((theme) => ({
                                     3
                                 </th>
                                 <td>
-                                    Proportion of all active patients with documented abnormal weight of 121 and above
+                                    Proportion of all active patients without documented abnormal weight of 121 and above
                                 </td>
                                 <td>{clinicals[0]?.adultWeightNumerator}</td>
                                 <td>{clinicals[0]?.adultWeightDenominator}</td>
-                                <td>{clinicals[0]?.adultWeightPerformance} %</td>
+                                <td>{clinicals[0]?.adultWeightVariance} </td>
+                                <td style={{ backgroundColor: clinicals[0]?.adultWeightPerformance >= 95 ? 'green' : clinicals[0]?.adultWeightPerformance >= 90 ? 'yellow' : 'red', color: clinicals[0]?.adultWeightPerformance >= 95 ? 'white' : clinicals[0]?.adultWeightPerformance >= 90 ? 'black' : 'white',
+                                    textAlign: 'center', fontWeight: 'bold' }}>{clinicals[0]?.adultWeightPerformance} %</td>
                                 <td>
                                     <div>
-                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with documented abnormal weight of 121 and above", "dataCon2" )}> View</p>
+                                    <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of all active patients with documented abnormal weight of 121 and above", "dataCon2" )}
+                                    >View</Button>
                                     </div>
                                 </td>
                             </tr>
@@ -259,10 +270,14 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{clinicals[0]?.peadWeightNumerator}</td>
                                 <td>{clinicals[0]?.peadWeightDenominator}</td>
-                                <td>{clinicals[0]?.peadWeightPerformance} %</td>
+                                <td>{clinicals[0]?.peadWeightVariance} </td>
+                                <td style={{ backgroundColor: clinicals[0]?.peadWeightPerformance >= 95 ? 'green' : clinicals[0]?.peadWeightPerformance >= 90 ? 'yellow' : 'red', color: clinicals[0]?.peadWeightPerformance >= 95 ? 'white' : clinicals[0]?.peadWeightPerformance >= 90 ? 'black' : 'white',
+                                    textAlign: 'center', fontWeight: 'bold' }}>{clinicals[0]?.peadWeightPerformance} %</td>
                                 <td>
                                     <div>
-                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportions of all active paediatric patients age 0 – 14 on ART that had documented weight of 61 and above", "dataCon3" )}> View</p>
+                                    <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                        onClick={() => viewDetail("Proportions of all active paediatric patients age 0 – 14 on ART that had documented weight of 61 and above", "dataCon3" )}
+                                    >View</Button>
                                     </div>
                                 </td>
                             </tr>
@@ -275,10 +290,14 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{clinicals[0]?.pregNumerator}</td>
                                 <td>{clinicals[0]?.pregDenominator}</td>
-                                <td>{clinicals[0]?.pregPerformance} %</td>
+                                <td>{clinicals[0]?.pregVariance} </td>
+                                <td style={{ backgroundColor: clinicals[0]?.pregPerformance >= 95 ? 'green' : clinicals[0]?.pregPerformance >= 90 ? 'yellow' : 'red', color: clinicals[0]?.pregPerformance >= 95 ? 'white' : clinicals[0]?.pregPerformance >= 90 ? 'black' : 'white',
+                                    textAlign: 'center', fontWeight: 'bold' }}> {clinicals[0]?.pregPerformance} %</td>
                                 <td>
                                 <div>
-                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active female patient 12 year and above with a documented pregnancy status", "dataCon4" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                        onClick={() => viewDetail("Proportion of all active female patient 12 year and above with a documented pregnancy status", "dataCon4" )}
+                                    >View</Button>
                                     </div>
                                 </td>
                             </tr>
@@ -289,12 +308,16 @@ const useStyles = makeStyles((theme) => ({
                                 <td>
                                     Proportion of all active patients with an ART start date on or before the current calendar date
                                 </td>
-                               <td>{clinicals[0]?.artDateLessTodayDenominator}</td>
                                <td>{clinicals[0]?.artDateLessTodayNumerator}</td>
-                               <td>{clinicals[0]?.artDateLessTodayPerformance} %</td>
+                               <td>{clinicals[0]?.artDateLessTodayDenominator}</td>
+                               <td>{clinicals[0]?.artDateLessTodayVariance} </td>
+                               <td style={{ backgroundColor: clinicals[0]?.artDateLessTodayPerformance >= 95 ? 'green' : clinicals[0]?.artDateLessTodayPerformance >= 90 ? 'yellow' : 'red', color: clinicals[0]?.artDateLessTodayPerformance >= 95 ? 'white' : clinicals[0]?.artDateLessTodayPerformance >= 90 ? 'black' : 'white',
+                                    textAlign: 'center', fontWeight: 'bold' }}>{clinicals[0]?.artDateLessTodayPerformance} %</td>
                                 <td>
                                     <div>
-                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with an ART start date on or before the current calendar date", "" )}> View</p>
+                                    <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                        onClick={() => viewDetail("Proportion of all active patients with an ART start date on or before the current calendar date", "DataCon5" )}
+                                    >View</Button>
                                     </div>
                                 </td>
                             </tr>
@@ -307,10 +330,14 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{clinicals[0]?.artEqClinicNumerator}</td>
                                 <td>{clinicals[0]?.artEqClinicDenominator}</td>
-                                <td>{clinicals[0]?.artEqClinicPerformance} %</td>
+                                <td>{clinicals[0]?.artEqClinicVariance} </td>
+                                <td style={{ backgroundColor: clinicals[0]?.artEqClinicPerformance >= 95 ? 'green' : clinicals[0]?.artEqClinicPerformance >= 90 ? 'yellow' : 'red', color: clinicals[0]?.artEqClinicPerformance >= 95 ? 'white' : clinicals[0]?.artEqClinicPerformance >= 90 ? 'black' : 'white',
+                                    textAlign: 'center', fontWeight: 'bold' }}>{clinicals[0]?.artEqClinicPerformance} %</td>
                                 <td>
                                     <div>
-                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with an ART start date on or before last clinic visit date", "" )}> View</p>
+                                    <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                        onClick={() => viewDetail("Proportion of all active patients with an ART start date on or before last clinic visit date", "DataCon6" )}
+                                    >View</Button>
                                     </div>
                                 </td>
                             </tr>
@@ -323,10 +350,14 @@ const useStyles = makeStyles((theme) => ({
                                 </td>
                                 <td>{clinicals[0]?.artEqLastPickupNumerator}</td>
                                 <td>{clinicals[0]?.artEqLastPickupDenominator}</td>
-                                <td>{clinicals[0]?.artEqLastPickupPerformance} %</td>
+                                <td>{clinicals[0]?.artEqLastPickupVariance} </td>
+                                <td style={{ backgroundColor: clinicals[0]?.artEqLastPickupPerformance >= 95 ? 'green' : clinicals[0]?.artEqLastPickupPerformance >= 90 ? 'yellow' : 'red', color: clinicals[0]?.artEqLastPickupPerformance >= 95 ? 'white' : clinicals[0]?.artEqLastPickupPerformance >= 90 ? 'black' : 'white',
+                                    textAlign: 'center', fontWeight: 'bold' }}>{clinicals[0]?.artEqLastPickupPerformance} %</td>
                                 <td>
                                     <div>
-                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with an ART start date on or before last drug pickup date", "" )}> View</p>
+                                    <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                        onClick={() => viewDetail("Proportion of all active patients with an ART start date on or before last drug pickup date", "DataCon7" )}
+                                    >View</Button>
                                     </div>
                                 </td>
                             </tr>
@@ -339,10 +370,14 @@ const useStyles = makeStyles((theme) => ({
                               </td>
                               <td>{clinicals[0]?.lgreaterConfNumerator}</td>
                               <td>{clinicals[0]?.lgreaterConfDenominator}</td>
-                              <td>{clinicals[0]?.lgreaterConfPerformance} %</td>
+                              <td>{clinicals[0]?.lgreaterConfVariance} </td>
+                              <td style={{ backgroundColor: clinicals[0]?.lgreaterConfPerformance >= 95 ? 'green' : clinicals[0]?.lgreaterConfPerformance >= 90 ? 'yellow' : 'red', color: clinicals[0]?.lgreaterConfPerformance >= 95 ? 'white' : clinicals[0]?.lgreaterConfPerformance >= 90 ? 'black' : 'white',
+                                    textAlign: 'center', fontWeight: 'bold' }}>{clinicals[0]?.lgreaterConfPerformance} %</td>
                               <td>
                                     <div>
-                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with last drug pickup date on or after first confirmed HIV date", "" )}> View</p>
+                                    <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                        onClick={() => viewDetail("Proportion of all active patients with last drug pickup date on or after first confirmed HIV date", "DataCon8" )}
+                                    >View</Button>
                                     </div>
                               </td>
                               </tr>
@@ -355,92 +390,114 @@ const useStyles = makeStyles((theme) => ({
                              </td>
                              <td>{clinicals[0]?.artGreaterTransNumerator}</td>
                              <td>{clinicals[0]?.artGreaterTransDenominator}</td>
-                             <td>{clinicals[0]?.artGreaterTransPerformance} %</td>
+                             <td>{clinicals[0]?.artGreaterTransVariance} </td>
+                             <td style={{ backgroundColor: clinicals[0]?.artGreaterTransPerformance >= 95 ? 'green' : clinicals[0]?.artGreaterTransPerformance >= 90 ? 'yellow' : 'red', color: clinicals[0]?.artGreaterTransPerformance >= 95 ? 'white' : clinicals[0]?.artGreaterTransPerformance >= 90 ? 'black' : 'white',
+                                    textAlign: 'center', fontWeight: 'bold' }}>{clinicals[0]?.artGreaterTransPerformance} %</td>
                              <td>
                                     <div>
-                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with ART start date before transfer-in date", "" )}> View</p>
+                                    <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                        onClick={() => viewDetail("Proportion of all active patients with ART start date before transfer-in date", "DataCon9" )}
+                                    >View</Button>
                                     </div>
                              </td>
                              </tr>
 
-                            <tr>
-                            <th scope="row">
-                                11
-                            </th>
-                            <td>
-                                Proportion of all active patients with Last clinic visit date on or after first confirmed HIV date
-                            </td>
-                            <td>{clinicals[0]?.lgreaterConfNumerator}</td>
-                            <td>{clinicals[0]?.lgreaterConfDenominator}</td>
-                            <td>{clinicals[0]?.lgreaterConfPerformance} %</td>
-                            <td>
-                                <div>
-                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Last clinic visit date on or after first confirmed HIV date", "" )}> View</p>
-                                </div>
-                            </td>
-                            </tr>
-
                                 <tr>
                                 <th scope="row">
-                                    12
+                                    11
                                 </th>
                                 <td>
                                     Proportion of all active patients with Last drug pickup date after date of birth
                                 </td>
                                 <td>{clinicals[0]?.lstPickGreaterDObNumerator}</td>
                                 <td>{clinicals[0]?.lstPickGreaterDObDenominator}</td>
-                                <td>{clinicals[0]?.lstPickGreaterDObPerformance} %</td>
+                                <td>{clinicals[0]?.lstPickGreaterDObVariance} </td>
+                                <td style={{ backgroundColor: clinicals[0]?.lstPickGreaterDObPerformance >= 95 ? 'green' : clinicals[0]?.lstPickGreaterDObPerformance >= 90 ? 'yellow' : 'red', color: clinicals[0]?.lstPickGreaterDObPerformance >= 95 ? 'white' : clinicals[0]?.lstPickGreaterDObPerformance >= 90 ? 'black' : 'white',
+                                    textAlign: 'center', fontWeight: 'bold' }}>{clinicals[0]?.lstPickGreaterDObPerformance} %</td>
                                 <td>
                                     <div>
-                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Last drug pickup date after date of birth", "" )}> View</p>
+                                    <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                        onClick={() => viewDetail("Proportion of all active patients with Last drug pickup date after date of birth", "DataCon10" )}
+                                    >View</Button>
                                     </div>
                                 </td>
                             </tr>
                             <tr>
                             <th scope="row">
-                                13
+                                12
                             </th>
                             <td>
                                 Proportion of all active patients Newly initiated on ART (TX_NEW) in the quarter but has previous quarter drug pickup date
                             </td>
                             <td> N/A</td>
                             <td>N/A</td>
+                            <td> </td>
                             <td> %</td>
                             <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients Newly initiated on ART (TX_NEW) in the quarter but has previous quarter drug pickup date", "" )}> View</p>
+                                    <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                            onClick={() => viewDetail("Proportion of all active patients Newly initiated on ART (TX_NEW) in the quarter but has previous quarter drug pickup date", "" )}
+                                        >View</Button>
                                 </div>
                             </td>
                             </tr>
                             <tr>
                             <th scope="row">
-                                14
+                                13
                             </th>
                             <td>
                                 Proportion of all active patients with Last drug pickup date on or after transferred in date
                             </td>
                             <td>{clinicals[0]?.ldrugPickHighNumerator}</td>
                             <td>{clinicals[0]?.ldrugPickHighDenominator}</td>
-                            <td>{clinicals[0]?.ldrugPickHighPerformance} %</td>
+                            <td>{clinicals[0]?.ldrugPickHighVariance} </td>
+                            <td style={{ backgroundColor: clinicals[0]?.ldrugPickHighPerformance >= 95 ? 'green' : clinicals[0]?.ldrugPickHighPerformance >= 90 ? 'yellow' : 'red', color: clinicals[0]?.ldrugPickHighPerformance >= 95 ? 'white' : clinicals[0]?.ldrugPickHighPerformance >= 90 ? 'black' : 'white',
+                                    textAlign: 'center', fontWeight: 'bold' }}>{clinicals[0]?.ldrugPickHighPerformance} %</td>
                             <td>
                                 <div>
-                                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Last drug pickup date on or after transferred in date", "" )}> View</p>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                            onClick={() => viewDetail("Proportion of all active patients with Last drug pickup date on or after transferred in date", "DataCon11" )}
+                                        >View</Button>
                                 </div>
                             </td>
                             </tr>
                             <tr>
                              <th scope="row">
-                                 15
+                                 14
                              </th>
                              <td>
                                  Proportion of all active patients with Last drug pickup date on or before current calendar date
                              </td>
                              <td>{clinicals[0]?.clinicPickLessTodayNumerator}</td>
                              <td>{clinicals[0]?.clinicPickLessTodayDenominator}</td>
-                             <td>{clinicals[0]?.clinicPickLessTodayPerformance} %</td>
+                             <td>{clinicals[0]?.clinicPickLessTodayVariance} </td>
+                             <td style={{ backgroundColor: clinicals[0]?.clinicPickLessTodayPerformance >= 95 ? 'green' : clinicals[0]?.clinicPickLessTodayPerformance >= 90 ? 'yellow' : 'red', color: clinicals[0]?.clinicPickLessTodayPerformance >= 95 ? 'white' : clinicals[0]?.clinicPickLessTodayPerformance >= 90 ? 'black' : 'white',
+                                    textAlign: 'center', fontWeight: 'bold' }}>{clinicals[0]?.clinicPickLessTodayPerformance} %</td>
                              <td>
                                     <div>
-                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Last drug pickup date on or before current calendar date", "" )}> View</p>
+                                    <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                            onClick={() => viewDetail("Proportion of all active patients with Last drug pickup date on or before current calendar date", "DataCon12" )}
+                                        >View</Button>
+                                    </div>
+                             </td>
+                             </tr>
+<tr>
+                             <th scope="row">
+                                 15
+                             </th>
+                             <td>
+                                 Proportion of all active patients with Last clinic visit date on or before current calendar date
+                             </td>
+                             <td>{clinicals[0]?.clinicPickLessTodayNumerator}</td>
+                             <td>{clinicals[0]?.clinicPickLessTodayDenominator}</td>
+                             <td>{clinicals[0]?.clinicPickLessTodayVariance} </td>
+                             <td style={{ backgroundColor: clinicals[0]?.clinicPickLessTodayPerformance >= 95 ? 'green' : clinicals[0]?.clinicPickLessTodayPerformance >= 90 ? 'yellow' : 'red', color: clinicals[0]?.clinicPickLessTodayPerformance >= 95 ? 'white' : clinicals[0]?.clinicPickLessTodayPerformance >= 90 ? 'black' : 'white',
+                                    textAlign: 'center', fontWeight: 'bold' }}>{clinicals[0]?.clinicPickLessTodayPerformance} %</td>
+                             <td>
+                                     <div>
+                                     <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                            onClick={() => viewDetail("Proportion of all active patients with Last clinic visit date on or before current calendar date", "DataCon13" )}
+                                        >View</Button>
                                     </div>
                              </td>
                              </tr>
@@ -449,15 +506,19 @@ const useStyles = makeStyles((theme) => ({
                                  16
                              </th>
                              <td>
-                                 Proportion of all active patients with Last clinic visit date on or before current calendar date
+                                 Proportion of all active patients with Date of VL result after the date of VL sample collection
                              </td>
-                             <td>{clinicals[0]?.clinicPickLessTodayNumerator}</td>
-                             <td>{clinicals[0]?.clinicPickLessTodayDenominator}</td>
-                             <td>{clinicals[0]?.clinicPickLessTodayPerformance} %</td>
+                             <td>{clinicals[0]?.vlNumerator}</td>
+                             <td>{clinicals[0]?.vlDenominator}</td>
+                             <td>{clinicals[0]?.vlVariance} </td>
+                             <td style={{ backgroundColor: clinicals[0]?.vlPerformance >= 95 ? 'green' : clinicals[0]?.vlPerformance >= 90 ? 'yellow' : 'red', color: clinicals[0]?.vlPerformance >= 95 ? 'white' : clinicals[0]?.vlPerformance >= 90 ? 'black' : 'white',
+                                    textAlign: 'center', fontWeight: 'bold' }}>{clinicals[0]?.vlPerformance} %</td>
                              <td>
-                                     <div>
-                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Last clinic visit date on or before current calendar date", "" )}> View</p>
-                                    </div>
+                                <div>
+                                <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of all active patients with Date of VL result after the date of VL sample collection", "DataCon14" )}
+                                        >View</Button>
+                                </div>
                              </td>
                              </tr>
 <tr>
@@ -465,30 +526,17 @@ const useStyles = makeStyles((theme) => ({
                                  17
                              </th>
                              <td>
-                                 Proportion of all active patients with Date of VL result after the date of VL sample collection
-                             </td>
-                             <td></td>
-                             <td></td>
-                             <td> %</td>
-                             <td>
-                                <div>
-                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Date of VL result after the date of VL sample collection", "" )}> View</p>
-                                </div>
-                             </td>
-                             </tr>
-<tr>
-                             <th scope="row">
-                                 18
-                             </th>
-                             <td>
                                  Proportion of new patients (TX_NEW) with CD4 count
                              </td>
                              <td></td>
                              <td></td>
+                             <td> </td>
                              <td> %</td>
                              <td>
                                     <div>
-                                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of new patients (TX_NEW) with CD4 count", "" )}> View</p>
+                                    <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                                    onClick={() => viewDetail("Proportion of new patients (TX_NEW) with CD4 count", "" )}
+                                        >View</Button>
                                     </div>
                              </td>
                              </tr>
@@ -521,7 +569,7 @@ const useStyles = makeStyles((theme) => ({
                               { title: "Status", field: "status", filtering: false },
 
                             ]}
-                            data={ demographicsPatientsView.map((row) => ({
+                            data={ clinicalsPatientsView.map((row) => ({
                               //Id: manager.id,
                               hospitalNumber: row.hospitalNumber,
                               sex: row.sex,

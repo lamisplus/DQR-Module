@@ -177,6 +177,7 @@ const useStyles = makeStyles((theme) => ({
                   <th>Complete Variables</th>
                   <th>Numerator</th>
                   <th>Denominator</th>
+                  <th> Variance </th>
                   <th>Performance</th>
                   <th>Action</th>
                 </tr>
@@ -189,12 +190,14 @@ const useStyles = makeStyles((theme) => ({
                   </td>
                   <td>{validity[0]?.normalDobNumerator}</td>
                   <td>{validity[0]?.normalDobDenominator}</td>
-                  <td>{validity[0]?.normalDobPerformance} %</td>
+                  <td>{validity[0]?.normalDobVariance} </td>
+                  <td style={{ backgroundColor: validity[0]?.normalDobPerformance >= 95 ? 'green' : validity[0]?.normalDobPerformance >= 90 ? 'yellow' : 'red', color: validity[0]?.normalDobPerformance >= 95 ? 'white' : validity[0]?.normalDobPerformance >= 90 ? 'black' : 'white',
+                    textAlign: 'center', fontWeight: 'bold' }}>{validity[0]?.normalDobPerformance} %</td>
                   <td>
                   <div>
-
-                        <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Date of Birth (DOB)", "validity0" )}> View</p>
-
+                  <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                        onClick={() => viewDetail("Proportion of all active patients with Date of Birth (DOB)", "validity0" )}
+                        >View</Button>
                     </div>
                   </td>
                 </tr>
@@ -205,12 +208,14 @@ const useStyles = makeStyles((theme) => ({
                   </td>
                   <td>{validity[0]?.ageInitiatedNumerator}</td>
                    <td>{validity[0]?.ageInitiatedDenominator}</td>
-                   <td>{validity[0]?.ageInitiatedPerformance} %</td>
+                   <td>{validity[0]?.ageInitiatedVariance} </td>
+                   <td style={{ backgroundColor: validity[0]?.ageInitiatedPerformance >= 95 ? 'green' : validity[0]?.ageInitiatedPerformance >= 90 ? 'yellow' : 'red', color: validity[0]?.ageInitiatedPerformance >= 95 ? 'white' : validity[0]?.ageInitiatedPerformance >= 90 ? 'black' : 'white',
+                    textAlign: 'center', fontWeight: 'bold' }}>{validity[0]?.ageInitiatedPerformance} %</td>
                   <td>
                   <div>
-
-                  <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all active patients with Age at ART initiation (from ages of 0-90 years)", "validity1" )}> View</p>
-
+                  <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                        onClick={() => viewDetail("Proportion of all active patients with Age at ART initiation (from ages of 0-90 years)", "validity1" )}
+                        >View</Button>
                   </div>
                   </td>
                 </tr>
@@ -221,12 +226,14 @@ const useStyles = makeStyles((theme) => ({
                   </td>
                   <td>{validity[0]?.startDateNumerator}</td>
                   <td>{validity[0]?.startDateDenominator}</td>
-                  <td>{validity[0]?.startDatePerformance} %</td>
+                  <td>{validity[0]?.startDateVariance} </td>
+                  <td style={{ backgroundColor: validity[0]?.startDatePerformance >= 95 ? 'green' : validity[0]?.startDatePerformance >= 90 ? 'yellow' : 'red', color: validity[0]?.startDatePerformance >= 95 ? 'white' : validity[0]?.startDatePerformance >= 90 ? 'black' : 'white',
+                    textAlign: 'center', fontWeight: 'bold' }}>{validity[0]?.startDatePerformance} %</td>
                   <td>
                   <div>
-
-                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patient with ART start date (from 1985 to current calendar year)", "validity2" )}> View</p>
-
+                  <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                        onClick={() => viewDetail("Proportion of patient with ART start date (from 1985 to current calendar year)", "validity2" )}
+                        >View</Button>
                     </div>
                   </td>
                 </tr>
@@ -235,11 +242,14 @@ const useStyles = makeStyles((theme) => ({
                   <td>Proportion of eligible patient with First confirmed HIV test date (from 1985 to current calendar year)</td>
                   <td>{validity[0]?.hivDateNumerator}</td>
                   <td>{validity[0]?.hivDateDenominator}</td>
-                  <td>{validity[0]?.hivDatePerformance} %</td>
-                  <td><div>
-
-                    <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of eligible patient with First confirmed HIV test date (from 1985 to current calendar year)", "validity3" )}> View</p>
-
+                  <td>{validity[0]?.hivDateVariance} </td>
+                  <td style={{ backgroundColor: validity[0]?.hivDatePerformance >= 95 ? 'green' : validity[0]?.hivDatePerformance >= 90 ? 'yellow' : 'red', color: validity[0]?.hivDatePerformance >= 95 ? 'white' : validity[0]?.hivDatePerformance >= 90 ? 'black' : 'white',
+                    textAlign: 'center', fontWeight: 'bold' }}>{validity[0]?.hivDatePerformance} %</td>
+                  <td>
+                    <div>
+                  <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                        onClick={() => viewDetail("Proportion of eligible patient with First confirmed HIV test date (from 1985 to current calendar year)", "validity3" )}
+                        >View</Button>
                   </div>
                   </td>
                 </tr>
@@ -250,10 +260,14 @@ const useStyles = makeStyles((theme) => ({
                   </td>
                   <td>{validity[0]?.vlDateNumerator}</td>
                   <td>{validity[0]?.vlDateDenominator}</td>
-                  <td>{validity[0]?.vlDatePerformance} %</td>
+                  <td>{validity[0]?.vlDateVariance} </td>
+                  <td style={{ backgroundColor: validity[0]?.vlDatePerformance >= 95 ? 'green' : validity[0]?.vlDatePerformance >= 90 ? 'yellow' : 'red', color: validity[0]?.vlDatePerformance >= 95 ? 'white' : validity[0]?.vlDatePerformance >= 90 ? 'black' : 'white',
+                    textAlign: 'center', fontWeight: 'bold' }}>{validity[0]?.vlDatePerformance} %</td>
                   <td>
                     <div>
-                      <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patient with Date of viral load result (from 1985 to current calendar year)", "validity6" )}> View</p>
+                    <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                        onClick={() => viewDetail("Proportion of patient with Date of viral load result (from 1985 to current calendar year)", "validity6" )}
+                        >View</Button>
                     </div>
                   </td>
                 </tr>
@@ -264,10 +278,14 @@ const useStyles = makeStyles((theme) => ({
                   </td>
                   <td>{validity[0]?.bioNumerator}</td>
                   <td>{validity[0]?.bioDenominator}</td>
-                  <td>{validity[0]?.bioPerformance} %</td>
+                  <td>{validity[0]?.bioVariance} </td>
+                  <td style={{ backgroundColor: validity[0]?.bioPerformance >= 95 ? 'green' : validity[0]?.bioPerformance >= 90 ? 'yellow' : 'red', color: validity[0]?.bioPerformance >= 95 ? 'white' : validity[0]?.bioPerformance >= 90 ? 'black' : 'white',
+                    textAlign: 'center', fontWeight: 'bold' }}>{validity[0]?.bioPerformance} %</td>
                   <td>
                   <div>
-                      <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of all patients with valid Biometric fingerprint captured", "validity4" )}> View</p>
+                  <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                      onClick={() => viewDetail("Proportion of all patients with valid Biometric fingerprint captured", "validity4" )}
+                        >View</Button>
                     </div>
                   </td>
                 </tr>
@@ -278,10 +296,14 @@ const useStyles = makeStyles((theme) => ({
                   </td>
                   <td>{validity[0]?.regimenNumerator}</td>
                   <td>{validity[0]?.regimenDenominator}</td>
-                  <td>{validity[0]?.regimenPerformance} %</td>
+                  <td>{validity[0]?.regimenVariance} </td>
+                  <td style={{ backgroundColor: validity[0]?.regimenPerformance >= 95 ? 'green' : validity[0]?.regimenPerformance >= 90 ? 'yellow' : 'red', color: validity[0]?.regimenPerformance >= 95 ? 'white' : validity[0]?.regimenPerformance >= 90 ? 'black' : 'white',
+                    textAlign: 'center', fontWeight: 'bold' }}>{validity[0]?.regimenPerformance} %</td>
                   <td>
                   <div>
-                      <p style={{cursor:"pointer" }} onClick={() => viewDetail("Proportion of patients with Days of ARV refill (between 14 - 180 days)", "validity4" )}> View</p>
+                  <Button style={{ backgroundColor: "rgb(153,46,98)" }} primary 
+                      onClick={() => viewDetail("Proportion of patients with Days of ARV refill (between 14 - 180 days)", "validity4" )}
+                        >View</Button>
                     </div>
                   </td>
                 </tr>
