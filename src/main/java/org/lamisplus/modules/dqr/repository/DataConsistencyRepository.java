@@ -58,7 +58,7 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
             ") ph ON p.uuid = ph.person_uuid " +
             "     LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "     WHERE p.archived=0 AND p.facility_id= ?1 AND e.target_group_id is null\n" +
+            "     WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND e.target_group_id is null\n" +
             "     GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status\n" +
             "     ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getPatientsWithoutTargetGroup(Long facilityId);
@@ -106,7 +106,7 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
             ") ph ON p.uuid = ph.person_uuid "+
             "      LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "      WHERE p.archived=0 AND p.facility_id= ?1 AND e.entry_point_id is null\n" +
+            "      WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND e.entry_point_id is null\n" +
             "      GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status\n" +
             "      ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getPatientsWithoutCareEntryPoint(Long facilityId);
@@ -166,7 +166,7 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "  ) AS ph ON p.uuid = ph.person_uuid\n" +
             "WHERE\n" +
             "  p.archived = 0\n" +
-            "  AND p.facility_id = ?1\n" +
+            "  AND p.facility_id = ?1 AND status = 'Active'\n" +
             "  AND (tri.body_weight > 121 OR tri.body_weight IS NULL)\n" +
             "ORDER BY\n" +
             "  p.id DESC;", nativeQuery = true)
@@ -226,7 +226,7 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "  ) AS ph ON p.uuid = ph.person_uuid\n" +
             "WHERE\n" +
             "  p.archived = 0\n" +
-            "  AND p.facility_id = ?1\n" +
+            "  AND p.facility_id = ?1 AND AGE(NOW(), ph.last_visit_date) <= INTERVAL '28 DAYS'\n" +
             "  AND CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) BETWEEN 0 AND 14 AND (tri.body_weight > 61 OR tri.body_weight IS NULL) \n" +
             "ORDER BY\n" +
             "  p.id DESC;", nativeQuery = true)
@@ -276,7 +276,7 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
             ") ph ON p.uuid = ph.person_uuid "+
             "      LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "      WHERE p.archived=0 AND p.facility_id= ?1 AND e.date_started > NOW()\n" +
+            "      WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND e.date_started > NOW()\n" +
             "      GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status\n" +
             "      ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getPatientStartDateGreaterThanToday (Long facilityId);
@@ -333,7 +333,7 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "LEFT JOIN\n" +
             "  base_application_codeset pc ON pc.id = e.status_at_registration_id\n" +
             "WHERE\n" +
-            "  p.archived = 0 AND p.facility_id = ?1\n" +
+            "  p.archived = 0 AND p.facility_id = ?1 AND status = 'Active'\n" +
             "GROUP BY\n" +
             "  e.unique_id, p.hospital_number, p.sex, p.date_of_birth, ph.status, e.person_uuid, p.id, e.date_started\n" +
             "HAVING\n" +
@@ -394,7 +394,7 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "\tORDER BY\n" +
             "     person_uuid DESC ) pharm ON pharm.person_uuid = p.uuid\n" +
             "      LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "      WHERE p.archived=0 AND p.facility_id= ?1 AND e.date_started > pharm.visit_date\n" +
+            "      WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND e.date_started > pharm.visit_date\n" +
             "      GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status, pharm.visit_date\n" +
             "      ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getPatientArtDateGreaterThanClinicDay (Long facilityId);
@@ -451,7 +451,7 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "\tORDER BY\n" +
             "     person_uuid DESC ) pharm ON pharm.person_uuid = p.uuid\n" +
             "      LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "      WHERE p.archived=0 AND p.facility_id= ?1 AND e.date_confirmed_hiv > pharm.visit_date\n" +
+            "      WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND e.date_confirmed_hiv > pharm.visit_date\n" +
             "      GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status, pharm.visit_date\n" +
             "      ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getPatientLastPickUpGreaterThanConfirmDate (Long facilityId);
@@ -505,7 +505,7 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "\t\tperson_id, MAX(status_date) AS status_date, hiv_status FROM hiv_status_tracker where hiv_status = 'ART_TRANSFER_IN'\n" +
             "\t\tGROUP BY person_id, hiv_status ) transfer ON p.uuid = transfer.person_id\n" +
             "        LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "        WHERE p.archived=0 AND p.facility_id= ?1 AND transfer.status_date < e.date_started\n" +
+            "        WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND transfer.status_date < e.date_started\n" +
             "        GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status, transfer.status_date\n" +
             "        ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getPatientStartDateGreaterThanTransferIn (Long facilityId);
@@ -562,7 +562,7 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "\tORDER BY\n" +
             "     person_uuid DESC ) pharm ON pharm.person_uuid = p.uuid\n" +
             "      LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "      WHERE p.archived=0 AND p.facility_id= ?1 AND p.date_of_birth > pharm.visit_date\n" +
+            "      WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND p.date_of_birth > pharm.visit_date\n" +
             "      GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status, pharm.visit_date\n" +
             "      ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getPatientDobGreaterThanLastPick (Long facilityId);
@@ -623,7 +623,7 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "\tORDER BY\n" +
             "     person_uuid DESC ) pharm ON pharm.person_uuid = p.uuid\n" +
             "      LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "      WHERE p.archived=0 AND p.facility_id= ?1 AND pharm.visit_date < transfer.status_date\n" +
+            "      WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND pharm.visit_date < transfer.status_date\n" +
             "      GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status, pharm.visit_date, transfer.status_date\n" +
             "      ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getPatientLastPickUpGreaterThanTransferInDate (Long facilityId);
@@ -694,7 +694,7 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "  base_application_codeset pc ON pc.id = e.status_at_registration_id\n" +
             "WHERE\n" +
             "  p.archived = 0\n" +
-            "  AND p.facility_id = ?1\n" +
+            "  AND p.facility_id = ?1 AND status = 'Active'\n" +
             "  AND COALESCE(pharm.visit_date, NOW()) > NOW()\n" +
             "GROUP BY\n" +
             "  e.unique_id, p.hospital_number, p.sex, p.date_of_birth, ph.status, p.id\n" +
@@ -768,7 +768,7 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "  base_application_codeset pc ON pc.id = e.status_at_registration_id\n" +
             "WHERE\n" +
             "  p.archived = 0\n" +
-            "  AND p.facility_id = ?1\n" +
+            "  AND p.facility_id = ?1 AND status = 'Active'\n" +
             "  AND pharm.visit_date > NOW()\n" +
             "GROUP BY\n" +
             "  e.unique_id, p.hospital_number, p.sex, p.date_of_birth, ph.status, p.id\n" +
@@ -840,7 +840,7 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "\t\t\tlr.date_result_reported IS NOT NULL\n" +
             "\t\t) vl ON e.person_uuid = vl.person_uuid\n" +
             "\t    LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "        WHERE p.archived=0 AND p.facility_id= ?1 AND vl.dateSampleCollected > vl.dateOfLastViralLoad\n" +
+            "        WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND vl.dateSampleCollected > vl.dateOfLastViralLoad\n" +
             "        GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status\n" +
             "        ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getPatientVlSampleDateGreaterThanResultDate (Long facilityId);
@@ -901,7 +901,7 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "  ) AS ph ON p.uuid = ph.person_uuid\n" +
             "WHERE\n" +
             "  p.archived = 0\n" +
-            "  AND p.facility_id = ?1\n" +
+            "  AND p.facility_id = ?1 AND status = 'Active'\n" +
             "  AND CAST(EXTRACT(YEAR FROM AGE(NOW(), p.date_of_birth)) AS INTEGER) > 12\n" +
             "  AND INITCAP(p.sex) = 'Female' AND preg.pregnancy_status is null\n" +
             "ORDER BY\n" +

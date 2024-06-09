@@ -63,7 +63,7 @@ public interface BiometricRepository extends JpaRepository<DQA, Long> {
             "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
             ") ph ON p.uuid = ph.person_uuid"+
             "  LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "  WHERE p.archived=0 AND p.facility_id= ?1 AND b.person_uuid is null AND CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) > 12\n" +
+            "  WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND b.person_uuid is null AND CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) > 12\n" +
             "  GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status ,ca.visit_date, ca.pregnancy_status, b.biometric_fingers_captured, b.biometric_valid_captured, b.person_uuid\n" +
             "  ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getPatientsNotCaptured(Long facilityId);
@@ -116,7 +116,7 @@ public interface BiometricRepository extends JpaRepository<DQA, Long> {
             "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
             ") ph ON p.uuid = ph.person_uuid"+
             "  LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "  WHERE p.archived=0 AND p.facility_id= ?1 AND b.biometric_valid_captured !=0 AND CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) > 12\n" +
+            "  WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND b.biometric_valid_captured !=0 AND CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) > 12\n" +
             "  GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status, ca.visit_date, ca.pregnancy_status, b.biometric_fingers_captured, b.biometric_valid_captured\n" +
             "  ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getPatientsValidCaptured(Long facilityId);
@@ -173,7 +173,7 @@ public interface BiometricRepository extends JpaRepository<DQA, Long> {
             "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
             ") ph ON p.uuid = ph.person_uuid\n" +
             "  LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "  WHERE p.archived=0 AND p.facility_id= ?1 AND \n" +
+            "  WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND \n" +
             "\t(bb.person_uuid IS NULL AND b.person_uuid IS NOT NULL) AND \n" +
             "\tCAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) > 12\n" +
             "  GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status, ca.visit_date, ca.pregnancy_status\n" +
@@ -228,7 +228,7 @@ public interface BiometricRepository extends JpaRepository<DQA, Long> {
             "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
             ") ph ON p.uuid = ph.person_uuid " +
             "  LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "  WHERE p.archived=0 AND p.facility_id= ?1 AND b.biometric_valid_captured !=0 AND CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) > 12\n" +
+            "  WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND b.biometric_valid_captured !=0 AND CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) > 12\n" +
             "  GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ca.visit_date, ca.pregnancy_status, b.biometric_fingers_captured,ph.status ,b.biometric_valid_captured\n" +
             "  ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getPatientsValidRecaptured (Long facilityId);

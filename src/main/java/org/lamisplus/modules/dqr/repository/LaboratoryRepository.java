@@ -89,7 +89,7 @@ public interface LaboratoryRepository extends JpaRepository<DQA, Long> {
             "\t  \twhere archived !=1\n" +
             "\t\tGROUP BY refill_period, person_uuid ORDER BY person_uuid DESC ) fi ORDER BY\n" +
             "    \tperson_uuid DESC ) pharm ON e.person_uuid = pharm.person_uuid\n" +
-            "        WHERE p.archived=0 AND p.facility_id= ?1 AND pharm.visit_date >= NOW() - INTERVAL '1 YEAR' AND pharm.visit_date <= NOW()\n" +
+            "        WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND pharm.visit_date >= NOW() - INTERVAL '1 YEAR' AND pharm.visit_date <= NOW()\n" +
             "\t\tAND vl.lastViralLoad IS NULL\n" +
             "        GROUP BY e.id, ca.commenced, p.id, p.hospital_number, p.date_of_birth,ph.status, vl.dateSampleCollected, \n" +
             "\t\tvl.lastViralLoad, vl.dateOfLastViralLoad, pharm.visit_date, vl.pcrDate, vl.viralLoadType, cd4.cd4date\n" +
@@ -174,7 +174,7 @@ public interface LaboratoryRepository extends JpaRepository<DQA, Long> {
             "\t  \twhere archived !=1\n" +
             "\t\tGROUP BY refill_period, person_uuid ORDER BY person_uuid DESC ) fi ORDER BY\n" +
             "    \tperson_uuid DESC ) pharm ON e.person_uuid = pharm.person_uuid\n" +
-            "        WHERE p.archived=0 AND p.facility_id= ?1 AND vl.dateOfLastViralLoad IS NULL AND vl.dateSampleCollected IS NULL\n" +
+            "        WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND vl.dateOfLastViralLoad IS NULL AND vl.dateSampleCollected IS NULL\n" +
             "\t\tAND pharm.visit_date >= NOW() - INTERVAL '1 YEAR' AND pharm.visit_date <= NOW()\n" +
             "        GROUP BY e.id, ca.commenced, p.id, p.hospital_number, p.date_of_birth,ph.status, vl.dateSampleCollected, \n" +
             "\t\tvl.lastViralLoad, vl.dateOfLastViralLoad, pharm.visit_date, vl.pcrDate, vl.viralLoadType, cd4.cd4date\n" +
@@ -258,7 +258,7 @@ public interface LaboratoryRepository extends JpaRepository<DQA, Long> {
             "\t  \twhere archived !=1\n" +
             "\t\tGROUP BY refill_period, person_uuid ORDER BY person_uuid DESC ) fi ORDER BY\n" +
             "    \tperson_uuid DESC ) pharm ON e.person_uuid = pharm.person_uuid\n" +
-            "        WHERE p.archived=0 AND p.facility_id= ?1 AND vl.dateOfLastViralLoad IS NOT NULL AND vl.pcrDate IS NULL\n" +
+            "        WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND vl.dateOfLastViralLoad IS NOT NULL AND vl.pcrDate IS NULL\n" +
             "        GROUP BY e.id, ca.commenced, p.id, p.hospital_number, p.date_of_birth,ph.status, vl.dateSampleCollected, \n" +
             "\t\tvl.lastViralLoad, vl.dateOfLastViralLoad, pharm.visit_date, vl.pcrDate, vl.viralLoadType, cd4.cd4date\n" +
             "        ORDER BY p.id DESC", nativeQuery = true)
@@ -340,7 +340,7 @@ public interface LaboratoryRepository extends JpaRepository<DQA, Long> {
             "\t  \twhere archived !=1\n" +
             "\t\tGROUP BY refill_period, person_uuid ORDER BY person_uuid DESC ) fi ORDER BY\n" +
             "    \tperson_uuid DESC ) pharm ON e.person_uuid = pharm.person_uuid\n" +
-            "        WHERE p.archived=0 AND p.facility_id= ?1 AND vl.dateOfLastViralLoad IS NOT NULL AND vl.viralLoadType IS NULL\n" +
+            "        WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND vl.dateOfLastViralLoad IS NOT NULL AND vl.viralLoadType IS NULL\n" +
             "        GROUP BY e.id, ca.commenced, p.id, p.hospital_number, p.date_of_birth,ph.status, vl.dateSampleCollected, \n" +
             "\t\tvl.lastViralLoad, vl.dateOfLastViralLoad, pharm.visit_date, vl.pcrDate, vl.viralLoadType, cd4.cd4date\n" +
             "        ORDER BY p.id DESC", nativeQuery = true)
@@ -421,7 +421,7 @@ public interface LaboratoryRepository extends JpaRepository<DQA, Long> {
             "\t  \twhere archived !=1\n" +
             "\t\tGROUP BY refill_period, person_uuid ORDER BY person_uuid DESC ) fi ORDER BY\n" +
             "    \tperson_uuid DESC ) pharm ON e.person_uuid = pharm.person_uuid\n" +
-            "        WHERE p.archived=0 AND p.facility_id= ?1 AND vl.dateSampleCollected > vl.dateOfLastViralLoad\n" +
+            "        WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND vl.dateSampleCollected > vl.dateOfLastViralLoad\n" +
             "        GROUP BY e.id, ca.commenced, p.id, p.hospital_number, p.date_of_birth,ph.status, vl.dateSampleCollected, \n" +
             "\t\tvl.lastViralLoad, vl.dateOfLastViralLoad, pharm.visit_date, vl.pcrDate, vl.viralLoadType, cd4.cd4date\n" +
             "        ORDER BY p.id DESC", nativeQuery = true)
@@ -501,7 +501,7 @@ public interface LaboratoryRepository extends JpaRepository<DQA, Long> {
             "\t  \twhere archived !=1\n" +
             "\t\tGROUP BY refill_period, person_uuid ORDER BY person_uuid DESC ) fi ORDER BY\n" +
             "    \tperson_uuid DESC ) pharm ON e.person_uuid = pharm.person_uuid\n" +
-            "        WHERE p.archived=0 AND p.facility_id= ?1 AND vl.dateOfLastViralLoad >= NOW() - INTERVAL '1 YEAR' AND vl.dateOfLastViralLoad <= NOW()\n" +
+            "        WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND vl.dateOfLastViralLoad >= NOW() - INTERVAL '1 YEAR' AND vl.dateOfLastViralLoad <= NOW()\n" +
             "\t\tAND cd4.cd4date IS NULL\n" +
             "        GROUP BY e.id, ca.commenced, p.id, p.hospital_number, p.date_of_birth,ph.status , vl.dateSampleCollected, \n" +
             "\t\tvl.lastViralLoad, vl.dateOfLastViralLoad, pharm.visit_date, vl.pcrDate, vl.viralLoadType, cd4.cd4date\n" +
@@ -585,7 +585,7 @@ public interface LaboratoryRepository extends JpaRepository<DQA, Long> {
             "\t  \twhere archived !=1\n" +
             "\t\tGROUP BY refill_period, person_uuid ORDER BY person_uuid DESC ) fi ORDER BY\n" +
             "    \tperson_uuid DESC ) pharm ON e.person_uuid = pharm.person_uuid\n" +
-            "        WHERE p.archived=0 AND p.facility_id= ?1 AND cd4.cd4date IS NULL\n" +
+            "        WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND cd4.cd4date IS NULL\n" +
             "        GROUP BY e.id, ca.commenced, p.id, p.hospital_number, p.date_of_birth,ph.status, vl.dateSampleCollected, \n" +
             "\t\tvl.lastViralLoad, vl.dateOfLastViralLoad, pharm.visit_date, vl.pcrDate, vl.viralLoadType, cd4.cd4date\n" +
             "        ORDER BY p.id DESC", nativeQuery = true)

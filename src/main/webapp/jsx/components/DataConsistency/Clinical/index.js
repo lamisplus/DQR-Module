@@ -226,7 +226,7 @@ const useStyles = makeStyles((theme) => ({
                                     2
                                 </th>
                                 <td>
-                                    Proportion of all active patients with a documented care entry point
+                                    Proportion of all active patients without a documented care entry point
                                 </td>
                                 <td>{clinicals[0]?.entryNumerator}</td>
                                 <td>{clinicals[0]?.entryDenominator}</td>
@@ -246,7 +246,7 @@ const useStyles = makeStyles((theme) => ({
                                     3
                                 </th>
                                 <td>
-                                    Proportion of all active patients with documented abnormal weight of 121 and above
+                                    Proportion of all active patients without documented abnormal weight of 121 and above
                                 </td>
                                 <td>{clinicals[0]?.adultWeightNumerator}</td>
                                 <td>{clinicals[0]?.adultWeightDenominator}</td>

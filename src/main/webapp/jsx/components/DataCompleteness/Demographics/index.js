@@ -286,7 +286,7 @@ const DemographicsDQA = (props) => {
                 <tr>
                   <th scope="row">6</th>
                   <td>
-                    Proportion of all active patients with a documented marital
+                    Proportion of all active patients with a documented marital status
                   </td>
                   <td>{demographics[0]?.maritalNumerator}</td>
                   <td>{demographics[0]?.maritalDenominator}</td>

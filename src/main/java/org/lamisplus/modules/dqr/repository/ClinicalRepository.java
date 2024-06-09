@@ -56,7 +56,7 @@ public interface ClinicalRepository extends JpaRepository<DQA, Long> {
             "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
             ") ph ON p.uuid = ph.person_uuid " +
             "  LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "  WHERE p.archived=0 AND p.facility_id= ?1 AND e.date_started IS NULL\n" +
+            "  WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND e.date_started IS NULL\n" +
             "  GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status\n" +
             "  ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getClinicalWithoutArtDate (Long facilityId);
@@ -106,7 +106,7 @@ public interface ClinicalRepository extends JpaRepository<DQA, Long> {
             "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
             ") ph ON p.uuid = ph.person_uuid " +
             "  LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "  WHERE p.archived=0 AND p.facility_id= ?1 AND e.date_confirmed_hiv IS NULL\n" +
+            "  WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND e.date_confirmed_hiv IS NULL\n" +
             "  GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status\n" +
             "  ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getClinicalWithoutHivDate (Long facilityId);
@@ -155,7 +155,7 @@ public interface ClinicalRepository extends JpaRepository<DQA, Long> {
             "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
             ") ph ON p.uuid = ph.person_uuid" +
             "  LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "  WHERE p.archived=0 AND p.facility_id= ?1 AND e.target_group_id IS NULL\n" +
+            "  WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND e.target_group_id IS NULL\n" +
             "  GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status\n" +
             "  ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection>getClinicalWithoutTarg (Long facilityId);
@@ -204,7 +204,7 @@ public interface ClinicalRepository extends JpaRepository<DQA, Long> {
             "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
             ") ph ON p.uuid = ph.person_uuid " +
             "  LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "  WHERE p.archived=0 AND p.facility_id= ?1 AND e.entry_point_id IS NULL\n" +
+            "  WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND e.entry_point_id IS NULL\n" +
             "  GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status\n" +
             "  ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getClinicalWithoutEntryPoint (Long facilityId);
@@ -253,7 +253,7 @@ public interface ClinicalRepository extends JpaRepository<DQA, Long> {
             "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
             ") ph ON p.uuid = ph.person_uuid " +
             "  LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "  WHERE p.archived=0 AND p.facility_id= ?1 AND ca.visit_date is null\n" +
+            "  WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND ca.visit_date is null\n" +
             "  GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status, ca.visit_date\n" +
             "  ORDER BY p.id DESC", nativeQuery = true)
     List <PatientDTOProjection> getClientWithoutCommencementDate (Long facilityId);
@@ -302,7 +302,7 @@ public interface ClinicalRepository extends JpaRepository<DQA, Long> {
             "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
             ") ph ON p.uuid = ph.person_uuid "+
             "  LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "  WHERE p.archived=0 AND p.facility_id= ?1 AND e.date_started is null\n" +
+            "  WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND e.date_started is null\n" +
             "  GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status, ca.visit_date\n" +
             "  ORDER BY p.id DESC", nativeQuery = true)
     List <PatientDTOProjection> getClientWithoutHivEnrolDate (Long facilityId);
@@ -351,7 +351,7 @@ public interface ClinicalRepository extends JpaRepository<DQA, Long> {
             "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
             ") ph ON p.uuid = ph.person_uuid " +
             "  LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "  WHERE p.archived=0 AND p.facility_id= ?1 AND e.time_hiv_diagnosis is null\n" +
+            "  WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND e.time_hiv_diagnosis is null\n" +
             "  GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status, ca.visit_date\n" +
             "  ORDER BY p.id DESC", nativeQuery = true)
     List <PatientDTOProjection> getClientWithoutDateDiagnoseHiv (Long facilityId);
@@ -410,7 +410,7 @@ public interface ClinicalRepository extends JpaRepository<DQA, Long> {
             "  ) AS ph ON p.uuid = ph.person_uuid\n" +
             "WHERE\n" +
             "  p.archived = 0\n" +
-            "  AND p.facility_id = ?1\n" +
+            "  AND p.facility_id = ?1 AND status = 'Active'\n" +
             "  AND CAST(EXTRACT(YEAR FROM AGE(NOW(), p.date_of_birth)) AS INTEGER) > 12\n" +
             "  AND INITCAP(p.sex) = 'Female' AND preg.pregnancy_status is null\n" +
             "ORDER BY\n" +
@@ -470,7 +470,7 @@ public interface ClinicalRepository extends JpaRepository<DQA, Long> {
             "    GROUP BY ht.person_uuid, tr.body_weight ORDER BY ht.person_uuid DESC ) fi ORDER BY\n" +
             "    person_uuid DESC ) tri ON tri.person_uuid = p.uuid\n" +
             "  LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "  WHERE p.archived=0 AND p.facility_id= ?1 \n" +
+            "  WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' \n" +
             "  GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status, ca.visit_date, tri.body_weight, p.facility_id, tri.visit_date\n" +
             "  ORDER BY p.id DESC) dd where weight is null\n" +
             "\t) ee", nativeQuery = true)
@@ -529,7 +529,7 @@ public interface ClinicalRepository extends JpaRepository<DQA, Long> {
             "GROUP BY refill_period, person_uuid ORDER BY person_uuid DESC ) fi ORDER BY\n" +
             "    person_uuid DESC ) pharm ON pharm.person_uuid = p.uuid\n" +
             "  LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "  WHERE p.archived=0 AND p.facility_id= ?1 \n" +
+            "  WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' \n" +
             "  GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status, ca.visit_date, pharm.refill_period, p.facility_id, pharm.visit_date\n" +
             "  ORDER BY p.id DESC) dd where refillmonth is NOT null\n" +
             "\t) ee", nativeQuery = true)
@@ -579,7 +579,7 @@ public interface ClinicalRepository extends JpaRepository<DQA, Long> {
             "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
             ") ph ON p.uuid = ph.person_uuid " +
             "  LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "  WHERE p.archived=0 AND p.facility_id= ?1 AND CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) IS NULL\n" +
+            "  WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) IS NULL\n" +
             "  GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status\n" +
             "  ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getClientWithoutAge(Long facilityId);
@@ -637,7 +637,7 @@ public interface ClinicalRepository extends JpaRepository<DQA, Long> {
             "GROUP BY refill_period, person_uuid ORDER BY person_uuid DESC ) fi ORDER BY\n" +
             "    person_uuid DESC ) pharm ON pharm.person_uuid = p.uuid\n" +
             "  LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "  WHERE p.archived=0 AND p.facility_id= ?1 \n" +
+            "  WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' \n" +
             "  GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status, ca.visit_date, pharm.refill_period, p.facility_id, pharm.visit_date\n" +
             "  ORDER BY p.id DESC) dd where visit_date is null\n" +
             "\t) ee", nativeQuery = true)
@@ -694,7 +694,7 @@ public interface ClinicalRepository extends JpaRepository<DQA, Long> {
             "  GROUP BY refill_period, person_uuid ORDER BY person_uuid DESC ) fi ORDER BY\n" +
             "      person_uuid DESC ) pharm ON pharm.person_uuid = p.uuid\n" +
             "    LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "    WHERE p.archived=0 AND p.facility_id= ? AND pharm.refill_period IS NULL\n" +
+            "    WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND pharm.refill_period IS NULL\n" +
             "    GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status, ca.visit_date, pharm.refill_period, p.facility_id, pharm.visit_date\n" +
             "    ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getClientWithNoMonthRefill (Long facilityId);

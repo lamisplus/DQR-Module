@@ -92,8 +92,8 @@ const useStyles = makeStyles((theme) => ({
 
                     </td>
 
-                  <td style={{ backgroundColor: "rgb(255,255,0)", color: "white",
-                                           border: "2px solid", margin: "2px", padding: "8px", fontWeight: "bold",
+                  <td style={{ backgroundColor: "rgb(255,255,0)", color: "black",
+                                            margin: "2px", padding: "8px", fontWeight: "bold",
                                            boxSizing: "border-box"
                                            }}>
                     90% - 94% Score -- Good

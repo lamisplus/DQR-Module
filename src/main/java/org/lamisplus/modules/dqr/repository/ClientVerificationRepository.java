@@ -69,7 +69,7 @@ public interface ClientVerificationRepository extends JpaRepository<DQA, Long> {
             " JOIN hiv_regimen hr ON r.regimenName = hr.description\n" +
             "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
             ") ph ON p.uuid = ph.person_uuid\n" +
-            "  WHERE p.archived=0 AND p.facility_id= ?1 AND\n" +
+            "  WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND\n" +
             "  CAST(DATE_PART('year', AGE(NOW(), ca.visit_date)) * 12 + DATE_PART('month', AGE(NOW(), ca.visit_date)) AS INTEGER ) >= 6 \n" +
             "  AND sampleCol.dateOfViralLoadSampleCollection IS NULL", nativeQuery = true)
     List<PatientDTOProjection> getVlPrior (Long facilityId);
@@ -124,7 +124,7 @@ public interface ClientVerificationRepository extends JpaRepository<DQA, Long> {
             " JOIN hiv_regimen hr ON r.regimenName = hr.description\n" +
             "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
             ") ph ON p.uuid = ph.person_uuid\n" +
-            "  WHERE p.archived=0 AND p.facility_id= ?1", nativeQuery = true)
+            "  WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active'", nativeQuery = true)
     List<PatientDTOProjection> getIncompleteEncounter (Long facilityId);
 
     @Query(value = "SELECT e.unique_id AS patientId, p.hospital_number AS hospitalNumber,\n" +
@@ -181,7 +181,7 @@ public interface ClientVerificationRepository extends JpaRepository<DQA, Long> {
             " JOIN hiv_regimen hr ON r.regimenName = hr.description\n" +
             "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
             ") ph ON p.uuid = ph.person_uuid\n" +
-            "  WHERE p.archived=0 AND p.facility_id= ?1 AND pickUp.monthApart >= 12", nativeQuery = true)
+            "  WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND pickUp.monthApart >= 12", nativeQuery = true)
     List<PatientDTOProjection> getLastPickMoreThanOneYear (Long facilityId);
 
     @Query(value = "SELECT e.unique_id AS patientId, p.hospital_number AS hospitalNumber,\n" +
@@ -254,7 +254,7 @@ public interface ClientVerificationRepository extends JpaRepository<DQA, Long> {
             " JOIN hiv_regimen hr ON r.regimenName = hr.description\n" +
             "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
             ") ph ON p.uuid = ph.person_uuid\n" +
-            "  WHERE p.archived=0 AND p.facility_id= ?1", nativeQuery = true)
+            "  WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active'", nativeQuery = true)
     List<PatientDTOProjection> getDuplicateClinicVisit (Long facilityId);
 
     @Query(value = " SELECT e.unique_id AS patientId, p.hospital_number AS hospitalNumber,\n" +
@@ -317,7 +317,7 @@ public interface ClientVerificationRepository extends JpaRepository<DQA, Long> {
             " JOIN hiv_regimen hr ON r.regimenName = hr.description\n" +
             "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
             ") ph ON p.uuid = ph.person_uuid\n" +
-            "  WHERE p.archived=0 AND p.facility_id= ?1 AND\n" +
+            "  WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND\n" +
             "(lastVisit.visit_date > recap.enrollment_date) AND b.enrollment_date IS NOT NULL;\t", nativeQuery = true)
     List<PatientDTOProjection> getRecentClinicEncounterNoRecapture (Long facilityId);
 
@@ -372,7 +372,7 @@ public interface ClientVerificationRepository extends JpaRepository<DQA, Long> {
             " JOIN hiv_regimen hr ON r.regimenName = hr.description\n" +
             "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
             ") ph ON p.uuid = ph.person_uuid\n" +
-            "WHERE p.archived=0 AND p.facility_id= ?1\n" +
+            "WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active'\n" +
             "GROUP BY e.id, p.id, p.hospital_number, p.date_of_birth, ph.status", nativeQuery = true)
     List<PatientDTOProjection> getClinicGreaterThanOneFiveMonthYear (Long facilityId);
 
@@ -455,7 +455,7 @@ public interface ClientVerificationRepository extends JpaRepository<DQA, Long> {
             " JOIN hiv_regimen hr ON r.regimenName = hr.description\n" +
             "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
             ") ph ON p.uuid = ph.person_uuid\n" +
-            "  WHERE p.archived=0 AND p.facility_id= ?1\n" +
+            "  WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active'\n" +
             "\t\tAND sameDemographics.person_uuid IS NOT NULL\n" +
             "   GROUP BY e.id, p.id, p.hospital_number, p.date_of_birth, sameDemographics.person_uuid, ph.status ) duplicateDemographics", nativeQuery = true)
     List<PatientDTOProjection> getDuplicateDemo (Long facilityId);
@@ -509,7 +509,7 @@ public interface ClientVerificationRepository extends JpaRepository<DQA, Long> {
             " JOIN hiv_regimen hr ON r.regimenName = hr.description\n" +
             "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
             ") ph ON p.uuid = ph.person_uuid\n" +
-            "  WHERE p.archived=0 AND p.facility_id= ?1\n" +
+            "  WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active'\n" +
             "\t\tAND recap.person_uuid IS NULL\n" +
             "--    AND CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) > 12\n" +
             "   GROUP BY e.id, p.id, p.hospital_number, p.date_of_birth, recap.person_uuid, ph.status ) noRecaptureBiometric", nativeQuery = true)
@@ -564,7 +564,7 @@ public interface ClientVerificationRepository extends JpaRepository<DQA, Long> {
             " JOIN hiv_regimen hr ON r.regimenName = hr.description\n" +
             "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
             ") ph ON p.uuid = ph.person_uuid\n" +
-            "  WHERE p.archived=0 AND p.facility_id= ?1\n" +
+            "  WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active'\n" +
             "\t\tAND b.person_uuid IS NULL\n" +
             "--    AND CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) > 12\n" +
             "   GROUP BY e.id, p.id, p.hospital_number, p.date_of_birth, b.person_uuid, ph.status ) noBiometric\t", nativeQuery = true)

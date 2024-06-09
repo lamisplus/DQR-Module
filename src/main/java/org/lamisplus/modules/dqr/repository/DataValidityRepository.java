@@ -59,7 +59,7 @@ public interface DataValidityRepository extends JpaRepository<DQA, Long> {
             "  LEFT JOIN (SELECT person_uuid, max(visit_date) as lastPS from hiv_art_clinical where archived=0 \n" +
             "  group by person_uuid, visit_date ORDER BY lastPS DESC LIMIT 1) lasPreg ON p.uuid = lasPreg.person_uuid\n" +
             "  LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "  WHERE p.archived=0 AND p.facility_id= ?1 AND EXTRACT(YEAR FROM p.date_of_birth) < 1920\n" +
+            "  WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND EXTRACT(YEAR FROM p.date_of_birth) < 1920\n" +
             "  GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status, ca.visit_date, ca.pregnancy_status\n" +
             "  ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getPatientsWithDateLessThan1920(Long facilityId);
@@ -109,7 +109,7 @@ public interface DataValidityRepository extends JpaRepository<DQA, Long> {
             "  LEFT JOIN (SELECT person_uuid, max(visit_date) as lastPS from hiv_art_clinical where archived=0 \n" +
             "  group by person_uuid, visit_date ORDER BY lastPS DESC LIMIT 1) lasPreg ON p.uuid = lasPreg.person_uuid\n" +
             "  LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "  WHERE p.archived=0 AND p.facility_id= ?1 AND CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) NOT BETWEEN 0 AND 90\n" +
+            "  WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) NOT BETWEEN 0 AND 90\n" +
             "  GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status, ca.visit_date, ca.pregnancy_status\n" +
             "  ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getPatientsWithAgeBetweenZeroAndNinety(Long facilityId);
@@ -160,7 +160,7 @@ public interface DataValidityRepository extends JpaRepository<DQA, Long> {
             "  LEFT JOIN (SELECT person_uuid, max(visit_date) as lastPS from hiv_art_clinical where archived=0 \n" +
             "  group by person_uuid, visit_date ORDER BY lastPS DESC LIMIT 1) lasPreg ON p.uuid = lasPreg.person_uuid\n" +
             "  LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "  WHERE p.archived=0 AND p.facility_id= ?1 AND EXTRACT(YEAR FROM e.date_started) < 1985\n" +
+            "  WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND EXTRACT(YEAR FROM e.date_started) < 1985\n" +
             "  GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth,ph.status, ca.visit_date, ca.pregnancy_status\n" +
             "  ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getPatientsWithArtStartLessThan1985(Long facilityId);
@@ -210,7 +210,7 @@ public interface DataValidityRepository extends JpaRepository<DQA, Long> {
             "  LEFT JOIN (SELECT person_uuid, max(visit_date) as lastPS from hiv_art_clinical where archived=0 \n" +
             "  group by person_uuid, visit_date ORDER BY lastPS DESC LIMIT 1) lasPreg ON p.uuid = lasPreg.person_uuid\n" +
             "  LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "  WHERE p.archived=0 AND p.facility_id= ?1 AND EXTRACT(YEAR FROM e.date_confirmed_hiv) NOT BETWEEN 1985 AND EXTRACT(YEAR FROM CURRENT_DATE)\n" +
+            "  WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND EXTRACT(YEAR FROM e.date_confirmed_hiv) NOT BETWEEN 1985 AND EXTRACT(YEAR FROM CURRENT_DATE)\n" +
             "  GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status, ca.visit_date, ca.pregnancy_status\n" +
             "  ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getPatientsWithhivConfirmDateLessThan1985(Long facilityId);
@@ -261,7 +261,7 @@ public interface DataValidityRepository extends JpaRepository<DQA, Long> {
             "\tSELECT person_uuid, COUNT(biometric_type) AS biometric_fingers_captured, COUNT(*) FILTER (WHERE ENCODE(CAST(template AS BYTEA), 'hex') NOT LIKE '46%') AS biometric_valid_captured FROM biometric\n" +
             " WHERE archived != 1 GROUP BY person_uuid) b ON p.uuid = b.person_uuid\n" +
             "  LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "  WHERE p.archived=0 AND p.facility_id= ?1 AND b.biometric_valid_captured !=0\n" +
+            "  WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND b.biometric_valid_captured !=0\n" +
             "  GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status, ca.visit_date, ca.pregnancy_status, b.biometric_fingers_captured, b.biometric_valid_captured\n" +
             "  ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getPatientsWithValidBiometric (Long facilityId);
@@ -318,7 +318,7 @@ public interface DataValidityRepository extends JpaRepository<DQA, Long> {
             "GROUP BY refill_period, person_uuid, extra ORDER BY person_uuid DESC ) fi ORDER BY\n" +
             "    person_uuid DESC ) pharm ON pharm.person_uuid = p.uuid\n" +
             "  LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "  WHERE p.archived=0 AND p.facility_id= ?1 AND pharm.refill_period IS NOT NULL\n" +
+            "  WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND pharm.refill_period IS NOT NULL\n" +
             "  GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status, ca.visit_date, pharm.refill_period, p.facility_id,  pharm.extra\n" +
             "  ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getPatientsWithArvRefillPeriodBetweennFourteenAndOneHundredAndEight (Long facilityId);
@@ -388,7 +388,7 @@ public interface DataValidityRepository extends JpaRepository<DQA, Long> {
             "  LEFT JOIN (SELECT person_uuid, max(visit_date) as lastPS from hiv_art_clinical where archived=0 \n" +
             "  group by person_uuid, visit_date ORDER BY lastPS DESC LIMIT 1) lasPreg ON p.uuid = lasPreg.person_uuid\n" +
             "  LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "  WHERE p.archived=0 AND p.facility_id= ?1 AND EXTRACT(YEAR FROM vl.dateOfLastViralLoad) < 1985\n" +
+            "  WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND EXTRACT(YEAR FROM vl.dateOfLastViralLoad) < 1985\n" +
             "  GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth,ph.status, ca.visit_date, ca.pregnancy_status, vl.dateOfLastViralLoad\n" +
             "  ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getPatientsWithViralLoadDateLessThan1985 (Long facilityId);

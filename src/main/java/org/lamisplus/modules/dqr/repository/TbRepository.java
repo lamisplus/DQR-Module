@@ -173,7 +173,7 @@ public interface TbRepository extends JpaRepository<DQA, Long> {
             "    LEFT JOIN base_application_codeset pc ON pc.id = e.status_at_registration_id\n" +
             "    WHERE\n" +
             "        p.archived = 0\n" +
-            "        AND p.facility_id = ?1 AND tpt.data->'tbIptScreening'->>'fever' IS NULL\n" +
+            "        AND p.facility_id = ?1 AND status = 'Active' AND tpt.data->'tbIptScreening'->>'fever' IS NULL\n" +
             "    GROUP BY\n" +
             "        e.id,\n" +
             "        ca.commenced,\n" +
@@ -348,7 +348,7 @@ public interface TbRepository extends JpaRepository<DQA, Long> {
             "    LEFT JOIN base_application_codeset pc ON pc.id = e.status_at_registration_id\n" +
             "    WHERE\n" +
             "        p.archived = 0\n" +
-            "        AND p.facility_id = ?1 \n" +
+            "        AND p.facility_id = ?1 AND status = 'Active' \n" +
             "\t\tAND tpt.data->'tbIptScreening'->>'fever' IS NULL\n" +
             "\t\tAND (tpt.data->'tbIptScreening'->>'outcome' IS NULL)\n" +
             "    GROUP BY\n" +
@@ -524,7 +524,7 @@ public interface TbRepository extends JpaRepository<DQA, Long> {
             "    LEFT JOIN base_application_codeset pc ON pc.id = e.status_at_registration_id\n" +
             "    WHERE\n" +
             "        p.archived = 0\n" +
-            "        AND p.facility_id = ?1 \n" +
+            "        AND p.facility_id = ?1 AND status = 'Active' \n" +
             "\t\tAND tpt.data->'tbIptScreening'->>'outcome' IS NULL\n" +
             "    GROUP BY\n" +
             "        e.id,\n" +
@@ -698,7 +698,7 @@ public interface TbRepository extends JpaRepository<DQA, Long> {
             "    LEFT JOIN base_application_codeset pc ON pc.id = e.status_at_registration_id\n" +
             "    WHERE\n" +
             "        p.archived = 0\n" +
-            "        AND p.facility_id = ?1 \n" +
+            "        AND p.facility_id = ?1 AND status = 'Active' \n" +
             "\t\tAND tpt.data->'tbIptScreening'->>'outcome' ILIKE '%Presumptive TB case%' \n" +
             "\tAND (tpt.data->'tbIptScreening'->>'completionDate' IS NULL OR tpt.data->'tbIptScreening'->>'completionDate' = '')\n" +
             "    GROUP BY\n" +
@@ -874,7 +874,7 @@ public interface TbRepository extends JpaRepository<DQA, Long> {
             "    LEFT JOIN base_application_codeset pc ON pc.id = e.status_at_registration_id\n" +
             "    WHERE\n" +
             "        p.archived = 0\n" +
-            "        AND p.facility_id = ?1 \n" +
+            "        AND p.facility_id = ?1 AND status = 'Active' \n" +
             "\t\tAND (tpt.data->'tbIptScreening'->>'outcome' ILIKE '%Presumptive TB case%' \n" +
             "\tAND (tpt.data->'tbIptScreening'->>'completionDate'  IS NOT NULL OR tpt.data->'tbIptScreening'->>'completionDate' <> '') AND \n" +
             "\ttpt.data->'tbIptScreening'->>'treatementType' IS NULL)\n" +
@@ -1051,7 +1051,7 @@ public interface TbRepository extends JpaRepository<DQA, Long> {
             "    LEFT JOIN base_application_codeset pc ON pc.id = e.status_at_registration_id\n" +
             "    WHERE\n" +
             "        p.archived = 0\n" +
-            "        AND p.facility_id = ?1 \n" +
+            "        AND p.facility_id = ?1 AND status = 'Active' \n" +
             "\t\tAND tpt.data->'tbIptScreening'->>'tbTreatment' = 'Yes' \n" +
             "\t\tAND (tpt.data->'tbIptScreening'->>'outcome' IS NULL\n" +
             "\t\t\t OR tpt.data->'tbIptScreening'->>'outcome' = '')\n" +
@@ -1229,7 +1229,7 @@ public interface TbRepository extends JpaRepository<DQA, Long> {
             "    LEFT JOIN base_application_codeset pc ON pc.id = e.status_at_registration_id\n" +
             "    WHERE\n" +
             "        p.archived = 0\n" +
-            "        AND p.facility_id = ?1 \n" +
+            "        AND p.facility_id = ?1 AND status = 'Active' \n" +
             "\t\tAND tpt.data->'tbIptScreening'->>'eligibleForTPT' = 'Yes' \n" +
             "\t\tAND (tpt.data->'tptMonitoring'->> 'date' IS NULL OR\n" +
             "\ttpt.data->'tptMonitoring'->> 'date' = '')\n" +
@@ -1406,7 +1406,7 @@ public interface TbRepository extends JpaRepository<DQA, Long> {
             "    LEFT JOIN base_application_codeset pc ON pc.id = e.status_at_registration_id\n" +
             "    WHERE\n" +
             "        p.archived = 0\n" +
-            "        AND p.facility_id = ?1 \n" +
+            "        AND p.facility_id = ?1 AND status = 'Active' \n" +
             "\t\tAND ipt.dateOfIptStart >= NOW() - INTERVAL '6 MONTH' AND ipt.dateOfIptStart <= NOW()\n" +
             "\t\tAND ipt.iptCompletionDate IS NULL\n" +
             "    GROUP BY\n" +
@@ -1582,7 +1582,7 @@ public interface TbRepository extends JpaRepository<DQA, Long> {
             "    LEFT JOIN base_application_codeset pc ON pc.id = e.status_at_registration_id\n" +
             "    WHERE\n" +
             "        p.archived = 0\n" +
-            "        AND p.facility_id = ?1 \n" +
+            "        AND p.facility_id = ?1 AND status = 'Active' \n" +
             "\t\tAND ipt.dateOfIptStart >= NOW() - INTERVAL '6 MONTH' AND ipt.dateOfIptStart <= NOW()\n" +
             "\t\tAND ipt.iptCompletionStatus IS NULL \n" +
             "    GROUP BY\n" +
@@ -1758,7 +1758,7 @@ public interface TbRepository extends JpaRepository<DQA, Long> {
             "    LEFT JOIN base_application_codeset pc ON pc.id = e.status_at_registration_id\n" +
             "    WHERE\n" +
             "        p.archived = 0\n" +
-            "        AND p.facility_id = ?1 \n" +
+            "        AND p.facility_id = ?1 AND status = 'Active' \n" +
             "\t\tAND ipt.dateOfIptStart >= NOW() - INTERVAL '6 MONTH' AND ipt.dateOfIptStart <= NOW()\n" +
             "\t\tAND ipt.iptType IS NULL \n" +
             "    GROUP BY\n" +

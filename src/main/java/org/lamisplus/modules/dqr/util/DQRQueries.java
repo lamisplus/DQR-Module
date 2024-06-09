@@ -6,7 +6,7 @@ public class DQRQueries {
 
         public static final String CLINICALS_SUMMARY_QUERIES = "WITH dataConsistence AS (\n" +
                 "SELECT e.unique_id AS patientId , p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex,p.date_of_birth AS dateOfBirth, CASE WHEN tri.body_weight IS NOT NULL AND CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) > 12 AND st.status = 'Active' THEN 1 ELSE NULL END AS adultweight, \n" +
-                "tri.visit_date AS visit_date, e.target_group_id as target_group, CASE WHEN e.entry_point_id IS NOT NULL AND st.status = 'Active' THEN 1 ELSE NULL END AS entryPoint,\n" +
+                "tri.visit_date AS visit_date, CASE WHEN e.target_group_id IS NOT NULL AND st.status = 'Active' THEN 1 ELSE NULL END as target_group, CASE WHEN e.entry_point_id IS NOT NULL AND st.status = 'Active' THEN 1 ELSE NULL END AS entryPoint,\n" +
                 "e.date_confirmed_hiv AS hiv_confirm_date, (CASE WHEN lasClinic.lastvisit >= e.date_confirmed_hiv AND st.status = 'Active' THEN 1 ELSE null END) AS lGreaterConf,\n" +
                 "pharm.visit_date AS lastPickUp,(CASE WHEN pharm.visit_date >  p.date_of_birth AND st.status = 'Active' THEN 1 ELSE null END) AS lstPickGreaterDOb,\n" +
                 "transfer.hiv_status, transfer.status_date,(CASE WHEN e.date_started < transfer.status_date AND st.status = 'Active' THEN 1 ELSE null END)  AS ArtGreaterTrans,\n" +
@@ -121,44 +121,44 @@ public class DQRQueries {
                 "                    ) stat ON stat.person_id = pharmacy.person_uuid\n" +
                 "            ) st\n" +
                 "    ) st ON st.personUuid = e.person_uuid\n" +
-                "\t\n" +
                 " LEFT JOIN\n" +
-                " (SELECT DISTINCT ON (person_uuid)\n" +
-                "   person_uuid, visit_date, body_weight\n" +
-                "FROM ( SELECT ht.person_uuid, MAX(ht.visit_date) AS visit_date, tr.body_weight\n" +
-                "   FROM hiv_art_clinical ht JOIN triage_vital_sign tr ON ht.person_uuid = tr.person_uuid AND ht.vital_sign_uuid = tr.uuid \n" +
-                "GROUP BY ht.person_uuid, tr.body_weight ORDER BY ht.person_uuid DESC ) fi ORDER BY\n" +
-                "   person_uuid DESC ) tri ON tri.person_uuid = p.uuid\n" +
-                "LEFT JOIN (SELECT DISTINCT ON (person_uuid)\n" +
-                "person_uuid, lastVisit,pregnancy_status\n" +
+                " (SELECT\n" +
+                "   person_uuid, visit_date, body_weight, rkk\n" +
+                "FROM ( SELECT person_uuid, body_weight,CAST(capture_date AS DATE) As visit_date,\n" +
+                "\t  ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY CAST(capture_date AS DATE) DESC) rkk\n" +
+                "\t  FROM triage_vital_sign) fi\n" +
+                " ) tri ON tri.person_uuid = p.uuid AND rkk = 1\n" +
+                "LEFT JOIN (SELECT \n" +
+                "person_uuid, lastVisit,pregnancy_status, rank2\n" +
                 "  FROM\n" +
-                "(SELECT hacc.person_uuid, MAX(hacc.visit_date) as lastVisit, pregnancy_status from hiv_art_clinical hacc JOIN patient_person p2\n" +
+                "(SELECT hacc.person_uuid, hacc.visit_date as lastVisit, pregnancy_status,\n" +
+                " ROW_NUMBER () OVER (PARTITION BY hacc.person_uuid ORDER BY hacc.visit_date DESC) as rank2\n" +
+                " from hiv_art_clinical hacc JOIN patient_person p2\n" +
                 "ON hacc.person_uuid = p2.uuid\n" +
-                "where hacc.archived=0 \n" +
-                " group by person_uuid, pregnancy_status ORDER BY person_uuid DESC ) lClinicVisit ORDER BY\n" +
-                "   person_uuid DESC ) \n" +
-                " lasClinic ON p.uuid = lasClinic.person_uuid\n" +
+                "where hacc.archived=0 ) lClinicVisit WHERE rank2 = 1 ) \n" +
+                " lasClinic ON p.uuid = lasClinic.person_uuid AND rank2 = 1\n" +
                 "LEFT JOIN\n" +
                 "(SELECT DISTINCT (person_id)\n" +
                 "person_id, MAX(status_date) AS status_date, hiv_status FROM hiv_status_tracker where hiv_status = 'ART_TRANSFER_IN'\n" +
-                "GROUP BY person_id, hiv_status ) transfer ON p.uuid = transfer.person_id\n" +
+                "GROUP BY person_id, hiv_status ) transfer ON p.uuid = transfer.person_id\t\n" +
                 "LEFT JOIN (\n" +
-                "SELECT DISTINCT ON(lo.patient_uuid) lo.patient_uuid as person_uuid, ls.date_sample_collected as dateSampleCollected,\n" +
-                "lr.result_reported AS lastViralLoad,\n" +
-                "lr.date_result_reported as dateOfLastViralLoad\n" +
-                "FROM laboratory_order lo\n" +
-                "LEFT JOIN ( SELECT patient_uuid, MAX(order_date) AS MAXDATE FROM laboratory_order lo\n" +
-                "GROUP BY patient_uuid ORDER BY MAXDATE ASC ) AS current_lo\n" +
-                "ON current_lo.patient_uuid=lo.patient_uuid AND current_lo.MAXDATE=lo.order_date\n" +
-                "LEFT JOIN laboratory_test lt ON lt.lab_order_id=lo.id AND lt.patient_uuid = lo.patient_uuid\n" +
-                "LEFT JOIN base_application_codeset bac_viral_load ON bac_viral_load.id=lt.viral_load_indication\n" +
-                "LEFT JOIN laboratory_labtest ll ON ll.id=lt.lab_test_id\n" +
-                "-- INNER JOIN hiv_enrollment h ON h.person_uuid=current_lo.patient_uuid\n" +
-                "LEFT JOIN laboratory_sample ls ON ls.test_id=lt.id AND ls.patient_uuid = lo.patient_uuid\n" +
-                "LEFT JOIN laboratory_result lr ON lr.test_id=lt.id AND lr.patient_uuid = lo.patient_uuid\n" +
-                "WHERE  lo.archived=0 AND\n" +
-                "lr.date_result_reported IS NOT NULL\n" +
+                "SELECT CAST(vl_result.lastViralLoad AS DECIMAL), vl_result.person_uuid, vl_result.dateSampleCollected, vl_result.dateOfLastViralLoad  FROM (\n" +
+                "         SELECT CAST(ls.date_sample_collected AS DATE ) AS dateSampleCollected, sm.patient_uuid as person_uuid , sm.facility_id as vlFacility, sm.archived as vlArchived, acode.display as viralLoadIndication, sm.result_reported  as lastViralLoad,CAST(sm.date_result_reported AS DATE) as dateOfLastViralLoad,\n" +
+                "     ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_result_reported DESC) as rank2\n" +
+                "         FROM public.laboratory_result  sm\n" +
+                "      INNER JOIN public.laboratory_test  lt on sm.test_id = lt.id\n" +
+                "  INNER JOIN public.laboratory_sample ls on ls.test_id = lt.id\n" +
+                "      INNER JOIN public.base_application_codeset  acode on acode.id =  lt.viral_load_indication\n" +
+                "         WHERE lt.lab_test_id = 16\n" +
+                "           AND  lt.viral_load_indication !=719\n" +
+                "           AND sm. date_result_reported IS NOT NULL\n" +
+                "           AND sm.date_result_reported <= CAST ( NOW() AS DATE)\n" +
+                "           AND sm.result_reported is NOT NULL\n" +
+                "     )as vl_result\n" +
+                "   WHERE vl_result.rank2 = 1\n" +
+                "     AND (vl_result.vlArchived = 0 OR vl_result.vlArchived is null)\n" +
                 ") vl ON e.person_uuid = vl.person_uuid\n" +
+                "\t\n" +
                 "LEFT JOIN \n" +
                 "  (SELECT DISTINCT ON (person_uuid)\n" +
                 "    person_uuid, visit_date, refill_period, regimen\n" +
@@ -178,63 +178,63 @@ public class DQRQueries {
                 " COUNT(target_group) AS targNumerator,\n" +
                 " COUNT(artStatus) AS targDenominator,\n" +
                 "  COUNT(artStatus) -  COUNT(target_group) AS targVariance,\n" +
-                " ROUND((CAST(COUNT(target_group) AS DECIMAL) / COUNT(artStatus)) * 100, 2) AS targPerformance,\n" +
+                " COALESCE(ROUND((CAST(COUNT(target_group) AS DECIMAL) / NULLIF(COUNT(artStatus), 0)) * 100, 2),0) AS targPerformance,\n" +
                 " COUNT(entrypoint) AS entryNumerator,\n" +
                 " COUNT(artStatus) AS entryDenominator,\n" +
                 "  COUNT(artStatus) -  COUNT(entrypoint) AS entryVariance,\n" +
-                " ROUND((CAST(COUNT(entrypoint) AS DECIMAL) / COUNT(artStatus)) * 100, 2) AS entryPerformance,\n" +
+                " COALESCE(ROUND((CAST(COUNT(entrypoint) AS DECIMAL) / NULLIF(COUNT(artStatus), 0)) * 100, 2),0) AS entryPerformance,\n" +
                 " COUNT(adultweight) AS adultWeightNumerator,\n" +
                 " COUNT(artStatus) AS adultWeightDenominator,\n" +
                 " COUNT(artStatus) -  COUNT(adultweight) AS adultWeightVariance,\n" +
-                " ROUND((CAST(COUNT(adultweight) AS DECIMAL) / COUNT(artStatus)) * 100, 2) AS adultWeightPerformance,\n" +
+                " COALESCE(ROUND((CAST(COUNT(adultweight) AS DECIMAL) / NULLIF(COUNT(artStatus), 0)) * 100, 2),0) AS adultWeightPerformance,\n" +
                 " COUNT(peadweight) AS peadWeightNumerator,\n" +
                 " COUNT(peadcURR) AS peadWeightDenominator,\n" +
                 "  COUNT(peadcURR) - COUNT(peadweight) AS peadWeightVariance,\n" +
-                " ROUND((CAST(COUNT(peadweight) AS DECIMAL) / COUNT(peadcURR)) * 100, 2) AS peadWeightPerformance,\n" +
+                " COALESCE(ROUND((CAST(COUNT(peadweight) AS DECIMAL) / NULLIF(COUNT(peadcURR), 0)) * 100, 2),0) AS peadWeightPerformance,\n" +
                 " COUNT(adultPre) AS pregNumerator,\n" +
                 " COUNT(activeFemaleAdult) AS pregDenominator,\n" +
                 "  COUNT(activeFemaleAdult) - COUNT(adultPre) AS pregVariance,\n" +
-                " ROUND((CAST(COUNT(adultPre) AS DECIMAL) / COUNT(activeFemaleAdult)) * 100, 2) AS pregPerformance,\n" +
+                " COALESCE(ROUND((CAST(COUNT(adultPre) AS DECIMAL) / NULLIF(COUNT(activeFemaleAdult), 0)) * 100, 2),0) AS pregPerformance,\n" +
                 " COUNT(ArtEqClinicD) AS artEqClinicNumerator,\n" +
                 " COUNT(artStatus) AS artEqClinicDenominator,\n" +
                 " COUNT(artStatus) - COUNT(ArtEqClinicD) AS artEqClinicVariance,\n" +
-                " ROUND((CAST(COUNT(ArtEqClinicD) AS DECIMAL) / COUNT(artStatus)) * 100, 2) AS artEqClinicPerformance,\n" +
+                " COALESCE(ROUND((CAST(COUNT(ArtEqClinicD) AS DECIMAL) / NULLIF(COUNT(artStatus), 0)) * 100, 2),0) AS artEqClinicPerformance,\n" +
                 " COUNT(ArtEqDrugPickupD) AS artEqLastPickupNumerator,\n" +
                 " COUNT(artStatus) AS artEqLastPickupDenominator,\n" +
                 " COUNT(artStatus) - COUNT(ArtEqDrugPickupD) AS artEqLastPickupVariance,\n" +
-                " ROUND((CAST(COUNT(ArtEqDrugPickupD) AS DECIMAL) / COUNT(artStatus)) * 100, 2) AS artEqLastPickupPerformance,\n" +
+                " COALESCE(ROUND((CAST(COUNT(ArtEqDrugPickupD) AS DECIMAL) / NULLIF(COUNT(artStatus), 0)) * 100, 2),0) AS artEqLastPickupPerformance,\n" +
                 " COUNT(lGreaterConf) AS lGreaterConfNumerator,\n" +
                 " COUNT(artStatus) AS lGreaterConfDenominator,\n" +
                 " COUNT(artStatus) - COUNT(lGreaterConf) AS lGreaterConfVariance,\n" +
-                " ROUND((CAST(COUNT(lGreaterConf) AS DECIMAL) / COUNT(artStatus)) * 100, 2) AS lGreaterConfPerformance,\n" +
+                " COALESCE(ROUND((CAST(COUNT(lGreaterConf) AS DECIMAL) / NULLIF(COUNT(artStatus), 0)) * 100, 2),0) AS lGreaterConfPerformance,\n" +
                 " COUNT(ArtGreaterTrans) AS artGreaterTransNumerator,\n" +
                 " COUNT(artStatus) AS ArtGreaterTransDenominator,\n" +
                 " COUNT(artStatus) - COUNT(ArtGreaterTrans) AS ArtGreaterTransVariance,\n" +
-                " ROUND((CAST(COUNT(ArtGreaterTrans) AS DECIMAL) / COUNT(artStatus)) * 100, 2) AS ArtGreaterTransPerformance,\n" +
+                " COALESCE(ROUND((CAST(COUNT(ArtGreaterTrans) AS DECIMAL) / NULLIF(COUNT(artStatus), 0)) * 100, 2),0) AS ArtGreaterTransPerformance,\n" +
                 " COUNT(lstPickGreaterDOb) AS lstPickGreaterDObNumerator,\n" +
                 " COUNT(artStatus) AS lstPickGreaterDObDenominator,\n" +
                 " COUNT(artStatus) - COUNT(lstPickGreaterDOb) AS lstPickGreaterDObVariance,\n" +
-                " ROUND((CAST(COUNT(lstPickGreaterDOb) AS DECIMAL) / COUNT(artStatus)) * 100, 2) AS lstPickGreaterDObPerformance,\n" +
+                " COALESCE(ROUND((CAST(COUNT(lstPickGreaterDOb) AS DECIMAL) / NULLIF(COUNT(artStatus), 0)) * 100, 2),0) AS lstPickGreaterDObPerformance,\n" +
                 " COUNT(DrugPickHigherThanTrans) AS lDrugPickHighNumerator,\n" +
                 " COUNT(artStatus) AS lDrugPickHighDenominator,\n" +
                 " COUNT(artStatus) - COUNT(DrugPickHigherThanTrans) AS lDrugPickHighVariance,\n" +
-                " ROUND((CAST(COUNT(DrugPickHigherThanTrans) AS DECIMAL) / COUNT(artStatus)) * 100, 2) AS lDrugPickHighPerformance,\n" +
+                " COALESCE(ROUND((CAST(COUNT(DrugPickHigherThanTrans) AS DECIMAL) / NULLIF(COUNT(artStatus), 0)) * 100, 2),0) AS lDrugPickHighPerformance,\n" +
                 " COUNT(DrugPickLessToday) AS lDrugPickHighTodayNumerator,\n" +
                 " COUNT(artStatus) AS lDrugPickHighTodayDenominator,\n" +
                 " COUNT(artStatus) - COUNT(DrugPickLessToday) AS lDrugPickHighTodayVariance,\n" +
-                " ROUND((CAST(COUNT(DrugPickLessToday) AS DECIMAL) / COUNT(artStatus)) * 100, 2) AS lDrugPickHighTodayPerformance,\n" +
+                " COALESCE(ROUND((CAST(COUNT(DrugPickLessToday) AS DECIMAL) / NULLIF(COUNT(artStatus), 0)) * 100, 2),0) AS lDrugPickHighTodayPerformance,\n" +
                 " COUNT(clinicPickLessToday) AS clinicPickLessTodayNumerator,\n" +
                 " COUNT(artStatus) AS clinicPickLessTodayDenominator,\n" +
                 " COUNT(artStatus) - COUNT(clinicPickLessToday) AS clinicPickLessTodayVariance,\n" +
-                " ROUND((CAST(COUNT(clinicPickLessToday) AS DECIMAL) / COUNT(artStatus)) * 100, 2) AS clinicPickLessTodayPerformance,\n" +
+                " COALESCE(ROUND((CAST(COUNT(clinicPickLessToday) AS DECIMAL) / NULLIF(COUNT(artStatus), 0)) * 100, 2),0) AS clinicPickLessTodayPerformance,\n" +
                 " COUNT(artDateLessToday) AS artDateLessTodayNumerator,\n" +
                 " COUNT(artStatus) AS artDateLessTodayDenominator,\n" +
                 " COUNT(artStatus) - COUNT(artDateLessToday) AS artDateLessTodayVariance,\n" +
-                " ROUND((CAST(COUNT(artDateLessToday) AS DECIMAL) / COUNT(artStatus)) * 100, 2) AS artDateLessTodayPerformance,\n" +
+                " COALESCE(ROUND((CAST(COUNT(artDateLessToday) AS DECIMAL) / NULLIF(COUNT(artStatus), 0)) * 100, 2),0) AS artDateLessTodayPerformance,\n" +
                 " COUNT(vlSample) AS vlNumerator,\n" +
                 " COUNT(artStatus) AS vlDenominator,\n" +
                 " COUNT(artStatus) -  COUNT(vlSample) AS vlVariance,\n" +
-                " ROUND((CAST(COUNT(vlSample) AS DECIMAL) / COUNT(artStatus)) * 100, 2) AS vlPerformance\n" +
+                " COALESCE(ROUND((CAST(COUNT(vlSample) AS DECIMAL) / NULLIF(COUNT(artStatus), 0)) * 100, 2),0) AS vlPerformance\n" +
                 " FROM\n" +
                 "  dataConsistence";
 

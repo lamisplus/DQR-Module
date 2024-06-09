@@ -65,7 +65,7 @@ public interface PharmacyRepository extends JpaRepository<DQA, Long> {
             "GROUP BY refill_period, person_uuid, extra ORDER BY person_uuid DESC ) fi ORDER BY\n" +
             "    person_uuid DESC ) pharm ON pharm.person_uuid = p.uuid\n" +
             "  LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "  WHERE p.archived=0 AND p.facility_id= ?1 \n" +
+            "  WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' \n" +
             "  GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status, ca.visit_date, pharm.refill_period, p.facility_id, pharm.visit_date, pharm.extra\n" +
             "  ORDER BY p.id DESC) dd\n" +
             "\t\t  where regimen is null\n" +
@@ -126,7 +126,7 @@ public interface PharmacyRepository extends JpaRepository<DQA, Long> {
             "GROUP BY refill_period, person_uuid ORDER BY person_uuid DESC ) fi ORDER BY\n" +
             "    person_uuid DESC ) pharm ON pharm.person_uuid = p.uuid\n" +
             "  LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "  WHERE p.archived=0 AND p.facility_id= ?1 \n" +
+            "  WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' \n" +
             "  GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status, ca.visit_date, pharm.refill_period, p.facility_id, pharm.visit_date\n" +
             "  ORDER BY p.id DESC) dd\n" +
             "\t\t  where refillMonth is null\n" +
