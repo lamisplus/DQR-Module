@@ -1,20 +1,22 @@
 package org.lamisplus.modules.dqr.util;
 
+// Enrolment and ART commencement are read from hiv_enrollment_commencement. hiv_enrollment and the
+// commencement rows in hiv_art_clinical stopped being written to when that form replaced them.
 public class DQRQueries {
 
     public static class DataConsistency {
 
         public static final String CLINICALS_SUMMARY_QUERIES = "WITH dataConsistence AS (\n" +
                 "SELECT e.unique_id AS patientId , p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex,p.date_of_birth AS dateOfBirth, CASE WHEN tri.body_weight IS NOT NULL AND CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) > 12 AND st.status = 'Active' THEN 1 ELSE NULL END AS adultweight, \n" +
-                "tri.visit_date AS visit_date, CASE WHEN e.target_group_id IS NOT NULL AND st.status = 'Active' THEN 1 ELSE NULL END as target_group, CASE WHEN e.entry_point_id IS NOT NULL AND st.status = 'Active' THEN 1 ELSE NULL END AS entryPoint,\n" +
-                "e.date_confirmed_hiv AS hiv_confirm_date, (CASE WHEN lasClinic.lastvisit >= e.date_confirmed_hiv AND st.status = 'Active' THEN 1 ELSE null END) AS lGreaterConf,\n" +
+                "tri.visit_date AS visit_date, CASE WHEN (CASE WHEN e.is_kp IS FALSE OR NULLIF(e.kp_typology_id, '') IS NOT NULL THEN TRUE END) IS NOT NULL AND st.status = 'Active' THEN 1 ELSE NULL END as target_group, CASE WHEN e.care_entry_point_id IS NOT NULL AND st.status = 'Active' THEN 1 ELSE NULL END AS entryPoint,\n" +
+                "e.date_confirmed_hiv_test AS hiv_confirm_date, (CASE WHEN lasClinic.lastvisit >= e.date_confirmed_hiv_test AND st.status = 'Active' THEN 1 ELSE null END) AS lGreaterConf,\n" +
                 "pharm.visit_date AS lastPickUp,(CASE WHEN pharm.visit_date >  p.date_of_birth AND st.status = 'Active' THEN 1 ELSE null END) AS lstPickGreaterDOb,\n" +
-                "transfer.hiv_status, transfer.status_date,(CASE WHEN e.date_started < transfer.status_date AND st.status = 'Active' THEN 1 ELSE null END)  AS ArtGreaterTrans,\n" +
-                "(CASE WHEN e.date_started = lasClinic.lastvisit AND st.status = 'Active' THEN 1 ELSE null END) ArtEqClinicD, (CASE WHEN e.date_started = pharm.visit_date AND st.status = 'Active' THEN 1 ELSE null END) ArtEqDrugPickupD,\n" +
+                "transfer.hiv_status, transfer.status_date,(CASE WHEN e.date_art_started < transfer.status_date AND st.status = 'Active' THEN 1 ELSE null END)  AS ArtGreaterTrans,\n" +
+                "(CASE WHEN e.date_art_started = lasClinic.lastvisit AND st.status = 'Active' THEN 1 ELSE null END) ArtEqClinicD, (CASE WHEN e.date_art_started = pharm.visit_date AND st.status = 'Active' THEN 1 ELSE null END) ArtEqDrugPickupD,\n" +
                 "(CASE WHEN pharm.visit_date >= transfer.status_date AND st.status = 'Active' THEN 1 ELSE null END)  AS DrugPickHigherThanTrans,\n" +
                 "(CASE WHEN pharm.visit_date <= CAST(now() AS DATE) AND st.status = 'Active' THEN 1 ELSE null END)  AS DrugPickLessToday,\n" +
                 "(CASE WHEN lasClinic.lastvisit <= CAST(now() AS DATE) AND st.status = 'Active' THEN 1 ELSE null END)  AS clinicPickLessToday,\n" +
-                "(CASE WHEN e.date_started <= CAST(now() AS DATE) AND st.status = 'Active' THEN 1 ELSE null END)  AS artDateLessToday,\n" +
+                "(CASE WHEN e.date_art_started <= CAST(now() AS DATE) AND st.status = 'Active' THEN 1 ELSE null END)  AS artDateLessToday,\n" +
                 "(CASE WHEN lasClinic.lastvisit > transfer.status_date AND st.status = 'Active'  THEN 1 ELSE null END)  AS clinicGreaterThanTrans,\n" +
                 "(CASE WHEN vl.dateOfLastViralLoad > vl.dateSampleCollected AND st.status = 'Active' THEN 1 ELSE NULL END) AS vlSample,\n" +
                 "CASE WHEN SEX = 'Female' AND CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) > 12 AND st.status = 'Active' THEN 1 ELSE NULL END AS activeFemaleAdult,\n" +
@@ -24,10 +26,10 @@ public class DQRQueries {
                 "CASE WHEN st.status = 'Active' THEN 1 ELSE NULL END AS artStatus\n" +
                 "\n" +
                 " FROM patient_person p\n" +
-                " INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+                " INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
                 " LEFT JOIN\n" +
-                " (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date, hac.pregnancy_status  FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
-                " GROUP BY hac.person_uuid, hac.visit_date, hac.pregnancy_status)ca ON p.uuid = ca.person_uuid\n" +
+                " (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date, (CASE WHEN hac.is_pregnant THEN 'PREGANACY_STATUS_PREGNANT' WHEN hac.is_breast_feeding THEN 'PREGANACY_STATUS_BREASTFEEDING' WHEN hac.is_pregnant IS FALSE THEN 'PREGANACY_STATUS_NOT_PREGNANT' END) AS pregnancy_status  FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+                " GROUP BY hac.person_uuid, hac.visit_date, hac.is_pregnant, hac.is_breast_feeding)ca ON p.uuid = ca.person_uuid\n" +
                 "\n" +
                 "LEFT JOIN \n" +
                 "    (\n" +
@@ -77,7 +79,7 @@ public class DQRQueries {
                 "                                INNER JOIN \n" +
                 "                                    public.hiv_art_pharmacy_regimens pr ON pr.art_pharmacy_id = hap.id \n" +
                 "                                INNER JOIN \n" +
-                "                                    hiv_enrollment h ON h.person_uuid = hap.person_uuid AND h.archived = 0 \n" +
+                "                                    hiv_enrollment_commencement h ON h.person_uuid = hap.person_uuid AND h.archived = 0 \n" +
                 "                                INNER JOIN \n" +
                 "                                    public.hiv_regimen r ON r.id = pr.regimens_id \n" +
                 "                                INNER JOIN \n" +
@@ -117,7 +119,7 @@ public class DQRQueries {
                 "                                    s.row_number = 1\n" +
                 "                            ) hst\n" +
                 "                        INNER JOIN \n" +
-                "                            hiv_enrollment he ON he.person_uuid = hst.person_id\n" +
+                "                            hiv_enrollment_commencement he ON he.person_uuid = hst.person_id\n" +
                 "                    ) stat ON stat.person_id = pharmacy.person_uuid\n" +
                 "            ) st\n" +
                 "    ) st ON st.personUuid = e.person_uuid\n" +
@@ -169,7 +171,7 @@ public class DQRQueries {
                 " LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
                 " WHERE p.archived=0 AND p.facility_id= ?1\n" +
                 " GROUP BY e.id, p.hospital_number, p.date_of_birth, ca.visit_date, tri.body_weight, p.facility_id, tri.visit_date, \n" +
-                "e.target_group_id, e.entry_point_id,  e.date_confirmed_hiv, p.sex, p.id,\n" +
+                "(CASE WHEN e.is_kp IS FALSE OR NULLIF(e.kp_typology_id, '') IS NOT NULL THEN TRUE END), e.care_entry_point_id,  e.date_confirmed_hiv_test, p.sex, p.id,\n" +
                 "transfer.hiv_status, transfer.status_date,lasclinic.lastvisit, pharm.visit_date, \n" +
                 "vl.dateOfLastViralLoad,vl.dateSampleCollected, st.status,\n" +
                 "lasClinic.pregnancy_status\n" +
@@ -245,10 +247,10 @@ public class DQRQueries {
                 "\tCASE WHEN pharm.extra IS NOT NULL AND st.status = 'Active' THEN 1 ELSE NULL END AS regimen, \n" +
                 "\tCASE WHEN st.status = 'Active' THEN 1 ELSE NULL END AS artStatus\n" +
                 "  FROM patient_person p \n" +
-                "  INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+                "  INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
                 "  LEFT JOIN\n" +
-                "  (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date, hac.pregnancy_status  FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
-                "  GROUP BY hac.person_uuid, hac.visit_date, hac.pregnancy_status)ca ON p.uuid = ca.person_uuid\n" +
+                "  (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date, (CASE WHEN hac.is_pregnant THEN 'PREGANACY_STATUS_PREGNANT' WHEN hac.is_breast_feeding THEN 'PREGANACY_STATUS_BREASTFEEDING' WHEN hac.is_pregnant IS FALSE THEN 'PREGANACY_STATUS_NOT_PREGNANT' END) AS pregnancy_status  FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+                "  GROUP BY hac.person_uuid, hac.visit_date, hac.is_pregnant, hac.is_breast_feeding)ca ON p.uuid = ca.person_uuid\n" +
                 "LEFT JOIN \n" +
                 "    (\n" +
                 "        SELECT \n" +
@@ -297,7 +299,7 @@ public class DQRQueries {
                 "                                INNER JOIN \n" +
                 "                                    public.hiv_art_pharmacy_regimens pr ON pr.art_pharmacy_id = hap.id \n" +
                 "                                INNER JOIN \n" +
-                "                                    hiv_enrollment h ON h.person_uuid = hap.person_uuid AND h.archived = 0 \n" +
+                "                                    hiv_enrollment_commencement h ON h.person_uuid = hap.person_uuid AND h.archived = 0 \n" +
                 "                                INNER JOIN \n" +
                 "                                    public.hiv_regimen r ON r.id = pr.regimens_id \n" +
                 "                                INNER JOIN \n" +
@@ -337,7 +339,7 @@ public class DQRQueries {
                 "                                    s.row_number = 1\n" +
                 "                            ) hst\n" +
                 "                        INNER JOIN \n" +
-                "                            hiv_enrollment he ON he.person_uuid = hst.person_id\n" +
+                "                            hiv_enrollment_commencement he ON he.person_uuid = hst.person_id\n" +
                 "                    ) stat ON stat.person_id = pharmacy.person_uuid\n" +
                 "            ) st\n" +
                 "    ) st ON st.personUuid = e.person_uuid\n" +
@@ -377,9 +379,9 @@ public class DQRQueries {
                 "(CASE WHEN vl.dateOfLastViralLoad > vl.dateSampleCollected AND st.status = 'Active' THEN 1 ELSE NULL END) AS vlDateGsDate,\n" +
                 "(CASE WHEN cd4.cd4date >= NOW() - INTERVAL '1 YEAR' AND cd4.cd4date <= NOW() AND st.status = 'Active' THEN 1 ELSE null END) AS hadcd4vl1year,\n" +
                 "st.status\n" +
-                "FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+                "FROM patient_person p INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
                 "LEFT JOIN\n" +
-                "(SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+                "(SELECT TRUE as commenced, hac.person_uuid FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
                 "GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
                 "LEFT JOIN \n" +
                 "    (\n" +
@@ -429,7 +431,7 @@ public class DQRQueries {
                 "                                INNER JOIN \n" +
                 "                                    public.hiv_art_pharmacy_regimens pr ON pr.art_pharmacy_id = hap.id \n" +
                 "                                INNER JOIN \n" +
-                "                                    hiv_enrollment h ON h.person_uuid = hap.person_uuid AND h.archived = 0 \n" +
+                "                                    hiv_enrollment_commencement h ON h.person_uuid = hap.person_uuid AND h.archived = 0 \n" +
                 "                                INNER JOIN \n" +
                 "                                    public.hiv_regimen r ON r.id = pr.regimens_id \n" +
                 "                                INNER JOIN \n" +
@@ -469,7 +471,7 @@ public class DQRQueries {
                 "                                    s.row_number = 1\n" +
                 "                            ) hst\n" +
                 "                        INNER JOIN \n" +
-                "                            hiv_enrollment he ON he.person_uuid = hst.person_id\n" +
+                "                            hiv_enrollment_commencement he ON he.person_uuid = hst.person_id\n" +
                 "                    ) stat ON stat.person_id = pharmacy.person_uuid\n" +
                 "            ) st\n" +
                 "    ) st ON st.personUuid = e.person_uuid\n" +
@@ -488,7 +490,7 @@ public class DQRQueries {
                 "LEFT JOIN laboratory_test lt ON lt.lab_order_id=lo.id AND lt.patient_uuid = lo.patient_uuid\n" +
                 "LEFT JOIN base_application_codeset bac_viral_load ON bac_viral_load.id=lt.viral_load_indication\n" +
                 "LEFT JOIN laboratory_labtest ll ON ll.id=lt.lab_test_id\n" +
-                "INNER JOIN hiv_enrollment h ON h.person_uuid=current_lo.patient_uuid\n" +
+                "INNER JOIN hiv_enrollment_commencement h ON h.person_uuid=current_lo.patient_uuid\n" +
                 "LEFT JOIN laboratory_sample ls ON ls.test_id=lt.id AND ls.patient_uuid = lo.patient_uuid\n" +
                 "LEFT JOIN laboratory_result lr ON lr.test_id=lt.id AND lr.patient_uuid = lo.patient_uuid\n" +
                 "WHERE  lo.archived=0\n" +
@@ -544,8 +546,8 @@ public class DQRQueries {
 
         public static final String EAC_SUMMARY_QUERIES = "WITH eacSummary AS (\n" +
                 "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex, \n" +
-                "p.date_of_birth AS dateOfBirth, e.date_started,e.person_uuid,\n" +
-                "(CASE WHEN e.date_started >= NOW() - INTERVAL '1 YEAR' AND e.date_started <= NOW() AND st.status = 'Active' THEN 1 ELSE null END) AS hadVl1year,\n" +
+                "p.date_of_birth AS dateOfBirth, e.date_art_started,e.person_uuid,\n" +
+                "(CASE WHEN e.date_art_started >= NOW() - INTERVAL '1 YEAR' AND e.date_art_started <= NOW() AND st.status = 'Active' THEN 1 ELSE null END) AS hadVl1year,\n" +
                 "(CASE WHEN ((pharm.visit_date  >= NOW() - INTERVAL '6 MONTH' AND pharm.visit_date <= NOW()) AND CAST(vl.clastViralLoad AS NUMERIC) > 1000) AND st.status = 'Active' THEN 1 ELSE null END) AS sixmVl,\n" +
                 "(CASE WHEN ((pharm.visit_date  >= NOW() - INTERVAL '6 MONTH' AND pharm.visit_date <= NOW()) AND eac.eac_commenced IS NOT NULL AND CAST(vl.clastViralLoad AS NUMERIC) > 1000) AND st.status = 'Active'  THEN 1 ELSE null END) AS hadeac,\n" +
                 "pharm.visit_date,\n" +
@@ -556,7 +558,7 @@ public class DQRQueries {
                 "(CASE WHEN eac1.status is NOT NULL AND eac1.visit_date IS NOT NULL AND eac1.date_of_last_viral_load IS NOT NULL AND st.status = 'Active' THEN 1 ELSE NULL END) AS postEac,\n" +
                 "st.status\n" +
                 "  FROM patient_person p \n" +
-                "  INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+                "  INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
                 "LEFT JOIN\n" +
                 "  (SELECT DISTINCT ON (person_uuid)\n" +
                 "    person_uuid, visit_date, refill_period\n" +
@@ -565,8 +567,8 @@ public class DQRQueries {
                 "GROUP BY refill_period, person_uuid ORDER BY person_uuid DESC ) fi ORDER BY\n" +
                 "    person_uuid DESC ) pharm ON e.person_uuid = pharm.person_uuid\n" +
                 "  LEFT JOIN\n" +
-                "  (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date, hac.pregnancy_status  FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
-                "  GROUP BY hac.person_uuid, hac.visit_date, hac.pregnancy_status) ca ON p.uuid = ca.person_uuid\n" +
+                "  (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date, (CASE WHEN hac.is_pregnant THEN 'PREGANACY_STATUS_PREGNANT' WHEN hac.is_breast_feeding THEN 'PREGANACY_STATUS_BREASTFEEDING' WHEN hac.is_pregnant IS FALSE THEN 'PREGANACY_STATUS_NOT_PREGNANT' END) AS pregnancy_status  FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+                "  GROUP BY hac.person_uuid, hac.visit_date, hac.is_pregnant, hac.is_breast_feeding) ca ON p.uuid = ca.person_uuid\n" +
                 "LEFT JOIN \n" +
                 "    (\n" +
                 "        SELECT \n" +
@@ -615,7 +617,7 @@ public class DQRQueries {
                 "                                INNER JOIN \n" +
                 "                                    public.hiv_art_pharmacy_regimens pr ON pr.art_pharmacy_id = hap.id \n" +
                 "                                INNER JOIN \n" +
-                "                                    hiv_enrollment h ON h.person_uuid = hap.person_uuid AND h.archived = 0 \n" +
+                "                                    hiv_enrollment_commencement h ON h.person_uuid = hap.person_uuid AND h.archived = 0 \n" +
                 "                                INNER JOIN \n" +
                 "                                    public.hiv_regimen r ON r.id = pr.regimens_id \n" +
                 "                                INNER JOIN \n" +
@@ -655,7 +657,7 @@ public class DQRQueries {
                 "                                    s.row_number = 1\n" +
                 "                            ) hst\n" +
                 "                        INNER JOIN \n" +
-                "                            hiv_enrollment he ON he.person_uuid = hst.person_id\n" +
+                "                            hiv_enrollment_commencement he ON he.person_uuid = hst.person_id\n" +
                 "                    ) stat ON stat.person_id = pharmacy.person_uuid\n" +
                 "            ) st\n" +
                 "    ) st ON st.personUuid = e.person_uuid\t\n" +
@@ -674,7 +676,7 @@ public class DQRQueries {
                 "LEFT JOIN laboratory_test lt ON lt.lab_order_id=lo.id AND lt.patient_uuid = lo.patient_uuid\n" +
                 "LEFT JOIN base_application_codeset bac_viral_load ON bac_viral_load.id=lt.viral_load_indication\n" +
                 "LEFT JOIN laboratory_labtest ll ON ll.id=lt.lab_test_id\n" +
-                "INNER JOIN hiv_enrollment h ON h.person_uuid=current_lo.patient_uuid\n" +
+                "INNER JOIN hiv_enrollment_commencement h ON h.person_uuid=current_lo.patient_uuid\n" +
                 "LEFT JOIN laboratory_sample ls ON ls.test_id=lt.id AND ls.patient_uuid = lo.patient_uuid\n" +
                 "LEFT JOIN laboratory_result lr ON lr.test_id=lt.id AND lr.patient_uuid = lo.patient_uuid\n" +
                 "WHERE  lo.archived=0 ) vl ON  e.person_uuid = vl.person_uuid\n" +
@@ -838,16 +840,18 @@ public class DQRQueries {
                 "    htsSummary;";
 
 
+        // Some urinalysis records save testDate as an empty string. NULLIF turns that into "no date"
+        // so the date conversion doesn't crash the whole summary.
         public static final String PREP_SUMMARY_QUERIES = "WITH prepSummary AS (\n" +
                 "SELECT DISTINCT ON (person_uuid) hc.person_uuid, hc.client_code, hc.date_visit,  (CASE WHEN hc.prep_offered = true  THEN 1 ELSE null END) AS prep_offered, \n" +
                 "hc.prep_accepted, hc.prep_offered = hc.prep_accepted AS offAndAccpt,\n" +
                 " hc.hiv_test_result, pe.status, pe.unique_id, pe.date_enrolled, pe.date_started, \n" +
                 "(CASE WHEN pe.date_enrolled IS NULL  THEN pe.date_started ELSE pe.date_enrolled END) AS date_enrolled_prep,\n" +
-                "pc. urinalysis, CAST((pc. urinalysis->>'testDate') AS DATE) AS UrinalysisDate,\n" +
-                "(CASE WHEN CAST((pc. urinalysis->>'testDate') AS DATE) > (CASE WHEN pe.date_enrolled IS NULL  THEN pe.date_started ELSE pe.date_enrolled END)\n" +
+                "pc. urinalysis, CAST(NULLIF(pc. urinalysis->>'testDate', '') AS DATE) AS UrinalysisDate,\n" +
+                "(CASE WHEN CAST(NULLIF(pc. urinalysis->>'testDate', '') AS DATE) > (CASE WHEN pe.date_enrolled IS NULL  THEN pe.date_started ELSE pe.date_enrolled END)\n" +
                 " THEN 1 ELSE NULL END) AS urinaGreaterthanenrollDate,\n" +
                 "hc.date_visit AS status_date,\n" +
-                "(CASE WHEN CAST((pc. urinalysis->>'testDate') AS DATE) > hc.date_visit\n" +
+                "(CASE WHEN CAST(NULLIF(pc. urinalysis->>'testDate', '') AS DATE) > hc.date_visit\n" +
                 " THEN 1 ELSE NULL END) AS urinaGreaterthanStatusDate,\n" +
                 "iscommenced.encounter_date,\n" +
                 "(CASE WHEN (CASE WHEN pe.date_enrolled IS NULL  THEN pe.date_started ELSE pe.date_enrolled END) < iscommenced.encounter_date\n" +
@@ -900,17 +904,17 @@ public class DQRQueries {
         public static final String CLINICAL_VARIABLE_SUMMARY_QUERIES = "WITH PatientClinic AS (\n" +
                 " SELECT e.unique_id AS patientId ,CASE WHEN p.hospital_number IS NOT NULL AND st.status = 'Active' THEN 1 ELSE NULL END AS hospitalNumber, INITCAP(p.sex) AS sex,p.date_of_birth AS dateOfBirth,\n" +
                 "CASE WHEN pharm.refill_period IS NOT NULL AND st.status = 'Active'THEN 0 ELSE NULL END  AS refillMonth, CASE WHEN pharm.visit_date IS NOT NULL AND st.status = 'Active' THEN 1 ELSE NULL END AS drug_visit_date, \n" +
-                "\tCASE WHEN pharm.regimen IS NOT NULL AND st.status = 'Active' THEN 0 ELSE NULL END AS regimen, CASE WHEN e.date_started IS NOT NULL AND st.status = 'Active' THEN 0 ELSE NULL END as start_date,\n" +
-                "CASE WHEN e.date_confirmed_hiv IS NOT NULL AND st.status = 'Active' THEN 0 ELSE NULL END AS hiv_confirm_date, CASE WHEN e.target_group_id IS NOT NULL AND st.status = 'Active' THEN 0 ELSE NULL END as target_group, CASE WHEN e.entry_point_id IS NOT NULL AND st.status = 'Active' THEN 0 ELSE NULL END AS entryPoint,\n" +
-                "CASE WHEN ca.visit_date IS NOT NULL AND st.status = 'Active' THEN 0 ELSE NULL END as commence_date,  CASE WHEN e.time_hiv_diagnosis IS NOT NULL AND st.status = 'Active' THEN 0 ELSE NULL END  as hivDiagnose, CASE WHEN CAST(EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) IS NOT NULL AND st.status = 'Active' THEN 0 ELSE NULL END AS age,\n" +
+                "\tCASE WHEN pharm.regimen IS NOT NULL AND st.status = 'Active' THEN 0 ELSE NULL END AS regimen, CASE WHEN e.date_art_started IS NOT NULL AND st.status = 'Active' THEN 0 ELSE NULL END as start_date,\n" +
+                "CASE WHEN e.date_confirmed_hiv_test IS NOT NULL AND st.status = 'Active' THEN 0 ELSE NULL END AS hiv_confirm_date, CASE WHEN (CASE WHEN e.is_kp IS FALSE OR NULLIF(e.kp_typology_id, '') IS NOT NULL THEN TRUE END) IS NOT NULL AND st.status = 'Active' THEN 0 ELSE NULL END as target_group, CASE WHEN e.care_entry_point_id IS NOT NULL AND st.status = 'Active' THEN 0 ELSE NULL END AS entryPoint,\n" +
+                "CASE WHEN ca.visit_date IS NOT NULL AND st.status = 'Active' THEN 0 ELSE NULL END as commence_date,  CASE WHEN e.date_confirmed_hiv_test IS NOT NULL AND st.status = 'Active' THEN 0 ELSE NULL END  as hivDiagnose, CASE WHEN CAST(EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) IS NOT NULL AND st.status = 'Active' THEN 0 ELSE NULL END AS age,\n" +
                 "preg.pregnancy_status as pregStatus, CASE WHEN tri.body_weight IS NOT NULL AND st.status = 'Active' THEN 0 ELSE NULL END as weight, CASE WHEN tri.visit_date IS NOT NULL AND st.status = 'Active' THEN 0 ELSE NULL END AS visit_date,\n" +
                 "CASE WHEN preg.pregnancy_status IS NOT NULL AND CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) > 12 AND INITCAP(p.sex) = 'Female' AND st.status = 'Active' THEN 1 ELSE NULL END AS adultPre,\n" +
                 "CASE WHEN CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) > 12 AND INITCAP(p.sex) = 'Female'AND st.status = 'Active' THEN 1 ELSE NULL END AS adultAge, st.status\n" +
                 "   FROM patient_person p\n" +
-                "   INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+                "   INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
                 "   LEFT JOIN\n" +
-                "   (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date, hac.pregnancy_status  FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
-                "   GROUP BY hac.person_uuid, hac.visit_date, hac.pregnancy_status)ca ON p.uuid = ca.person_uuid\n" +
+                "   (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date, (CASE WHEN hac.is_pregnant THEN 'PREGANACY_STATUS_PREGNANT' WHEN hac.is_breast_feeding THEN 'PREGANACY_STATUS_BREASTFEEDING' WHEN hac.is_pregnant IS FALSE THEN 'PREGANACY_STATUS_NOT_PREGNANT' END) AS pregnancy_status  FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+                "   GROUP BY hac.person_uuid, hac.visit_date, hac.is_pregnant, hac.is_breast_feeding)ca ON p.uuid = ca.person_uuid\n" +
                 "\tLEFT JOIN \n" +
                 "    (\n" +
                 "        SELECT \n" +
@@ -959,7 +963,7 @@ public class DQRQueries {
                 "                                INNER JOIN \n" +
                 "                                    public.hiv_art_pharmacy_regimens pr ON pr.art_pharmacy_id = hap.id \n" +
                 "                                INNER JOIN \n" +
-                "                                    hiv_enrollment h ON h.person_uuid = hap.person_uuid AND h.archived = 0 \n" +
+                "                                    hiv_enrollment_commencement h ON h.person_uuid = hap.person_uuid AND h.archived = 0 \n" +
                 "                                INNER JOIN \n" +
                 "                                    public.hiv_regimen r ON r.id = pr.regimens_id \n" +
                 "                                INNER JOIN \n" +
@@ -999,7 +1003,7 @@ public class DQRQueries {
                 "                                    s.row_number = 1\n" +
                 "                            ) hst\n" +
                 "                        INNER JOIN \n" +
-                "                            hiv_enrollment he ON he.person_uuid = hst.person_id\n" +
+                "                            hiv_enrollment_commencement he ON he.person_uuid = hst.person_id\n" +
                 "                    ) stat ON stat.person_id = pharmacy.person_uuid\n" +
                 "            ) st\n" +
                 "    ) st ON st.personUuid = e.person_uuid\n" +
@@ -1026,8 +1030,8 @@ public class DQRQueries {
                 "   LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
                 "   WHERE p.archived=0 AND p.facility_id= ?1\n" +
                 "   GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ca.visit_date, \n" +
-                "pharm.refill_period, p.facility_id, pharm.visit_date, e.date_started, e.date_confirmed_hiv, e.target_group_id,\n" +
-                "e.time_hiv_diagnosis,preg.pregnancy_status, tri.body_weight, tri.visit_date, pharm.regimen, st.status\n" +
+                "pharm.refill_period, p.facility_id, pharm.visit_date, e.date_art_started, e.date_confirmed_hiv_test, (CASE WHEN e.is_kp IS FALSE OR NULLIF(e.kp_typology_id, '') IS NOT NULL THEN TRUE END),\n" +
+                "e.date_confirmed_hiv_test,preg.pregnancy_status, tri.body_weight, tri.visit_date, pharm.regimen, st.status\n" +
                 "   ORDER BY p.id DESC\n" +
                 ")\n" +
                 "      SELECT\n" +
@@ -1107,10 +1111,10 @@ public class DQRQueries {
                 "    FROM \n" +
                 "        patient_person p \n" +
                 "    INNER JOIN \n" +
-                "        hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+                "        hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
                 "    LEFT JOIN \n" +
                 "        (SELECT TRUE as commenced, hac.person_uuid \n" +
-                "         FROM hiv_art_clinical hac\n" +
+                "         FROM hiv_enrollment_commencement hac\n" +
                 "         WHERE hac.archived = 0 AND hac.is_commencement IS TRUE \n" +
                 "         GROUP BY hac.person_uuid\n" +
                 "        ) ca ON p.uuid = ca.person_uuid\n" +
@@ -1162,7 +1166,7 @@ public class DQRQueries {
                 "                                    INNER JOIN \n" +
                 "                                        public.hiv_art_pharmacy_regimens pr ON pr.art_pharmacy_id = hap.id \n" +
                 "                                    INNER JOIN \n" +
-                "                                        hiv_enrollment h ON h.person_uuid = hap.person_uuid AND h.archived = 0 \n" +
+                "                                        hiv_enrollment_commencement h ON h.person_uuid = hap.person_uuid AND h.archived = 0 \n" +
                 "                                    INNER JOIN \n" +
                 "                                        public.hiv_regimen r ON r.id = pr.regimens_id \n" +
                 "                                    INNER JOIN \n" +
@@ -1202,7 +1206,7 @@ public class DQRQueries {
                 "                                        s.row_number = 1\n" +
                 "                                ) hst\n" +
                 "                            INNER JOIN \n" +
-                "                                hiv_enrollment he ON he.person_uuid = hst.person_id\n" +
+                "                                hiv_enrollment_commencement he ON he.person_uuid = hst.person_id\n" +
                 "                        ) stat ON stat.person_id = pharmacy.person_uuid\n" +
                 "                ) st\n" +
                 "        ) st ON st.personUuid = e.person_uuid\n" +
@@ -1265,10 +1269,10 @@ public class DQRQueries {
                 "SELECT  e.unique_id AS patientId , CASE WHEN p.hospital_number IS NOT NULL AND st.status = 'Active' THEN 0 ELSE NULL END AS hospitalNumber, INITCAP(p.sex) AS sex,\n" +
                 "p.date_of_birth AS dateOfBirth, CASE WHEN b.person_uuid IS NOT NULL AND st.status = 'Active' THEN 0 ELSE NULL END AS person_uuid1, CASE WHEN b.biometric_valid_captured IS NOT NULL AND st.status = 'Active' THEN 0 ELSE NULL END AS validcapture,\n" +
                 "b.person_uuid AS personId, CASE WHEN bb.recapture IS NOT NULL AND st.status = 'Active' THEN 0 ELSE NULL END AS recapture, bb.person_uuid, CASE WHEN bb.biometric_valid_captured IS NOT NULL AND st.status = 'Active' THEN 0 ELSE NULL END AS validrecap\n" +
-                "   FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+                "   FROM patient_person p INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
                 "   LEFT JOIN\n" +
-                "   (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date, hac.pregnancy_status  FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
-                "   GROUP BY hac.person_uuid, hac.visit_date, hac.pregnancy_status)ca ON p.uuid = ca.person_uuid\n" +
+                "   (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date, (CASE WHEN hac.is_pregnant THEN 'PREGANACY_STATUS_PREGNANT' WHEN hac.is_breast_feeding THEN 'PREGANACY_STATUS_BREASTFEEDING' WHEN hac.is_pregnant IS FALSE THEN 'PREGANACY_STATUS_NOT_PREGNANT' END) AS pregnancy_status  FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+                "   GROUP BY hac.person_uuid, hac.visit_date, hac.is_pregnant, hac.is_breast_feeding)ca ON p.uuid = ca.person_uuid\n" +
                 "LEFT JOIN \n" +
                 "    (\n" +
                 "        SELECT \n" +
@@ -1317,7 +1321,7 @@ public class DQRQueries {
                 "                                INNER JOIN \n" +
                 "                                    public.hiv_art_pharmacy_regimens pr ON pr.art_pharmacy_id = hap.id \n" +
                 "                                INNER JOIN \n" +
-                "                                    hiv_enrollment h ON h.person_uuid = hap.person_uuid AND h.archived = 0 \n" +
+                "                                    hiv_enrollment_commencement h ON h.person_uuid = hap.person_uuid AND h.archived = 0 \n" +
                 "                                INNER JOIN \n" +
                 "                                    public.hiv_regimen r ON r.id = pr.regimens_id \n" +
                 "                                INNER JOIN \n" +
@@ -1357,7 +1361,7 @@ public class DQRQueries {
                 "                                    s.row_number = 1\n" +
                 "                            ) hst\n" +
                 "                        INNER JOIN \n" +
-                "                            hiv_enrollment he ON he.person_uuid = hst.person_id\n" +
+                "                            hiv_enrollment_commencement he ON he.person_uuid = hst.person_id\n" +
                 "                    ) stat ON stat.person_id = pharmacy.person_uuid\n" +
                 "            ) st\n" +
                 "    ) st ON st.personUuid = e.person_uuid\t\n" +
@@ -1413,10 +1417,10 @@ public class DQRQueries {
                 "sampleCol.dateOfViralLoadSampleCollection, ca.visit_date,\n" +
                 "CASE WHEN\n" +
                 "CAST(DATE_PART('year', AGE(NOW(), ca.visit_date)) * 12 + DATE_PART('month', AGE(NOW(), ca.visit_date)) AS INTEGER ) >= 6 AND sampleCol.dateOfViralLoadSampleCollection IS NULL AND st.status = 'Active' THEN 1 ELSE NULL END AS vlPrior\n" +
-                "   FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+                "   FROM patient_person p INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
                 "   INNER JOIN\n" +
-                "   (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
-                "   GROUP BY hac.person_uuid, hac.visit_date, hac.pregnancy_status)ca ON p.uuid = ca.person_uuid\n" +
+                "   (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+                "   GROUP BY hac.person_uuid, hac.visit_date, hac.is_pregnant, hac.is_breast_feeding)ca ON p.uuid = ca.person_uuid\n" +
                 "LEFT JOIN \n" +
                 "    (\n" +
                 "        SELECT \n" +
@@ -1465,7 +1469,7 @@ public class DQRQueries {
                 "                                INNER JOIN \n" +
                 "                                    public.hiv_art_pharmacy_regimens pr ON pr.art_pharmacy_id = hap.id \n" +
                 "                                INNER JOIN \n" +
-                "                                    hiv_enrollment h ON h.person_uuid = hap.person_uuid AND h.archived = 0 \n" +
+                "                                    hiv_enrollment_commencement h ON h.person_uuid = hap.person_uuid AND h.archived = 0 \n" +
                 "                                INNER JOIN \n" +
                 "                                    public.hiv_regimen r ON r.id = pr.regimens_id \n" +
                 "                                INNER JOIN \n" +
@@ -1505,7 +1509,7 @@ public class DQRQueries {
                 "                                    s.row_number = 1\n" +
                 "                            ) hst\n" +
                 "                        INNER JOIN \n" +
-                "                            hiv_enrollment he ON he.person_uuid = hst.person_id\n" +
+                "                            hiv_enrollment_commencement he ON he.person_uuid = hst.person_id\n" +
                 "                    ) stat ON stat.person_id = pharmacy.person_uuid\n" +
                 "            ) st\n" +
                 "    ) st ON st.personUuid = e.person_uuid\n" +
@@ -1537,13 +1541,13 @@ public class DQRQueries {
                 "    AND p1.uuid <> p2.uuid  -- Exclude the same row\n" +
                 "INNER JOIN (\n" +
                 "    SELECT TRUE AS commenced, hac1.person_uuid, hac1.visit_date\n" +
-                "    FROM hiv_art_clinical hac1\n" +
+                "    FROM hiv_enrollment_commencement hac1\n" +
                 "    WHERE hac1.archived = 0 AND hac1.is_commencement IS TRUE\n" +
                 "    GROUP BY hac1.person_uuid, hac1.visit_date\n" +
                 ") ca1 ON ca1.person_uuid = p1.uuid\n" +
                 "INNER JOIN (\n" +
                 "    SELECT TRUE AS commenced, hac2.person_uuid, hac2.visit_date\n" +
-                "    FROM hiv_art_clinical hac2\n" +
+                "    FROM hiv_enrollment_commencement hac2\n" +
                 "    WHERE hac2.archived = 0 AND hac2.is_commencement IS TRUE\n" +
                 "    GROUP BY hac2.person_uuid, hac2.visit_date\n" +
                 ") ca2 ON ca2.person_uuid = p2.uuid\n" +
@@ -1674,19 +1678,19 @@ public class DQRQueries {
                 ",p.date_of_birth AS dateOfBirth, CASE WHEN b.biometric_valid_captured IS NOT NULL AND st.status = 'Active' THEN 0 ELSE NULL END AS validBio, \n" +
                 "\tCASE WHEN pharm.refill_period IS NOT NULL AND st.status = 'Active' THEN 0 ELSE NULL END AS refill_period,\n" +
                 "CASE WHEN vl.dateOfLastViralLoad IS NOT NULL AND st.status = 'Active' THEN 0 ELSE NULL END AS dateOfLastViralLoad, \n" +
-                "CASE WHEN EXTRACT(YEAR FROM e.date_confirmed_hiv) BETWEEN 1985 AND EXTRACT(YEAR FROM NOW()) AND st.status = 'Active'\n" +
-                "THEN EXTRACT(YEAR FROM e.date_confirmed_hiv) ELSE NULL END AS confirmed, \n" +
-                "CASE WHEN e.date_confirmed_hiv IS NOT NULL AND st.status = 'Active' THEN 0 ELSE NULL END AS hivConfirm,\n" +
-                "CASE WHEN EXTRACT(YEAR FROM e.date_started) BETWEEN 1985 AND EXTRACT(YEAR FROM NOW()) AND st.status = 'Active'\n" +
-                "     THEN EXTRACT(YEAR FROM e.date_started) ELSE NULL END AS start_date, CASE WHEN e.date_started IS NOT NULL AND st.status = 'Active' THEN 0 ELSE NULL END AS date_started,\n" +
+                "CASE WHEN EXTRACT(YEAR FROM e.date_confirmed_hiv_test) BETWEEN 1985 AND EXTRACT(YEAR FROM NOW()) AND st.status = 'Active'\n" +
+                "THEN EXTRACT(YEAR FROM e.date_confirmed_hiv_test) ELSE NULL END AS confirmed, \n" +
+                "CASE WHEN e.date_confirmed_hiv_test IS NOT NULL AND st.status = 'Active' THEN 0 ELSE NULL END AS hivConfirm,\n" +
+                "CASE WHEN EXTRACT(YEAR FROM e.date_art_started) BETWEEN 1985 AND EXTRACT(YEAR FROM NOW()) AND st.status = 'Active'\n" +
+                "     THEN EXTRACT(YEAR FROM e.date_art_started) ELSE NULL END AS start_date, CASE WHEN e.date_art_started IS NOT NULL AND st.status = 'Active' THEN 0 ELSE NULL END AS date_started,\n" +
                 "CASE WHEN CAST(EXTRACT(YEAR from AGE(NOW(), p.date_of_birth)) AS INTEGER) BETWEEN 0 AND 90 AND st.status = 'Active'\n" +
                 "     THEN EXTRACT(YEAR FROM p.date_of_birth) ELSE NULL END AS ageInitiated,\n" +
                 "CASE WHEN EXTRACT(YEAR FROM p.date_of_birth) > 1920 AND st.status = 'Active' THEN 1 ELSE NULL END AS normalDob\n" +
                 "\n" +
-                "  FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+                "  FROM patient_person p INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
                 "  LEFT JOIN\n" +
-                "  (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date, hac.pregnancy_status  FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
-                "  GROUP BY hac.person_uuid, hac.visit_date, hac.pregnancy_status)ca ON p.uuid = ca.person_uuid\n" +
+                "  (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date, (CASE WHEN hac.is_pregnant THEN 'PREGANACY_STATUS_PREGNANT' WHEN hac.is_breast_feeding THEN 'PREGANACY_STATUS_BREASTFEEDING' WHEN hac.is_pregnant IS FALSE THEN 'PREGANACY_STATUS_NOT_PREGNANT' END) AS pregnancy_status  FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+                "  GROUP BY hac.person_uuid, hac.visit_date, hac.is_pregnant, hac.is_breast_feeding)ca ON p.uuid = ca.person_uuid\n" +
                 "LEFT JOIN \n" +
                 "    (\n" +
                 "        SELECT \n" +
@@ -1735,7 +1739,7 @@ public class DQRQueries {
                 "                                INNER JOIN \n" +
                 "                                    public.hiv_art_pharmacy_regimens pr ON pr.art_pharmacy_id = hap.id \n" +
                 "                                INNER JOIN \n" +
-                "                                    hiv_enrollment h ON h.person_uuid = hap.person_uuid AND h.archived = 0 \n" +
+                "                                    hiv_enrollment_commencement h ON h.person_uuid = hap.person_uuid AND h.archived = 0 \n" +
                 "                                INNER JOIN \n" +
                 "                                    public.hiv_regimen r ON r.id = pr.regimens_id \n" +
                 "                                INNER JOIN \n" +
@@ -1775,7 +1779,7 @@ public class DQRQueries {
                 "                                    s.row_number = 1\n" +
                 "                            ) hst\n" +
                 "                        INNER JOIN \n" +
-                "                            hiv_enrollment he ON he.person_uuid = hst.person_id\n" +
+                "                            hiv_enrollment_commencement he ON he.person_uuid = hst.person_id\n" +
                 "                    ) stat ON stat.person_id = pharmacy.person_uuid\n" +
                 "            ) st\n" +
                 "    ) st ON st.personUuid = e.person_uuid\n" +
@@ -1804,7 +1808,7 @@ public class DQRQueries {
                 "LEFT JOIN laboratory_test lt ON lt.lab_order_id=lo.id AND lt.patient_uuid = lo.patient_uuid\n" +
                 "LEFT JOIN base_application_codeset bac_viral_load ON bac_viral_load.id=lt.viral_load_indication\n" +
                 "LEFT JOIN laboratory_labtest ll ON ll.id=lt.lab_test_id\n" +
-                "INNER JOIN hiv_enrollment h ON h.person_uuid=current_lo.patient_uuid\n" +
+                "INNER JOIN hiv_enrollment_commencement h ON h.person_uuid=current_lo.patient_uuid\n" +
                 "LEFT JOIN laboratory_sample ls ON ls.test_id=lt.id AND ls.patient_uuid = lo.patient_uuid\n" +
                 "LEFT JOIN laboratory_result lr ON lr.test_id=lt.id AND lr.patient_uuid = lo.patient_uuid\n" +
                 "WHERE  lo.archived=0 AND\n" +
@@ -1815,7 +1819,7 @@ public class DQRQueries {
                 "  LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
                 "  WHERE p.archived=0 AND p.facility_id= ?1 \n" +
                 "  GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ca.visit_date, ca.pregnancy_status, b.biometric_fingers_captured, b.biometric_valid_captured,\n" +
-                "  pharm.refill_period, vl.dateOfLastViralLoad, e.date_confirmed_hiv, st.status\n" +
+                "  pharm.refill_period, vl.dateOfLastViralLoad, e.date_confirmed_hiv_test, st.status\n" +
                 "  ORDER BY p.id DESC   \n" +
                 ") \n" +
                 "SELECT\n" +
@@ -1896,7 +1900,7 @@ public class DQRQueries {
                 "(CASE WHEN (ipt.dateOfIptStart >= NOW() - INTERVAL '6 MONTH' AND ipt.dateOfIptStart <= NOW()) AND ipt.iptType IS NOT NULL AND st.status = 'Active' THEN 1 ELSE null END) AS iptTypeStatus\n" +
                 "FROM\n" +
                 "    patient_person p\n" +
-                "INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+                "INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
                 "LEFT JOIN \n" +
                 "(\n" +
                 "SELECT DISTINCT ON (person_uuid) PERSON_UUID, MAX(VISIT_DATE) AS lastV FROM HIV_ART_PHARMACY\n" +
@@ -1922,7 +1926,7 @@ public class DQRQueries {
                 "        TRUE AS commenced,\n" +
                 "        hac.person_uuid\n" +
                 "    FROM\n" +
-                "        hiv_art_clinical hac\n" +
+                "        hiv_enrollment_commencement hac\n" +
                 "    WHERE\n" +
                 "        hac.archived = 0\n" +
                 "        AND hac.is_commencement IS TRUE\n" +
@@ -1977,7 +1981,7 @@ public class DQRQueries {
                 "                                INNER JOIN \n" +
                 "                                    public.hiv_art_pharmacy_regimens pr ON pr.art_pharmacy_id = hap.id \n" +
                 "                                INNER JOIN \n" +
-                "                                    hiv_enrollment h ON h.person_uuid = hap.person_uuid AND h.archived = 0 \n" +
+                "                                    hiv_enrollment_commencement h ON h.person_uuid = hap.person_uuid AND h.archived = 0 \n" +
                 "                                INNER JOIN \n" +
                 "                                    public.hiv_regimen r ON r.id = pr.regimens_id \n" +
                 "                                INNER JOIN \n" +
@@ -2017,7 +2021,7 @@ public class DQRQueries {
                 "                                    s.row_number = 1\n" +
                 "                            ) hst\n" +
                 "                        INNER JOIN \n" +
-                "                            hiv_enrollment he ON he.person_uuid = hst.person_id\n" +
+                "                            hiv_enrollment_commencement he ON he.person_uuid = hst.person_id\n" +
                 "                    ) stat ON stat.person_id = pharmacy.person_uuid\n" +
                 "            ) st\n" +
                 "    ) st ON st.personUuid = e.person_uuid\n" +

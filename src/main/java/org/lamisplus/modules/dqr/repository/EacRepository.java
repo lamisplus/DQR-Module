@@ -10,13 +10,17 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+// Enrolment and ART commencement are read from hiv_enrollment_commencement. hiv_enrollment and the
+// commencement rows in hiv_art_clinical stopped being written to when that form replaced them.
 @Repository
 public interface EacRepository extends JpaRepository<DQA, Long> {
 
+    // Two joined tables have a "status" column here (patient status and EAC status). The filter means
+    // the patient one, so it says ph.status.
     @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex, \n" +
             "p.date_of_birth AS dateOfBirth, ph.status\n" +
             "FROM patient_person p \n" +
-            "  INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "  INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             "LEFT JOIN (\n" +
             "SELECT DISTINCT ON (p1.person_uuid)\n" +
             "p1.person_uuid,\n" +
@@ -61,8 +65,8 @@ public interface EacRepository extends JpaRepository<DQA, Long> {
             "GROUP BY refill_period, person_uuid ORDER BY person_uuid DESC ) fi ORDER BY\n" +
             "    person_uuid DESC ) pharm ON e.person_uuid = pharm.person_uuid\n" +
             "  LEFT JOIN\n" +
-            "  (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date, hac.pregnancy_status  FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
-            "  GROUP BY hac.person_uuid, hac.visit_date, hac.pregnancy_status) ca ON p.uuid = ca.person_uuid\n" +
+            "  (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date, (CASE WHEN hac.is_pregnant THEN 'PREGANACY_STATUS_PREGNANT' WHEN hac.is_breast_feeding THEN 'PREGANACY_STATUS_BREASTFEEDING' WHEN hac.is_pregnant IS FALSE THEN 'PREGANACY_STATUS_NOT_PREGNANT' END) AS pregnancy_status  FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "  GROUP BY hac.person_uuid, hac.visit_date, hac.is_pregnant, hac.is_breast_feeding) ca ON p.uuid = ca.person_uuid\n" +
             "LEFT JOIN (\n" +
             "SELECT DISTINCT ON(lo.patient_uuid) lo.patient_uuid as person_uuid, ll.lab_test_name as test,\n" +
             "\t\tbac_viral_load.display AS viralLoadType, ls.date_sample_collected as dateSampleCollected,\n" +
@@ -78,7 +82,7 @@ public interface EacRepository extends JpaRepository<DQA, Long> {
             "LEFT JOIN laboratory_test lt ON lt.lab_order_id=lo.id AND lt.patient_uuid = lo.patient_uuid\n" +
             "LEFT JOIN base_application_codeset bac_viral_load ON bac_viral_load.id=lt.viral_load_indication\n" +
             "LEFT JOIN laboratory_labtest ll ON ll.id=lt.lab_test_id\n" +
-            "INNER JOIN hiv_enrollment h ON h.person_uuid=current_lo.patient_uuid\n" +
+            "INNER JOIN hiv_enrollment_commencement h ON h.person_uuid=current_lo.patient_uuid\n" +
             "LEFT JOIN laboratory_sample ls ON ls.test_id=lt.id AND ls.patient_uuid = lo.patient_uuid\n" +
             "LEFT JOIN laboratory_result lr ON lr.test_id=lt.id AND lr.patient_uuid = lo.patient_uuid\n" +
             "WHERE  lo.archived=0 ) vl ON  e.person_uuid = vl.person_uuid\n" +
@@ -95,7 +99,7 @@ public interface EacRepository extends JpaRepository<DQA, Long> {
             " GROUP BY person_uuid, eac_session_date ORDER BY  person_uuid, eac_session_date ASC ) eac ON e.person_uuid = eac.person_uuid \n" +
             "  LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
             "  LEFT JOIN hiv_eac ha ON e.person_uuid = ha.person_uuid\n" +
-            "  WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND pharm.visit_date  >= NOW() - INTERVAL '6 MONTH' AND pharm.visit_date <= NOW()\n" +
+            "  WHERE p.archived=0 AND p.facility_id= ?1 AND ph.status = 'Active' AND pharm.visit_date  >= NOW() - INTERVAL '6 MONTH' AND pharm.visit_date <= NOW()\n" +
             "  AND vl.clastViralLoad > 1000 AND eac.eac_commenced IS NULL\n" +
             "  GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status, ca.visit_date, p.facility_id, \n" +
             "  pharm.visit_date, ha.status, vl.clastViralLoad, eac.eac_commenced, vl.dateSampleCollected,\n" +
@@ -104,9 +108,11 @@ public interface EacRepository extends JpaRepository<DQA, Long> {
     List<PatientDTOProjection> getEligibleWithNoVlResult(Long facilityId);
 
 
+    // Two joined tables have a "status" column here (patient status and EAC status). The filter means
+    // the patient one, so it says ph.status.
     @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex, \n" +
             "p.date_of_birth AS dateOfBirth, ph.status FROM patient_person p \n" +
-            "  INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "  INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             "LEFT JOIN (\n" +
             "SELECT DISTINCT ON (p1.person_uuid)\n" +
             "p1.person_uuid,\n" +
@@ -151,8 +157,8 @@ public interface EacRepository extends JpaRepository<DQA, Long> {
             "GROUP BY refill_period, person_uuid ORDER BY person_uuid DESC ) fi ORDER BY\n" +
             "    person_uuid DESC ) pharm ON e.person_uuid = pharm.person_uuid\n" +
             "  LEFT JOIN\n" +
-            "  (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date, hac.pregnancy_status  FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
-            "  GROUP BY hac.person_uuid, hac.visit_date, hac.pregnancy_status) ca ON p.uuid = ca.person_uuid\n" +
+            "  (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date, (CASE WHEN hac.is_pregnant THEN 'PREGANACY_STATUS_PREGNANT' WHEN hac.is_breast_feeding THEN 'PREGANACY_STATUS_BREASTFEEDING' WHEN hac.is_pregnant IS FALSE THEN 'PREGANACY_STATUS_NOT_PREGNANT' END) AS pregnancy_status  FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "  GROUP BY hac.person_uuid, hac.visit_date, hac.is_pregnant, hac.is_breast_feeding) ca ON p.uuid = ca.person_uuid\n" +
             "LEFT JOIN (\n" +
             "SELECT DISTINCT ON(lo.patient_uuid) lo.patient_uuid as person_uuid, ll.lab_test_name as test,\n" +
             "\t\tbac_viral_load.display AS viralLoadType, ls.date_sample_collected as dateSampleCollected,\n" +
@@ -168,7 +174,7 @@ public interface EacRepository extends JpaRepository<DQA, Long> {
             "LEFT JOIN laboratory_test lt ON lt.lab_order_id=lo.id AND lt.patient_uuid = lo.patient_uuid\n" +
             "LEFT JOIN base_application_codeset bac_viral_load ON bac_viral_load.id=lt.viral_load_indication\n" +
             "LEFT JOIN laboratory_labtest ll ON ll.id=lt.lab_test_id\n" +
-            "INNER JOIN hiv_enrollment h ON h.person_uuid=current_lo.patient_uuid\n" +
+            "INNER JOIN hiv_enrollment_commencement h ON h.person_uuid=current_lo.patient_uuid\n" +
             "LEFT JOIN laboratory_sample ls ON ls.test_id=lt.id AND ls.patient_uuid = lo.patient_uuid\n" +
             "LEFT JOIN laboratory_result lr ON lr.test_id=lt.id AND lr.patient_uuid = lo.patient_uuid\n" +
             "WHERE  lo.archived=0 ) vl ON  e.person_uuid = vl.person_uuid\n" +
@@ -185,7 +191,7 @@ public interface EacRepository extends JpaRepository<DQA, Long> {
             " GROUP BY person_uuid, eac_session_date ORDER BY  person_uuid, eac_session_date ASC ) eac ON e.person_uuid = eac.person_uuid \n" +
             "  LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
             "  LEFT JOIN hiv_eac ha ON e.person_uuid = ha.person_uuid\n" +
-            "  WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND eac1.status is NOT NULL AND vl.dateSampleCollected IS  NULL\n" +
+            "  WHERE p.archived=0 AND p.facility_id= ?1 AND ph.status = 'Active' AND eac1.status is NOT NULL AND vl.dateSampleCollected IS  NULL\n" +
             "  GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status, ca.visit_date, p.facility_id, \n" +
             "  pharm.visit_date, ha.status, vl.clastViralLoad, eac.eac_commenced, vl.dateSampleCollected,\n" +
             "  eac1.status, eac1.last_viral_load, eac1.date_of_last_viral_load, eac1.visit_date\n" +
@@ -193,10 +199,12 @@ public interface EacRepository extends JpaRepository<DQA, Long> {
     List<PatientDTOProjection> getOnEacNotCompleted(Long facilityId);
 
 
+    // Two joined tables have a "status" column here (patient status and EAC status). The filter means
+    // the patient one, so it says ph.status.
     @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex, \n" +
             "p.date_of_birth AS dateOfBirth, ph.status \n" +
             "FROM patient_person p \n" +
-            "  INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "  INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             "LEFT JOIN (\n" +
             "SELECT DISTINCT ON (p1.person_uuid)\n" +
             "p1.person_uuid,\n" +
@@ -241,8 +249,8 @@ public interface EacRepository extends JpaRepository<DQA, Long> {
             "GROUP BY refill_period, person_uuid ORDER BY person_uuid DESC ) fi ORDER BY\n" +
             "    person_uuid DESC ) pharm ON e.person_uuid = pharm.person_uuid\n" +
             "  LEFT JOIN\n" +
-            "  (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date, hac.pregnancy_status  FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
-            "  GROUP BY hac.person_uuid, hac.visit_date, hac.pregnancy_status) ca ON p.uuid = ca.person_uuid\n" +
+            "  (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date, (CASE WHEN hac.is_pregnant THEN 'PREGANACY_STATUS_PREGNANT' WHEN hac.is_breast_feeding THEN 'PREGANACY_STATUS_BREASTFEEDING' WHEN hac.is_pregnant IS FALSE THEN 'PREGANACY_STATUS_NOT_PREGNANT' END) AS pregnancy_status  FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "  GROUP BY hac.person_uuid, hac.visit_date, hac.is_pregnant, hac.is_breast_feeding) ca ON p.uuid = ca.person_uuid\n" +
             "LEFT JOIN (\n" +
             "SELECT DISTINCT ON(lo.patient_uuid) lo.patient_uuid as person_uuid, ll.lab_test_name as test,\n" +
             "\t\tbac_viral_load.display AS viralLoadType, ls.date_sample_collected as dateSampleCollected,\n" +
@@ -258,7 +266,7 @@ public interface EacRepository extends JpaRepository<DQA, Long> {
             "LEFT JOIN laboratory_test lt ON lt.lab_order_id=lo.id AND lt.patient_uuid = lo.patient_uuid\n" +
             "LEFT JOIN base_application_codeset bac_viral_load ON bac_viral_load.id=lt.viral_load_indication\n" +
             "LEFT JOIN laboratory_labtest ll ON ll.id=lt.lab_test_id\n" +
-            "INNER JOIN hiv_enrollment h ON h.person_uuid=current_lo.patient_uuid\n" +
+            "INNER JOIN hiv_enrollment_commencement h ON h.person_uuid=current_lo.patient_uuid\n" +
             "LEFT JOIN laboratory_sample ls ON ls.test_id=lt.id AND ls.patient_uuid = lo.patient_uuid\n" +
             "LEFT JOIN laboratory_result lr ON lr.test_id=lt.id AND lr.patient_uuid = lo.patient_uuid\n" +
             "WHERE  lo.archived=0 ) vl ON  e.person_uuid = vl.person_uuid\n" +
@@ -275,7 +283,7 @@ public interface EacRepository extends JpaRepository<DQA, Long> {
             " GROUP BY person_uuid, eac_session_date ORDER BY  person_uuid, eac_session_date ASC ) eac ON e.person_uuid = eac.person_uuid \n" +
             "  LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
             "  LEFT JOIN hiv_eac ha ON e.person_uuid = ha.person_uuid\n" +
-            "  WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND eac1.status is NOT NULL AND eac1.visit_date IS NOT NULL AND eac1.date_of_last_viral_load IS NULL\n" +
+            "  WHERE p.archived=0 AND p.facility_id= ?1 AND ph.status = 'Active' AND eac1.status is NOT NULL AND eac1.visit_date IS NOT NULL AND eac1.date_of_last_viral_load IS NULL\n" +
             "  GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status, ca.visit_date, p.facility_id, \n" +
             "  pharm.visit_date, ha.status, vl.clastViralLoad, eac.eac_commenced, vl.dateSampleCollected,\n" +
             "  eac1.status, eac1.last_viral_load, eac1.date_of_last_viral_load, eac1.visit_date\n" +

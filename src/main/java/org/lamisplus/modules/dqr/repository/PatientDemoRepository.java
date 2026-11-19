@@ -8,6 +8,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+// Enrolment and ART commencement are read from hiv_enrollment_commencement. hiv_enrollment and the
+// commencement rows in hiv_art_clinical stopped being written to when that form replaced them.
 @Repository
 public interface PatientDemoRepository extends JpaRepository<DQA, Long> {
 
@@ -16,9 +18,9 @@ public interface PatientDemoRepository extends JpaRepository<DQA, Long> {
     @Query(value ="SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex\n" +
             ", CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) AS age, \n" +
             "   p.date_of_birth AS dateOfBirth, ph.status\n" +
-            "  FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "  FROM patient_person p INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             "  LEFT JOIN\n" +
-            "  (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "  (SELECT TRUE as commenced, hac.person_uuid FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "  GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
             "LEFT JOIN (\n" +
             "SELECT DISTINCT ON (p1.person_uuid)\n" +
@@ -66,9 +68,9 @@ public interface PatientDemoRepository extends JpaRepository<DQA, Long> {
     @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex\n" +
             ", CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) AS age, \n" +
             "   p.date_of_birth AS dateOfBirth, ph.status\n" +
-            "  FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "  FROM patient_person p INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             "  LEFT JOIN\n" +
-            "  (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "  (SELECT TRUE as commenced, hac.person_uuid FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "  GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
             "LEFT JOIN (\n" +
             "SELECT DISTINCT ON (p1.person_uuid)\n" +
@@ -116,9 +118,9 @@ public interface PatientDemoRepository extends JpaRepository<DQA, Long> {
     @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex\n" +
             ",  \n" +
             "   p.date_of_birth AS dateOfBirth, ph.status\n" +
-            "  FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "  FROM patient_person p INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             "  LEFT JOIN\n" +
-            "  (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "  (SELECT TRUE as commenced, hac.person_uuid FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "  GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
             "LEFT JOIN (\n" +
             "SELECT DISTINCT ON (p1.person_uuid)\n" +
@@ -165,9 +167,9 @@ public interface PatientDemoRepository extends JpaRepository<DQA, Long> {
     @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex\n" +
             ", \n" +
             "   p.date_of_birth AS dateOfBirth, ph.status\n" +
-            "  FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "  FROM patient_person p INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             "  LEFT JOIN\n" +
-            "  (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "  (SELECT TRUE as commenced, hac.person_uuid FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "  GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
             " LEFT JOIN (\n" +
             "SELECT DISTINCT ON (p1.person_uuid)\n" +
@@ -214,9 +216,9 @@ public interface PatientDemoRepository extends JpaRepository<DQA, Long> {
     @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex\n" +
             ",  \n" +
             "   p.date_of_birth AS dateOfBirth, ph.status\n" +
-            "  FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "  FROM patient_person p INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             "  LEFT JOIN\n" +
-            "  (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "  (SELECT TRUE as commenced, hac.person_uuid FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "  GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
             " LEFT JOIN (\n" +
             "SELECT DISTINCT ON (p1.person_uuid)\n" +
@@ -263,9 +265,9 @@ public interface PatientDemoRepository extends JpaRepository<DQA, Long> {
     @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex\n" +
             ",  \n" +
             "   p.date_of_birth AS dateOfBirth, ph.status\n" +
-            "  FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "  FROM patient_person p INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             "  LEFT JOIN\n" +
-            "  (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "  (SELECT TRUE as commenced, hac.person_uuid FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "  GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
             " LEFT JOIN (\n" +
             "SELECT DISTINCT ON (p1.person_uuid)\n" +
@@ -312,9 +314,9 @@ public interface PatientDemoRepository extends JpaRepository<DQA, Long> {
     @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex\n" +
             ",  \n" +
             "   p.date_of_birth AS dateOfBirth, ph.status\n" +
-            "  FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "  FROM patient_person p INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             "  LEFT JOIN\n" +
-            "  (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "  (SELECT TRUE as commenced, hac.person_uuid FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "  GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
             "LEFT JOIN (\n" +
             "SELECT DISTINCT ON (p1.person_uuid)\n" +
@@ -360,9 +362,9 @@ public interface PatientDemoRepository extends JpaRepository<DQA, Long> {
 
     @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex\n" +
             ", p.date_of_birth AS dateOfBirth, ph.status\n" +
-            "  FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "  FROM patient_person p INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             "  LEFT JOIN\n" +
-            "  (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "  (SELECT TRUE as commenced, hac.person_uuid FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "  GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
             " LEFT JOIN (\n" +
             "SELECT DISTINCT ON (p1.person_uuid)\n" +

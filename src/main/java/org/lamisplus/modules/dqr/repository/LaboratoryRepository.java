@@ -10,13 +10,15 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+// Enrolment and ART commencement are read from hiv_enrollment_commencement. hiv_enrollment and the
+// commencement rows in hiv_art_clinical stopped being written to when that form replaced them.
 @Repository
 public interface LaboratoryRepository extends JpaRepository<DQA, Long> {
 
     @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex,\n" +
             "\t\tCAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) AS age,\n" +
             "         p.date_of_birth AS dateOfBirth,ph.status\n" +
-            "        FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "        FROM patient_person p INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             "LEFT JOIN (\n" +
             "SELECT DISTINCT ON (p1.person_uuid)\n" +
             "p1.person_uuid,\n" +
@@ -54,7 +56,7 @@ public interface LaboratoryRepository extends JpaRepository<DQA, Long> {
             "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
             ") ph ON p.uuid = ph.person_uuid "+
             "        LEFT JOIN\n" +
-            "        (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "        (SELECT TRUE as commenced, hac.person_uuid FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "        GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
             "\t\tLEFT JOIN (\n" +
             "\t\tSELECT DISTINCT ON(lo.patient_uuid) lo.patient_uuid as person_uuid, ll.lab_test_name as test,\n" +
@@ -71,7 +73,7 @@ public interface LaboratoryRepository extends JpaRepository<DQA, Long> {
             "\t\tLEFT JOIN laboratory_test lt ON lt.lab_order_id=lo.id AND lt.patient_uuid = lo.patient_uuid\n" +
             "\t\tLEFT JOIN base_application_codeset bac_viral_load ON bac_viral_load.id=lt.viral_load_indication\n" +
             "\t\tLEFT JOIN laboratory_labtest ll ON ll.id=lt.lab_test_id\n" +
-            "\t\tINNER JOIN hiv_enrollment h ON h.person_uuid=current_lo.patient_uuid\n" +
+            "\t\tINNER JOIN hiv_enrollment_commencement h ON h.person_uuid=current_lo.patient_uuid\n" +
             "\t\tLEFT JOIN laboratory_sample ls ON ls.test_id=lt.id AND ls.patient_uuid = lo.patient_uuid\n" +
             "\t\tLEFT JOIN laboratory_result lr ON lr.test_id=lt.id AND lr.patient_uuid = lo.patient_uuid\n" +
             "\t\tWHERE  lo.archived=0\n" +
@@ -101,7 +103,7 @@ public interface LaboratoryRepository extends JpaRepository<DQA, Long> {
     @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex,\n" +
             "\t\tCAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) AS age,\n" +
             "         p.date_of_birth AS dateOfBirth,ph.status\n" +
-            "\t\t FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "\t\t FROM patient_person p INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             "LEFT JOIN (\n" +
             "SELECT DISTINCT ON (p1.person_uuid)\n" +
             "p1.person_uuid,\n" +
@@ -139,7 +141,7 @@ public interface LaboratoryRepository extends JpaRepository<DQA, Long> {
             "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
             ") ph ON p.uuid = ph.person_uuid "+
             "        LEFT JOIN\n" +
-            "        (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "        (SELECT TRUE as commenced, hac.person_uuid FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "        GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
             "\t\tLEFT JOIN (\n" +
             "\t\tSELECT DISTINCT ON(lo.patient_uuid) lo.patient_uuid as person_uuid, ll.lab_test_name as test,\n" +
@@ -156,7 +158,7 @@ public interface LaboratoryRepository extends JpaRepository<DQA, Long> {
             "\t\tLEFT JOIN laboratory_test lt ON lt.lab_order_id=lo.id AND lt.patient_uuid = lo.patient_uuid\n" +
             "\t\tLEFT JOIN base_application_codeset bac_viral_load ON bac_viral_load.id=lt.viral_load_indication\n" +
             "\t\tLEFT JOIN laboratory_labtest ll ON ll.id=lt.lab_test_id\n" +
-            "\t\tINNER JOIN hiv_enrollment h ON h.person_uuid=current_lo.patient_uuid\n" +
+            "\t\tINNER JOIN hiv_enrollment_commencement h ON h.person_uuid=current_lo.patient_uuid\n" +
             "\t\tLEFT JOIN laboratory_sample ls ON ls.test_id=lt.id AND ls.patient_uuid = lo.patient_uuid\n" +
             "\t\tLEFT JOIN laboratory_result lr ON lr.test_id=lt.id AND lr.patient_uuid = lo.patient_uuid\n" +
             "\t\tWHERE  lo.archived=0\n" +
@@ -185,9 +187,9 @@ public interface LaboratoryRepository extends JpaRepository<DQA, Long> {
     @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex,\n" +
             "\t\tCAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) AS age,\n" +
             "         p.date_of_birth AS dateOfBirth,ph.status\n" +
-            "        FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "        FROM patient_person p INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             "        LEFT JOIN\n" +
-            "        (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "        (SELECT TRUE as commenced, hac.person_uuid FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "        GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
             " LEFT JOIN (\n" +
             "SELECT DISTINCT ON (p1.person_uuid)\n" +
@@ -240,7 +242,7 @@ public interface LaboratoryRepository extends JpaRepository<DQA, Long> {
             "\t\tLEFT JOIN laboratory_test lt ON lt.lab_order_id=lo.id AND lt.patient_uuid = lo.patient_uuid\n" +
             "\t\tLEFT JOIN base_application_codeset bac_viral_load ON bac_viral_load.id=lt.viral_load_indication\n" +
             "\t\tLEFT JOIN laboratory_labtest ll ON ll.id=lt.lab_test_id\n" +
-            "\t\tINNER JOIN hiv_enrollment h ON h.person_uuid=current_lo.patient_uuid\n" +
+            "\t\tINNER JOIN hiv_enrollment_commencement h ON h.person_uuid=current_lo.patient_uuid\n" +
             "\t\tLEFT JOIN laboratory_sample ls ON ls.test_id=lt.id AND ls.patient_uuid = lo.patient_uuid\n" +
             "\t\tLEFT JOIN laboratory_result lr ON lr.test_id=lt.id AND lr.patient_uuid = lo.patient_uuid\n" +
             "\t\tWHERE  lo.archived=0\n" +
@@ -267,9 +269,9 @@ public interface LaboratoryRepository extends JpaRepository<DQA, Long> {
     @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex,\n" +
             "\t\tCAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) AS age,\n" +
             "         p.date_of_birth AS dateOfBirth,ph.status\t\n" +
-            "        FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "        FROM patient_person p INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             "        LEFT JOIN\n" +
-            "        (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "        (SELECT TRUE as commenced, hac.person_uuid FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "        GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
             "LEFT JOIN (\n" +
             "SELECT DISTINCT ON (p1.person_uuid)\n" +
@@ -322,7 +324,7 @@ public interface LaboratoryRepository extends JpaRepository<DQA, Long> {
             "\t\tLEFT JOIN laboratory_test lt ON lt.lab_order_id=lo.id AND lt.patient_uuid = lo.patient_uuid\n" +
             "\t\tLEFT JOIN base_application_codeset bac_viral_load ON bac_viral_load.id=lt.viral_load_indication\n" +
             "\t\tLEFT JOIN laboratory_labtest ll ON ll.id=lt.lab_test_id\n" +
-            "\t\tINNER JOIN hiv_enrollment h ON h.person_uuid=current_lo.patient_uuid\n" +
+            "\t\tINNER JOIN hiv_enrollment_commencement h ON h.person_uuid=current_lo.patient_uuid\n" +
             "\t\tLEFT JOIN laboratory_sample ls ON ls.test_id=lt.id AND ls.patient_uuid = lo.patient_uuid\n" +
             "\t\tLEFT JOIN laboratory_result lr ON lr.test_id=lt.id AND lr.patient_uuid = lo.patient_uuid\n" +
             "\t\tWHERE  lo.archived=0\n" +
@@ -350,9 +352,9 @@ public interface LaboratoryRepository extends JpaRepository<DQA, Long> {
     @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex,\n" +
             "\t\tCAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) AS age,\n" +
             "         p.date_of_birth AS dateOfBirth,ph.status\n" +
-            "        FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "        FROM patient_person p INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             "        LEFT JOIN\n" +
-            "        (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "        (SELECT TRUE as commenced, hac.person_uuid FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "        GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
             "LEFT JOIN (\n" +
             "SELECT DISTINCT ON (p1.person_uuid)\n" +
@@ -403,7 +405,7 @@ public interface LaboratoryRepository extends JpaRepository<DQA, Long> {
             "\t\tLEFT JOIN laboratory_test lt ON lt.lab_order_id=lo.id AND lt.patient_uuid = lo.patient_uuid\n" +
             "\t\tLEFT JOIN base_application_codeset bac_viral_load ON bac_viral_load.id=lt.viral_load_indication\n" +
             "\t\tLEFT JOIN laboratory_labtest ll ON ll.id=lt.lab_test_id\n" +
-            "\t\tINNER JOIN hiv_enrollment h ON h.person_uuid=current_lo.patient_uuid\n" +
+            "\t\tINNER JOIN hiv_enrollment_commencement h ON h.person_uuid=current_lo.patient_uuid\n" +
             "\t\tLEFT JOIN laboratory_sample ls ON ls.test_id=lt.id AND ls.patient_uuid = lo.patient_uuid\n" +
             "\t\tLEFT JOIN laboratory_result lr ON lr.test_id=lt.id AND lr.patient_uuid = lo.patient_uuid\n" +
             "\t\tWHERE  lo.archived=0\n" +
@@ -430,9 +432,9 @@ public interface LaboratoryRepository extends JpaRepository<DQA, Long> {
     @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex,\n" +
             "\t\tCAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) AS age,\n" +
             "         p.date_of_birth AS dateOfBirth,ph.status\n" +
-            "        FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "        FROM patient_person p INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             "        LEFT JOIN\n" +
-            "        (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "        (SELECT TRUE as commenced, hac.person_uuid FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "        GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
             "LEFT JOIN (\n" +
             "SELECT DISTINCT ON (p1.person_uuid)\n" +
@@ -483,7 +485,7 @@ public interface LaboratoryRepository extends JpaRepository<DQA, Long> {
             "\t\tLEFT JOIN laboratory_test lt ON lt.lab_order_id=lo.id AND lt.patient_uuid = lo.patient_uuid\n" +
             "\t\tLEFT JOIN base_application_codeset bac_viral_load ON bac_viral_load.id=lt.viral_load_indication\n" +
             "\t\tLEFT JOIN laboratory_labtest ll ON ll.id=lt.lab_test_id\n" +
-            "\t\tINNER JOIN hiv_enrollment h ON h.person_uuid=current_lo.patient_uuid\n" +
+            "\t\tINNER JOIN hiv_enrollment_commencement h ON h.person_uuid=current_lo.patient_uuid\n" +
             "\t\tLEFT JOIN laboratory_sample ls ON ls.test_id=lt.id AND ls.patient_uuid = lo.patient_uuid\n" +
             "\t\tLEFT JOIN laboratory_result lr ON lr.test_id=lt.id AND lr.patient_uuid = lo.patient_uuid\n" +
             "\t\tWHERE  lo.archived=0\n" +
@@ -512,9 +514,9 @@ public interface LaboratoryRepository extends JpaRepository<DQA, Long> {
     @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex,\n" +
             "\t\tCAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) AS age,\n" +
             "         p.date_of_birth AS dateOfBirth,ph.status\n" +
-            "        FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "        FROM patient_person p INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             "        LEFT JOIN\n" +
-            "        (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "        (SELECT TRUE as commenced, hac.person_uuid FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "        GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
             "LEFT JOIN (\n" +
             "SELECT DISTINCT ON (p1.person_uuid)\n" +
@@ -567,7 +569,7 @@ public interface LaboratoryRepository extends JpaRepository<DQA, Long> {
             "\t\tLEFT JOIN laboratory_test lt ON lt.lab_order_id=lo.id AND lt.patient_uuid = lo.patient_uuid\n" +
             "\t\tLEFT JOIN base_application_codeset bac_viral_load ON bac_viral_load.id=lt.viral_load_indication\n" +
             "\t\tLEFT JOIN laboratory_labtest ll ON ll.id=lt.lab_test_id\n" +
-            "\t\tINNER JOIN hiv_enrollment h ON h.person_uuid=current_lo.patient_uuid\n" +
+            "\t\tINNER JOIN hiv_enrollment_commencement h ON h.person_uuid=current_lo.patient_uuid\n" +
             "\t\tLEFT JOIN laboratory_sample ls ON ls.test_id=lt.id AND ls.patient_uuid = lo.patient_uuid\n" +
             "\t\tLEFT JOIN laboratory_result lr ON lr.test_id=lt.id AND lr.patient_uuid = lo.patient_uuid\n" +
             "\t\tWHERE  lo.archived=0\n" +

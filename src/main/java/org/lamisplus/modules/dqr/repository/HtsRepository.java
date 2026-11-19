@@ -105,6 +105,8 @@ public interface HtsRepository extends JpaRepository<DQA, Long> {
     List<PatientDTOProjection> getHtsPosRecentVlResultDateGreaterThanReportDate(Long facilityId);
 
 
+    // Some records save the opt-out test date as an empty string. NULLIF turns that into "no date"
+    // so the date conversion doesn't crash the whole query.
     @Query(value = "SELECT DISTINCT ON (hc.person_uuid)\n" +
             "    \thc.client_code AS patientId,\n" +
             "    \thc.client_code AS hospitalNumber,\n" +
@@ -124,7 +126,7 @@ public interface HtsRepository extends JpaRepository<DQA, Long> {
             "       AND hc.recency IS NOT NULL\n" +
             "\t   AND hc.RECENCY->>'rencencyId' IS NOT NULL \n" +
             "\t   AND hc.RECENCY->>'rencencyId' != ''\n" +
-            "\t   AND CAST(hc.RECENCY->>'optOutRTRITestDate' AS DATE) < hc.date_visit\n" +
+            "\t   AND CAST(NULLIF(hc.RECENCY->>'optOutRTRITestDate', '') AS DATE) < hc.date_visit\n" +
             "\t   AND lo.archived != 1 \n" +
             "\t   AND lr.archived != 1\n" +
             "\t   AND hc.archived != 1", nativeQuery = true)

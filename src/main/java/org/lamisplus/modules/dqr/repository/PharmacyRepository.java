@@ -9,15 +9,25 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+// Enrolment and ART commencement are read from hiv_enrollment_commencement. hiv_enrollment and the
+// commencement rows in hiv_art_clinical stopped being written to when that form replaced them.
 @Repository
 public interface PharmacyRepository extends JpaRepository<DQA, Long> {
 
-    @Query(value = "SELECT patientId, hospitalNumber, sex, dateOfBirth, status FROM (\n" +
+    // "pharm" is worked out once, up front (WITH ... AS MATERIALIZED). Left inline, Postgres guessed
+    // there was about 1 active patient and re-ran this subquery for every patient (over 2 minutes).
+    @Query(value = "WITH pharm AS MATERIALIZED (SELECT DISTINCT ON (person_uuid)\n" +
+            "    person_uuid, visit_date, refill_period, extra\n" +
+            "FROM ( select person_uuid, refill_period, MAX(visit_date) AS visit_date, extra from hiv_art_pharmacy\n" +
+            "\t  where archived = 0\n" +
+            "GROUP BY refill_period, person_uuid, extra ORDER BY person_uuid DESC ) fi ORDER BY\n" +
+            "    person_uuid DESC )\n" +
+            "SELECT patientId, hospitalNumber, sex, dateOfBirth, status FROM (\n" +
             "SELECT patientId, hospitalNumber, sex, dateOfBirth, status FROM (\n" +
             "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex\n" +
             ",p.date_of_birth AS dateOfBirth, ph.status, pharm.refill_period as refillMonth, pharm.visit_date AS visit_date, pharm.extra AS regimen\n" +
             "  FROM patient_person p \n" +
-            "  INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "  INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             "LEFT JOIN (\n" +
             "SELECT DISTINCT ON (p1.person_uuid)\n" +
             "p1.person_uuid,\n" +
@@ -55,15 +65,10 @@ public interface PharmacyRepository extends JpaRepository<DQA, Long> {
             "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
             ") ph ON p.uuid = ph.person_uuid " +
             "  LEFT JOIN\n" +
-            "  (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date, hac.pregnancy_status  FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
-            "  GROUP BY hac.person_uuid, hac.visit_date, hac.pregnancy_status)ca ON p.uuid = ca.person_uuid\n" +
+            "  (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date, (CASE WHEN hac.is_pregnant THEN 'PREGANACY_STATUS_PREGNANT' WHEN hac.is_breast_feeding THEN 'PREGANACY_STATUS_BREASTFEEDING' WHEN hac.is_pregnant IS FALSE THEN 'PREGANACY_STATUS_NOT_PREGNANT' END) AS pregnancy_status  FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "  GROUP BY hac.person_uuid, hac.visit_date, hac.is_pregnant, hac.is_breast_feeding)ca ON p.uuid = ca.person_uuid\n" +
             "  \t  LEFT JOIN\n" +
-            "  (SELECT DISTINCT ON (person_uuid)\n" +
-            "    person_uuid, visit_date, refill_period, extra\n" +
-            "FROM ( select person_uuid, refill_period, MAX(visit_date) AS visit_date, extra from hiv_art_pharmacy\n" +
-            "\t  where archived = 0\n" +
-            "GROUP BY refill_period, person_uuid, extra ORDER BY person_uuid DESC ) fi ORDER BY\n" +
-            "    person_uuid DESC ) pharm ON pharm.person_uuid = p.uuid\n" +
+            "  pharm ON pharm.person_uuid = p.uuid\n" +
             "  LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
             "  WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' \n" +
             "  GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status, ca.visit_date, pharm.refill_period, p.facility_id, pharm.visit_date, pharm.extra\n" +
@@ -78,7 +83,7 @@ public interface PharmacyRepository extends JpaRepository<DQA, Long> {
             "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex\n" +
             ",p.date_of_birth AS dateOfBirth, ph.status, pharm.refill_period as refillMonth, pharm.visit_date AS visit_date\n" +
             "  FROM patient_person p \n" +
-            "  INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "  INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             "LEFT JOIN (\n" +
             "SELECT DISTINCT ON (p1.person_uuid)\n" +
             "p1.person_uuid,\n" +
@@ -116,8 +121,8 @@ public interface PharmacyRepository extends JpaRepository<DQA, Long> {
             "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
             ") ph ON p.uuid = ph.person_uuid" +
             "  LEFT JOIN\n" +
-            "  (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date, hac.pregnancy_status  FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
-            "  GROUP BY hac.person_uuid, hac.visit_date, hac.pregnancy_status)ca ON p.uuid = ca.person_uuid\n" +
+            "  (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date, (CASE WHEN hac.is_pregnant THEN 'PREGANACY_STATUS_PREGNANT' WHEN hac.is_breast_feeding THEN 'PREGANACY_STATUS_BREASTFEEDING' WHEN hac.is_pregnant IS FALSE THEN 'PREGANACY_STATUS_NOT_PREGNANT' END) AS pregnancy_status  FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "  GROUP BY hac.person_uuid, hac.visit_date, hac.is_pregnant, hac.is_breast_feeding)ca ON p.uuid = ca.person_uuid\n" +
             "  \t  LEFT JOIN\n" +
             "  (SELECT DISTINCT ON (person_uuid)\n" +
             "    person_uuid, visit_date, refill_period\n" +

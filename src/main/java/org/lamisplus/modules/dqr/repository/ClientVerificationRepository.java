@@ -10,6 +10,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+// Enrolment and ART commencement are read from hiv_enrollment_commencement. hiv_enrollment and the
+// commencement rows in hiv_art_clinical stopped being written to when that form replaced them.
 @Repository
 public interface ClientVerificationRepository extends JpaRepository<DQA, Long> {
 
@@ -17,9 +19,9 @@ public interface ClientVerificationRepository extends JpaRepository<DQA, Long> {
     @Query(value = "SELECT e.unique_id AS patientId, p.hospital_number AS hospitalNumber,\n" +
             "        INITCAP(p.sex) AS sex, CAST(EXTRACT(YEAR FROM AGE(NOW(), p.date_of_birth)) AS INTEGER) AS age,\n" +
             "        p.date_of_birth AS dateOfBirth, ph.status\n" +
-            "FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "FROM patient_person p INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             "   INNER JOIN\n" +
-            "   (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "   (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "   GROUP BY hac.person_uuid, hac.visit_date)ca ON p.uuid = ca.person_uuid\n" +
             "LEFT JOIN (\n" +
             "SELECT CAST(sample.date_sample_collected AS DATE ) as dateOfViralLoadSampleCollection, patient_uuid as person_uuid1  FROM (\n" +
@@ -77,9 +79,9 @@ public interface ClientVerificationRepository extends JpaRepository<DQA, Long> {
     @Query(value = "SELECT e.unique_id AS patientId, p.hospital_number AS hospitalNumber,\n" +
             "        INITCAP(p.sex) AS sex, CAST(EXTRACT(YEAR FROM AGE(NOW(), p.date_of_birth)) AS INTEGER) AS age,\n" +
             "        p.date_of_birth AS dateOfBirth, ph.status\n" +
-            "FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "FROM patient_person p INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             "   INNER JOIN\n" +
-            "   (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "   (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "   GROUP BY hac.person_uuid, hac.visit_date)ca ON p.uuid = ca.person_uuid\t\n" +
             "INNER JOIN (\n" +
             "\tSELECT DISTINCT ON (hap.person_uuid) hap.person_uuid,hac.pregnancy_status ,hac.next_appointment, hac.tb_status ,\n" +
@@ -130,9 +132,9 @@ public interface ClientVerificationRepository extends JpaRepository<DQA, Long> {
     @Query(value = "SELECT e.unique_id AS patientId, p.hospital_number AS hospitalNumber,\n" +
             "        INITCAP(p.sex) AS sex, CAST(EXTRACT(YEAR FROM AGE(NOW(), p.date_of_birth)) AS INTEGER) AS age,\n" +
             "        p.date_of_birth AS dateOfBirth, ph.status\n" +
-            "FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "FROM patient_person p INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             "   INNER JOIN\n" +
-            "   (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "   (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "   GROUP BY hac.person_uuid, hac.visit_date)ca ON p.uuid = ca.person_uuid\n" +
             "LEFT JOIN (\n" +
             "SELECT person_uuid, visit_date, previousPickUpDrugDate,\n" +
@@ -187,9 +189,9 @@ public interface ClientVerificationRepository extends JpaRepository<DQA, Long> {
     @Query(value = "SELECT e.unique_id AS patientId, p.hospital_number AS hospitalNumber,\n" +
             "        INITCAP(p.sex) AS sex, CAST(EXTRACT(YEAR FROM AGE(NOW(), p.date_of_birth)) AS INTEGER) AS age,\n" +
             "        p.date_of_birth AS dateOfBirth, ph.status\n" +
-            "FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "FROM patient_person p INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             "   INNER JOIN\n" +
-            "   (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "   (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "   GROUP BY hac.person_uuid, hac.visit_date)ca ON p.uuid = ca.person_uuid\t\n" +
             "INNER JOIN (\n" +
             "SELECT\n" +
@@ -260,9 +262,9 @@ public interface ClientVerificationRepository extends JpaRepository<DQA, Long> {
     @Query(value = " SELECT e.unique_id AS patientId, p.hospital_number AS hospitalNumber,\n" +
             "        INITCAP(p.sex) AS sex, CAST(EXTRACT(YEAR FROM AGE(NOW(), p.date_of_birth)) AS INTEGER) AS age,\n" +
             "        p.date_of_birth AS dateOfBirth, ph.status\n" +
-            "FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "FROM patient_person p INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             "   INNER JOIN\n" +
-            "   (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "   (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "   GROUP BY hac.person_uuid, hac.visit_date)ca ON p.uuid = ca.person_uuid\n" +
             "\t LEFT JOIN (\n" +
             " SELECT DISTINCT ON (person_uuid) person_uuid, COUNT(biometric_type) AS biometric_fingers_captured, enrollment_date, COUNT(*) FILTER (WHERE ENCODE(CAST(template AS BYTEA), 'hex') LIKE '46%') AS biometric_valid_captured, recapture FROM biometric\n" +
@@ -324,7 +326,7 @@ public interface ClientVerificationRepository extends JpaRepository<DQA, Long> {
     @Query(value ="SELECT e.unique_id AS patientId, p.hospital_number AS hospitalNumber,\n" +
             "        INITCAP(p.sex) AS sex, CAST(EXTRACT(YEAR FROM AGE(NOW(), p.date_of_birth)) AS INTEGER) AS age,\n" +
             "        p.date_of_birth AS dateOfBirth, ph.status\n" +
-            "\t\tFROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "\t\tFROM patient_person p INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             "INNER JOIN (\n" +
             "SELECT * FROM (\n" +
             "SELECT \n" +
@@ -382,9 +384,9 @@ public interface ClientVerificationRepository extends JpaRepository<DQA, Long> {
             " SELECT e.unique_id AS patientId, p.hospital_number AS hospitalNumber,\n" +
             "        INITCAP(p.sex) AS sex, CAST(EXTRACT(YEAR FROM AGE(NOW(), p.date_of_birth)) AS INTEGER) AS age,\n" +
             "        p.date_of_birth AS dateOfBirth, sameDemographics.person_uuid, ph.status\t\n" +
-            "FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "FROM patient_person p INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             "   INNER JOIN\n" +
-            "   (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "   (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "   GROUP BY hac.person_uuid, hac.visit_date)ca ON p.uuid = ca.person_uuid\n" +
             " LEFT JOIN (\n" +
             "SELECT\n" +
@@ -408,13 +410,13 @@ public interface ClientVerificationRepository extends JpaRepository<DQA, Long> {
             "                      AND p1.uuid <> p2.uuid  -- Exclude the same row\n" +
             "INNER JOIN (\n" +
             "    SELECT TRUE AS commenced, hac1.person_uuid, hac1.visit_date\n" +
-            "    FROM hiv_art_clinical hac1\n" +
+            "    FROM hiv_enrollment_commencement hac1\n" +
             "    WHERE hac1.archived = 0 AND hac1.is_commencement IS TRUE\n" +
             "    GROUP BY hac1.person_uuid, hac1.visit_date\n" +
             ") ca1 ON ca1.person_uuid = p1.uuid\n" +
             "INNER JOIN (\n" +
             "    SELECT TRUE AS commenced, hac2.person_uuid, hac2.visit_date\n" +
-            "    FROM hiv_art_clinical hac2\n" +
+            "    FROM hiv_enrollment_commencement hac2\n" +
             "    WHERE hac2.archived = 0 AND hac2.is_commencement IS TRUE\n" +
             "    GROUP BY hac2.person_uuid, hac2.visit_date\n" +
             ") ca2 ON ca2.person_uuid = p2.uuid\n" +
@@ -466,9 +468,9 @@ public interface ClientVerificationRepository extends JpaRepository<DQA, Long> {
             " SELECT e.unique_id AS patientId, p.hospital_number AS hospitalNumber,\n" +
             "        INITCAP(p.sex) AS sex, CAST(EXTRACT(YEAR FROM AGE(NOW(), date_of_birth)) AS INTEGER) AS age,\n" +
             "        p.date_of_birth AS dateOfBirth, recap.person_uuid AS biometric, ph.status\t\n" +
-            "FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "FROM patient_person p INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             "   INNER JOIN\n" +
-            "   (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "   (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "   GROUP BY hac.person_uuid, hac.visit_date)ca ON p.uuid = ca.person_uuid\n" +
             " LEFT JOIN (\n" +
             " SELECT DISTINCT ON (person_uuid) person_uuid, COUNT(biometric_type) AS biometric_fingers_captured, enrollment_date, COUNT(*) FILTER (WHERE ENCODE(CAST(template AS BYTEA), 'hex') LIKE '46%') AS biometric_valid_captured, recapture FROM biometric\n" +
@@ -521,9 +523,9 @@ public interface ClientVerificationRepository extends JpaRepository<DQA, Long> {
             " SELECT e.unique_id AS patientId, p.hospital_number AS hospitalNumber,\n" +
             "        INITCAP(p.sex) AS sex, CAST(EXTRACT(YEAR FROM AGE(NOW(), date_of_birth)) AS INTEGER) AS age,\n" +
             "        p.date_of_birth AS dateOfBirth, b.person_uuid AS biometric, ph.status\t\n" +
-            "FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "FROM patient_person p INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             "   INNER JOIN\n" +
-            "   (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "   (SELECT TRUE as commenced, hac.person_uuid, hac.visit_date FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "   GROUP BY hac.person_uuid, hac.visit_date)ca ON p.uuid = ca.person_uuid\n" +
             "  LEFT JOIN (\n" +
             " SELECT DISTINCT ON (person_uuid) person_uuid, COUNT(biometric_type) AS biometric_fingers_captured, enrollment_date, COUNT(*) FILTER (WHERE ENCODE(CAST(template AS BYTEA), 'hex') LIKE '46%') AS biometric_valid_captured, recapture FROM biometric\n" +

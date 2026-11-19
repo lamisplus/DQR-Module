@@ -57,6 +57,8 @@ public interface PrepRepository extends JpaRepository<DQA, Long> {
             "AND hc.facility_id = ?1", nativeQuery = true)
     List<PatientDTOProjection> getDateRegisterLessThanDateCommenced(Long facilityId);
 
+    // Some urinalysis records save testDate as an empty string. NULLIF turns that into "no date"
+    // so the date conversion doesn't crash the whole query.
     @Query(value = "SELECT DISTINCT ON (hc.person_uuid)\n" +
             "       hc.client_code AS patientId,\n" +
             "       hc.client_code AS hospitalNumber,\n" +
@@ -74,10 +76,12 @@ public interface PrepRepository extends JpaRepository<DQA, Long> {
             "  AND (pc.urinalysis_result IS NOT NULL OR pc.urinalysis_result = '')\n" +
             "  AND hc.facility_id = ?1\n" +
             "GROUP BY hc.person_uuid, pc.urinalysis, hc.client_code, pc.urinalysis_result, hc.hiv_test_result, hc.extra, pe.date_enrolled\n" +
-            "HAVING pe.date_enrolled > CAST(MAX(pc.urinalysis->> 'testDate') AS DATE);\n", nativeQuery = true)
+            "HAVING pe.date_enrolled > CAST(MAX(NULLIF(pc.urinalysis->> 'testDate', '')) AS DATE);\n", nativeQuery = true)
     List<PatientDTOProjection> getUrinalysisGreaterThanDateEnroll(Long facilityId);
 
 
+    // Some urinalysis records save testDate as an empty string. NULLIF turns that into "no date"
+    // so the date conversion doesn't crash the whole query.
     @Query(value = "SELECT DISTINCT ON (hc.person_uuid)\n" +
             "       hc.client_code AS patientId,\n" +
             "       hc.client_code AS hospitalNumber,\n" +
@@ -99,7 +103,7 @@ public interface PrepRepository extends JpaRepository<DQA, Long> {
             "  AND pe.archived != 1\n" +
             "GROUP BY hc.person_uuid, pc.urinalysis, hc.client_code, pc.urinalysis_result, hc.hiv_test_result,\n" +
             "hc.extra, pe.date_enrolled, pc.encounter_date\n" +
-            "HAVING pc.encounter_date > CAST(MAX(pc.urinalysis->> 'testDate') AS DATE)", nativeQuery = true)
+            "HAVING pc.encounter_date > CAST(MAX(NULLIF(pc.urinalysis->> 'testDate', '')) AS DATE)", nativeQuery = true)
     List<PatientDTOProjection> getUrinalysisGreaterThanStatusDate(Long facilityId);
 
     // summary

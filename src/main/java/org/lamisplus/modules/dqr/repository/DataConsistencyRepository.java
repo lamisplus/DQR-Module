@@ -11,15 +11,17 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 
+// Enrolment and ART commencement are read from hiv_enrollment_commencement. hiv_enrollment and the
+// commencement rows in hiv_art_clinical stopped being written to when that form replaced them.
 @Repository
 public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
 
 
     @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex,\n" +
             "      p.date_of_birth AS dateOfBirth, ph.status\n" +
-            "     FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "     FROM patient_person p INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             "     LEFT JOIN\n" +
-            "     (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "     (SELECT TRUE as commenced, hac.person_uuid FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "     GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
             "LEFT JOIN (\n" +
             "SELECT DISTINCT ON (p1.person_uuid)\n" +
@@ -58,16 +60,16 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
             ") ph ON p.uuid = ph.person_uuid " +
             "     LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "     WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND e.target_group_id is null\n" +
+            "     WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND (CASE WHEN e.is_kp IS FALSE OR NULLIF(e.kp_typology_id, '') IS NOT NULL THEN TRUE END) is null\n" +
             "     GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status\n" +
             "     ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getPatientsWithoutTargetGroup(Long facilityId);
 
 
     @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex, p.date_of_birth AS dateOfBirth, ph.status\n" +
-            "      FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "      FROM patient_person p INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             "      LEFT JOIN\n" +
-            "      (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "      (SELECT TRUE as commenced, hac.person_uuid FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "      GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
             "LEFT JOIN (\n" +
             "SELECT DISTINCT ON (p1.person_uuid)\n" +
@@ -106,7 +108,7 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
             ") ph ON p.uuid = ph.person_uuid "+
             "      LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "      WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND e.entry_point_id is null\n" +
+            "      WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND e.care_entry_point_id is null\n" +
             "      GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status\n" +
             "      ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getPatientsWithoutCareEntryPoint(Long facilityId);
@@ -126,7 +128,7 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "FROM\n" +
             "  patient_person p\n" +
             "INNER JOIN\n" +
-            "  hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "  hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             " LEFT JOIN\n" +
             "    (SELECT DISTINCT ON (person_uuid)\n" +
             "      person_uuid, visit_date, body_weight\n" +
@@ -166,7 +168,14 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "  ) AS ph ON p.uuid = ph.person_uuid\n" +
             "WHERE\n" +
             "  p.archived = 0\n" +
-            "  AND p.facility_id = ?1 AND status = 'Active'\n" +
+            "  AND p.facility_id = ?1\n" +
+            // Postgres can't see the "status" alias from the SELECT here, so the same CASE is repeated.
+            "  AND (CASE\n" +
+            "    WHEN t.hiv_status = 'KNOWN_DEATH' THEN 'Dead'\n" +
+            "    WHEN t.hiv_status IN ('ART_TRANSFER_OUT', 'ART Transfer Out') THEN 'Transferred Out'\n" +
+            "    WHEN AGE(NOW(), ph.last_visit_date) <= INTERVAL '28 DAYS' THEN 'Active'\n" +
+            "    WHEN AGE(NOW(), ph.last_visit_date) > INTERVAL '28 DAYS' THEN 'IIT'\n" +
+            "  END) = 'Active'\n" +
             "  AND (tri.body_weight > 121 OR tri.body_weight IS NULL)\n" +
             "ORDER BY\n" +
             "  p.id DESC;", nativeQuery = true)
@@ -186,7 +195,7 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "FROM\n" +
             "  patient_person p\n" +
             "INNER JOIN\n" +
-            "  hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "  hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             " LEFT JOIN\n" +
             "    (SELECT DISTINCT ON (person_uuid)\n" +
             "      person_uuid, visit_date, body_weight\n" +
@@ -235,9 +244,9 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
     @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex, \n" +
             "CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) AS age, \n" +
             "       p.date_of_birth AS dateOfBirth, ph.status\n" +
-            "      FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "      FROM patient_person p INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             "      LEFT JOIN\n" +
-            "      (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "      (SELECT TRUE as commenced, hac.person_uuid FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "      GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
             "LEFT JOIN (\n" +
             "SELECT DISTINCT ON (p1.person_uuid)\n" +
@@ -276,7 +285,7 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
             ") ph ON p.uuid = ph.person_uuid "+
             "      LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "      WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND e.date_started > NOW()\n" +
+            "      WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND e.date_art_started > NOW()\n" +
             "      GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status\n" +
             "      ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getPatientStartDateGreaterThanToday (Long facilityId);
@@ -291,7 +300,7 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "FROM\n" +
             "  patient_person p\n" +
             "INNER JOIN\n" +
-            "  hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "  hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             "LEFT JOIN (\n" +
             "SELECT DISTINCT ON (p1.person_uuid)\n" +
             "p1.person_uuid,\n" +
@@ -335,20 +344,28 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "WHERE\n" +
             "  p.archived = 0 AND p.facility_id = ?1 AND status = 'Active'\n" +
             "GROUP BY\n" +
-            "  e.unique_id, p.hospital_number, p.sex, p.date_of_birth, ph.status, e.person_uuid, p.id, e.date_started\n" +
+            "  e.unique_id, p.hospital_number, p.sex, p.date_of_birth, ph.status, e.person_uuid, p.id, e.date_art_started\n" +
             "HAVING\n" +
-            " e.date_started > MAX(hac.visit_date)\n" +
+            " e.date_art_started > MAX(hac.visit_date)\n" +
             "ORDER BY\n" +
             "  p.id DESC;", nativeQuery = true)
     List<PatientDTOProjection> getPatientClinicDateGreaterThanToday (Long facilityId);
 
 
-    @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex\n" +
+    // "pharm" is worked out once, up front (WITH ... AS MATERIALIZED). Left inline, Postgres guessed
+    // there was about 1 active patient and re-ran this subquery for every patient (over 2 minutes).
+    @Query(value = "WITH pharm AS MATERIALIZED (SELECT DISTINCT ON (person_uuid)\n" +
+            "     person_uuid, visit_date, refill_period, regimen\n" +
+            " FROM ( select person_uuid, refill_period, MAX(visit_date) AS visit_date, extra->'regimens'->0->>'name' AS regimen from hiv_art_pharmacy\n" +
+            " GROUP BY refill_period, person_uuid, extra ORDER BY person_uuid DESC ) fi\n" +
+            "\tORDER BY\n" +
+            "     person_uuid DESC )\n" +
+            "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex\n" +
             "    , CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) AS age, \n" +
             "       p.date_of_birth AS dateOfBirth, ph.status\n" +
-            "      FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "      FROM patient_person p INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             "      LEFT JOIN\n" +
-            "      (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "      (SELECT TRUE as commenced, hac.person_uuid FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "      GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
             "LEFT JOIN (\n" +
             "SELECT DISTINCT ON (p1.person_uuid)\n" +
@@ -387,25 +404,28 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
             ") ph ON p.uuid = ph.person_uuid "+
             " LEFT JOIN \n" +
-            "   (SELECT DISTINCT ON (person_uuid)\n" +
-            "     person_uuid, visit_date, refill_period, regimen\n" +
-            " FROM ( select person_uuid, refill_period, MAX(visit_date) AS visit_date, extra->'regimens'->0->>'name' AS regimen from hiv_art_pharmacy\n" +
-            " GROUP BY refill_period, person_uuid, extra ORDER BY person_uuid DESC ) fi\n" +
-            "\tORDER BY\n" +
-            "     person_uuid DESC ) pharm ON pharm.person_uuid = p.uuid\n" +
+            "   pharm ON pharm.person_uuid = p.uuid\n" +
             "      LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "      WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND e.date_started > pharm.visit_date\n" +
+            "      WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND e.date_art_started > pharm.visit_date\n" +
             "      GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status, pharm.visit_date\n" +
             "      ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getPatientArtDateGreaterThanClinicDay (Long facilityId);
 
 
-    @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex\n" +
+    // "pharm" is worked out once, up front (WITH ... AS MATERIALIZED). Left inline, Postgres guessed
+    // there was about 1 active patient and re-ran this subquery for every patient (over 2 minutes).
+    @Query(value = "WITH pharm AS MATERIALIZED (SELECT DISTINCT ON (person_uuid)\n" +
+            "     person_uuid, visit_date, refill_period, regimen\n" +
+            " FROM ( select person_uuid, refill_period, MAX(visit_date) AS visit_date, extra->'regimens'->0->>'name' AS regimen from hiv_art_pharmacy\n" +
+            " GROUP BY refill_period, person_uuid, extra ORDER BY person_uuid DESC ) fi\n" +
+            "\tORDER BY\n" +
+            "     person_uuid DESC )\n" +
+            "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex\n" +
             "    , CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) AS age, \n" +
             "       p.date_of_birth AS dateOfBirth, ph.status\n" +
-            "      FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "      FROM patient_person p INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             "      LEFT JOIN\n" +
-            "      (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "      (SELECT TRUE as commenced, hac.person_uuid FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "      GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
             "LEFT JOIN (\n" +
             "SELECT DISTINCT ON (p1.person_uuid)\n" +
@@ -444,14 +464,9 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
             ") ph ON p.uuid = ph.person_uuid"+
             "\t  LEFT JOIN \n" +
-            "   (SELECT DISTINCT ON (person_uuid)\n" +
-            "     person_uuid, visit_date, refill_period, regimen\n" +
-            " FROM ( select person_uuid, refill_period, MAX(visit_date) AS visit_date, extra->'regimens'->0->>'name' AS regimen from hiv_art_pharmacy\n" +
-            " GROUP BY refill_period, person_uuid, extra ORDER BY person_uuid DESC ) fi\n" +
-            "\tORDER BY\n" +
-            "     person_uuid DESC ) pharm ON pharm.person_uuid = p.uuid\n" +
+            "   pharm ON pharm.person_uuid = p.uuid\n" +
             "      LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "      WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND e.date_confirmed_hiv > pharm.visit_date\n" +
+            "      WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND e.date_confirmed_hiv_test > pharm.visit_date\n" +
             "      GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status, pharm.visit_date\n" +
             "      ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getPatientLastPickUpGreaterThanConfirmDate (Long facilityId);
@@ -460,9 +475,9 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
     @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex\n" +
             "      , CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) AS age,\n" +
             "         p.date_of_birth AS dateOfBirth, ph.status\n" +
-            "        FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "        FROM patient_person p INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             "        LEFT JOIN\n" +
-            "        (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "        (SELECT TRUE as commenced, hac.person_uuid FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "        GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
             "LEFT JOIN (\n" +
             "SELECT DISTINCT ON (p1.person_uuid)\n" +
@@ -505,18 +520,26 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "\t\tperson_id, MAX(status_date) AS status_date, hiv_status FROM hiv_status_tracker where hiv_status = 'ART_TRANSFER_IN'\n" +
             "\t\tGROUP BY person_id, hiv_status ) transfer ON p.uuid = transfer.person_id\n" +
             "        LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
-            "        WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND transfer.status_date < e.date_started\n" +
+            "        WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND transfer.status_date < e.date_art_started\n" +
             "        GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status, transfer.status_date\n" +
             "        ORDER BY p.id DESC", nativeQuery = true)
     List<PatientDTOProjection> getPatientStartDateGreaterThanTransferIn (Long facilityId);
 
 
-    @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex\n" +
+    // "pharm" is worked out once, up front (WITH ... AS MATERIALIZED). Left inline, Postgres guessed
+    // there was about 1 active patient and re-ran this subquery for every patient (over 2 minutes).
+    @Query(value = "WITH pharm AS MATERIALIZED (SELECT DISTINCT ON (person_uuid)\n" +
+            "     person_uuid, visit_date, refill_period, regimen\n" +
+            " FROM ( select person_uuid, refill_period, MAX(visit_date) AS visit_date, extra->'regimens'->0->>'name' AS regimen from hiv_art_pharmacy\n" +
+            " GROUP BY refill_period, person_uuid, extra ORDER BY person_uuid DESC ) fi\n" +
+            "\tORDER BY\n" +
+            "     person_uuid DESC )\n" +
+            "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex\n" +
             "    , CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) AS age, \n" +
             "       p.date_of_birth AS dateOfBirth, ph.status\n" +
-            "      FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "      FROM patient_person p INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             "      LEFT JOIN\n" +
-            "      (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "      (SELECT TRUE as commenced, hac.person_uuid FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "      GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
             "LEFT JOIN (\n" +
             "SELECT DISTINCT ON (p1.person_uuid)\n" +
@@ -555,12 +578,7 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
             ") ph ON p.uuid = ph.person_uuid"+
             "\t  LEFT JOIN \n" +
-            "   (SELECT DISTINCT ON (person_uuid)\n" +
-            "     person_uuid, visit_date, refill_period, regimen\n" +
-            " FROM ( select person_uuid, refill_period, MAX(visit_date) AS visit_date, extra->'regimens'->0->>'name' AS regimen from hiv_art_pharmacy\n" +
-            " GROUP BY refill_period, person_uuid, extra ORDER BY person_uuid DESC ) fi\n" +
-            "\tORDER BY\n" +
-            "     person_uuid DESC ) pharm ON pharm.person_uuid = p.uuid\n" +
+            "   pharm ON pharm.person_uuid = p.uuid\n" +
             "      LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
             "      WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND p.date_of_birth > pharm.visit_date\n" +
             "      GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status, pharm.visit_date\n" +
@@ -568,12 +586,20 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
     List<PatientDTOProjection> getPatientDobGreaterThanLastPick (Long facilityId);
 
 
-    @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex\n" +
+    // "pharm" is worked out once, up front (WITH ... AS MATERIALIZED). Left inline, Postgres guessed
+    // there was about 1 active patient and re-ran this subquery for every patient (over 2 minutes).
+    @Query(value = "WITH pharm AS MATERIALIZED (SELECT DISTINCT ON (person_uuid)\n" +
+            "     person_uuid, visit_date, refill_period, regimen\n" +
+            " FROM ( select person_uuid, refill_period, MAX(visit_date) AS visit_date, extra->'regimens'->0->>'name' AS regimen from hiv_art_pharmacy\n" +
+            " GROUP BY refill_period, person_uuid, extra ORDER BY person_uuid DESC ) fi\n" +
+            "\tORDER BY\n" +
+            "     person_uuid DESC )\n" +
+            "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex\n" +
             "    , CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) AS age, \n" +
             "       p.date_of_birth AS dateOfBirth, ph.status\n" +
-            "      FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "      FROM patient_person p INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             "      LEFT JOIN\n" +
-            "      (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "      (SELECT TRUE as commenced, hac.person_uuid FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "      GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
             "LEFT JOIN (\n" +
             "SELECT DISTINCT ON (p1.person_uuid)\n" +
@@ -616,12 +642,7 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "\tperson_id, MAX(status_date) AS status_date, hiv_status FROM hiv_status_tracker where hiv_status = 'ART_TRANSFER_IN'\n" +
             "\tGROUP BY person_id, hiv_status ) transfer ON p.uuid = transfer.person_id\n" +
             "\t  LEFT JOIN \n" +
-            "   (SELECT DISTINCT ON (person_uuid)\n" +
-            "     person_uuid, visit_date, refill_period, regimen\n" +
-            " FROM ( select person_uuid, refill_period, MAX(visit_date) AS visit_date, extra->'regimens'->0->>'name' AS regimen from hiv_art_pharmacy\n" +
-            " GROUP BY refill_period, person_uuid, extra ORDER BY person_uuid DESC ) fi\n" +
-            "\tORDER BY\n" +
-            "     person_uuid DESC ) pharm ON pharm.person_uuid = p.uuid\n" +
+            "   pharm ON pharm.person_uuid = p.uuid\n" +
             "      LEFT JOIN base_application_codeset pc on pc.id = e.status_at_registration_id\n" +
             "      WHERE p.archived=0 AND p.facility_id= ?1 AND status = 'Active' AND pharm.visit_date < transfer.status_date\n" +
             "      GROUP BY e.id, ca.commenced, p.id, pc.display, p.hospital_number, p.date_of_birth, ph.status, pharm.visit_date, transfer.status_date\n" +
@@ -638,7 +659,7 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "FROM\n" +
             "  patient_person p\n" +
             "INNER JOIN\n" +
-            "  hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "  hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             "LEFT JOIN (\n" +
             "SELECT DISTINCT ON (p1.person_uuid)\n" +
             "p1.person_uuid,\n" +
@@ -676,7 +697,7 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
             ") ph ON p.uuid = ph.person_uuid "+
             "LEFT JOIN\n" +
-            "  hiv_art_clinical hac ON hac.person_uuid = e.person_uuid AND hac.archived = 0 AND hac.is_commencement IS TRUE\n" +
+            "  hiv_enrollment_commencement hac ON hac.person_uuid = e.person_uuid AND hac.archived = 0 AND hac.is_commencement IS TRUE\n" +
             "LEFT JOIN (\n" +
             "  SELECT\n" +
             "    person_uuid,\n" +
@@ -712,7 +733,7 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "FROM\n" +
             "  patient_person p\n" +
             "INNER JOIN\n" +
-            "  hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "  hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             "LEFT JOIN (\n" +
             "SELECT DISTINCT ON (p1.person_uuid)\n" +
             "p1.person_uuid,\n" +
@@ -750,7 +771,7 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "JOIN hiv_regimen_type hrt ON hr.regimen_type_id = hrt.id AND hrt.id IN (1, 2, 3, 4, 14) AND p1.archived != 1\n" +
             ") ph ON p.uuid = ph.person_uuid "+
             "LEFT JOIN\n" +
-            "  hiv_art_clinical hac ON hac.person_uuid = e.person_uuid AND hac.archived = 0 AND hac.is_commencement IS TRUE\n" +
+            "  hiv_enrollment_commencement hac ON hac.person_uuid = e.person_uuid AND hac.archived = 0 AND hac.is_commencement IS TRUE\n" +
             "LEFT JOIN (\n" +
             "  SELECT\n" +
             "    person_uuid,\n" +
@@ -780,9 +801,9 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
     @Query(value = "SELECT e.unique_id AS patientId ,p.hospital_number AS hospitalNumber, INITCAP(p.sex) AS sex\n" +
             "      , CAST (EXTRACT(YEAR from AGE(NOW(), date_of_birth)) AS INTEGER) AS age,\n" +
             "         p.date_of_birth AS dateOfBirth, ph.status\n" +
-            "        FROM patient_person p INNER JOIN hiv_enrollment e ON p.uuid = e.person_uuid\n" +
+            "        FROM patient_person p INNER JOIN hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
             "        LEFT JOIN\n" +
-            "        (SELECT TRUE as commenced, hac.person_uuid FROM hiv_art_clinical hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
+            "        (SELECT TRUE as commenced, hac.person_uuid FROM hiv_enrollment_commencement hac WHERE hac.archived=0 AND hac.is_commencement is true\n" +
             "        GROUP BY hac.person_uuid)ca ON p.uuid = ca.person_uuid\n" +
             "LEFT JOIN (\n" +
             "SELECT DISTINCT ON (p1.person_uuid)\n" +
@@ -833,7 +854,7 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "\t\tLEFT JOIN laboratory_test lt ON lt.lab_order_id=lo.id AND lt.patient_uuid = lo.patient_uuid\n" +
             "\t\tLEFT JOIN base_application_codeset bac_viral_load ON bac_viral_load.id=lt.viral_load_indication\n" +
             "\t\tLEFT JOIN laboratory_labtest ll ON ll.id=lt.lab_test_id\n" +
-            "\t\tINNER JOIN hiv_enrollment h ON h.person_uuid=current_lo.patient_uuid\n" +
+            "\t\tINNER JOIN hiv_enrollment_commencement h ON h.person_uuid=current_lo.patient_uuid\n" +
             "\t\tLEFT JOIN laboratory_sample ls ON ls.test_id=lt.id AND ls.patient_uuid = lo.patient_uuid\n" +
             "\t\tLEFT JOIN laboratory_result lr ON lr.test_id=lt.id AND lr.patient_uuid = lo.patient_uuid\n" +
             "\t\tWHERE  lo.archived=0 AND\n" +
@@ -847,39 +868,9 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
 
 
 
-    @Query(value = "SELECT\n" +
-            "  e.unique_id AS patientId,\n" +
-            "  p.hospital_number AS hospitalNumber,\n" +
-            "  INITCAP(p.sex) AS sex,\n" +
-            "  p.date_of_birth AS dateOfBirth,\n" +
-            "  CASE\n" +
-            "    WHEN t.hiv_status = 'KNOWN_DEATH' THEN 'Dead'\n" +
-            "    WHEN t.hiv_status IN ('ART_TRANSFER_OUT', 'ART Transfer Out') THEN 'Transferred Out'\n" +
-            "    WHEN AGE(NOW(), ph.last_visit_date) <= INTERVAL '28 DAYS' THEN 'Active'\n" +
-            "    WHEN AGE(NOW(), ph.last_visit_date) > INTERVAL '28 DAYS' THEN 'IIT'\n" +
-            "  END AS status\n" +
-            "FROM\n" +
-            "  patient_person p\n" +
-            "INNER JOIN\n" +
-            "  hiv_enrollment e ON p.uuid = e.person_uuid\n" +
-            "  LEFT JOIN (\n" +
-            "select DISTINCT ON (h1.person_uuid) h1.person_uuid, MAX(h1.visit_date) AS visit_date,\n" +
-            "h1.pregnancy_status\n" +
-            "from hiv_art_clinical h1\n" +
-            "GROUP BY h1.person_uuid, h1.visit_date, h1.pregnancy_status\n" +
-            "ORDER BY h1.person_uuid, h1.visit_date DESC \n" +
-            ") preg ON e.person_uuid = preg.person_uuid\n" +
-            "LEFT JOIN\n" +
-            "  (\n" +
-            "    SELECT\n" +
-            "      person_id,\n" +
-            "      hiv_status,\n" +
-            "      ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC) AS rn\n" +
-            "    FROM\n" +
-            "      hiv_status_tracker\n" +
-            "  ) AS t ON p.uuid = t.person_id AND t.rn = 1\n" +
-            "LEFT JOIN\n" +
-            "  (\n" +
+    // "ph" is worked out once, up front (WITH ... AS MATERIALIZED). Left inline, Postgres guessed
+    // there was about 1 active patient and re-ran this subquery for every patient (over 2 minutes).
+    @Query(value = "WITH ph AS MATERIALIZED (\n" +
             "    SELECT\n" +
             "      p1.person_uuid,\n" +
             "      MAX(p1.visit_date) AS last_visit_date,\n" +
@@ -898,10 +889,50 @@ public interface DataConsistencyRepository extends JpaRepository<DQA, Long> {
             "      p1.archived != 1\n" +
             "    GROUP BY\n" +
             "      p1.person_uuid\n" +
-            "  ) AS ph ON p.uuid = ph.person_uuid\n" +
+            "  )\n" +
+            "SELECT\n" +
+            "  e.unique_id AS patientId,\n" +
+            "  p.hospital_number AS hospitalNumber,\n" +
+            "  INITCAP(p.sex) AS sex,\n" +
+            "  p.date_of_birth AS dateOfBirth,\n" +
+            "  CASE\n" +
+            "    WHEN t.hiv_status = 'KNOWN_DEATH' THEN 'Dead'\n" +
+            "    WHEN t.hiv_status IN ('ART_TRANSFER_OUT', 'ART Transfer Out') THEN 'Transferred Out'\n" +
+            "    WHEN AGE(NOW(), ph.last_visit_date) <= INTERVAL '28 DAYS' THEN 'Active'\n" +
+            "    WHEN AGE(NOW(), ph.last_visit_date) > INTERVAL '28 DAYS' THEN 'IIT'\n" +
+            "  END AS status\n" +
+            "FROM\n" +
+            "  patient_person p\n" +
+            "INNER JOIN\n" +
+            "  hiv_enrollment_commencement e ON p.uuid = e.person_uuid\n" +
+            "  LEFT JOIN (\n" +
+            "select DISTINCT ON (h1.person_uuid) h1.person_uuid, MAX(h1.visit_date) AS visit_date,\n" +
+            "h1.pregnancy_status\n" +
+            "from hiv_art_clinical h1\n" +
+            "GROUP BY h1.person_uuid, h1.visit_date, h1.pregnancy_status\n" +
+            "ORDER BY h1.person_uuid, h1.visit_date DESC \n" +
+            ") preg ON e.person_uuid = preg.person_uuid\n" +
+            "LEFT JOIN\n" +
+            "  (\n" +
+            "    SELECT\n" +
+            "      person_id,\n" +
+            "      hiv_status,\n" +
+            "      ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC) AS rn\n" +
+            "    FROM\n" +
+            "      hiv_status_tracker\n" +
+            "  ) AS t ON p.uuid = t.person_id AND t.rn = 1\n" +
+            "LEFT JOIN\n" +
+            "  ph ON p.uuid = ph.person_uuid\n" +
             "WHERE\n" +
             "  p.archived = 0\n" +
-            "  AND p.facility_id = ?1 AND status = 'Active'\n" +
+            "  AND p.facility_id = ?1\n" +
+            // Postgres can't see the "status" alias from the SELECT here, so the same CASE is repeated.
+            "  AND (CASE\n" +
+            "    WHEN t.hiv_status = 'KNOWN_DEATH' THEN 'Dead'\n" +
+            "    WHEN t.hiv_status IN ('ART_TRANSFER_OUT', 'ART Transfer Out') THEN 'Transferred Out'\n" +
+            "    WHEN AGE(NOW(), ph.last_visit_date) <= INTERVAL '28 DAYS' THEN 'Active'\n" +
+            "    WHEN AGE(NOW(), ph.last_visit_date) > INTERVAL '28 DAYS' THEN 'IIT'\n" +
+            "  END) = 'Active'\n" +
             "  AND CAST(EXTRACT(YEAR FROM AGE(NOW(), p.date_of_birth)) AS INTEGER) > 12\n" +
             "  AND INITCAP(p.sex) = 'Female' AND preg.pregnancy_status is null\n" +
             "ORDER BY\n" +

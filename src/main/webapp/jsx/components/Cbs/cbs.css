@@ -1,0 +1,370 @@
+/* HIV Case-Based Surveillance screens. Everything is scoped under .cbs so the
+   existing DQR pages are not affected. Colours follow LAMISPlus: #014d88 and rgb(153,46,98). */
+
+.dqr-main-tabs.nav-tabs .nav-link {
+  color: #014d88;
+  font-weight: bold;
+  font-size: 15px;
+}
+.dqr-main-tabs.nav-tabs .nav-link.active {
+  color: #fff;
+  background-color: #014d88;
+  border-color: #014d88;
+}
+
+/* The theme gives every .card height: calc(100% - 30px), which stretches cards stacked
+   inside the CBS grid and leaves big empty areas. Let them size to their content. */
+.cbs .card {
+  height: auto;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+/* Screen titles; the theme shrinks h4 to body size */
+.cbs h4 {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.cbs label {
+  font-size: 14px;
+  color: #014d88;
+  font-weight: bold;
+}
+.cbs .form-control {
+  border-radius: 0.25rem;
+  height: 41px;
+}
+
+.cbs-context {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 20px;
+  color: #555;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+.cbs-context strong {
+  color: #014d88;
+}
+.cbs-context .cbs-refresh-btn {
+  margin-left: auto;
+}
+
+.cbs-warning {
+  border-left: 4px solid #ed6c02;
+  background: #fff4e5;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+.cbs-warning.error {
+  border-left-color: #c62828;
+  background: #fdecea;
+}
+
+.cbs-section-header {
+  background-color: #014d88;
+  color: #fff;
+  font-weight: bolder;
+  border-radius: 0.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.cbs-section-header .card-title {
+  color: #fff;
+  margin: 0;
+}
+
+.cbs-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.cbs-summary-card {
+  background: #f5f8fb;
+  border: 1px solid #dde5ee;
+  border-top: 6px solid #014d88;
+  border-radius: 6px;
+  padding: 14px 16px;
+}
+.cbs-summary-card.clickable {
+  cursor: pointer;
+}
+.cbs-summary-card.clickable:hover,
+.cbs-summary-card.active {
+  box-shadow: 0 0 0 2px #014d88 inset;
+}
+.cbs-summary-value {
+  font-size: 30px;
+  font-weight: bold;
+  color: #014d88;
+  line-height: 1.2;
+}
+.cbs-summary-label {
+  color: #555;
+  font-size: 15px;
+}
+.cbs-summary-help {
+  color: #888;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.cbs-components .cbs-component {
+  display: flex;
+  align-items: center;
+  border: 1px solid #dde5ee;
+  border-radius: 6px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  background: #fff;
+}
+.cbs-components .cbs-component:hover {
+  border-color: #014d88;
+}
+.cbs-component-number {
+  background: #e8eff6;
+  color: #014d88;
+  font-weight: bold;
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-right: 16px;
+}
+.cbs-component-title {
+  color: #014d88;
+  font-weight: bold;
+  font-size: 16px;
+}
+.cbs-component-text {
+  color: #666;
+  font-size: 14px;
+}
+.cbs-component-arrow {
+  margin-left: auto;
+  color: #014d88;
+}
+
+.cbs-subnav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.cbs-subnav button {
+  border: 1px solid #014d88;
+  background: #fff;
+  color: #014d88;
+  border-radius: 4px;
+  padding: 6px 14px;
+  font-weight: bold;
+  font-size: 14px;
+}
+.cbs-subnav button.active {
+  background: #014d88;
+  color: #fff;
+}
+
+.cbs-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px 14px;
+  margin-bottom: 14px;
+  align-items: end;
+}
+
+.cbs-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid;
+  border-radius: 12px;
+  padding: 1px 10px;
+  font-size: 12px;
+  font-weight: bold;
+  background: #fff;
+  white-space: nowrap;
+}
+.cbs-badge {
+  display: inline-block;
+  color: #fff;
+  border-radius: 10px;
+  padding: 2px 10px;
+  font-size: 12px;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.cbs-link {
+  color: #014d88;
+  font-weight: bold;
+  background: none;
+  border: none;
+  padding: 0;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.cbs-back {
+  background-color: #014d88;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 14px;
+  margin-bottom: 12px;
+}
+
+/* Patient tracker */
+.cbs-patient-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 32px;
+  background: #e8eff6;
+  border-radius: 6px;
+  padding: 14px 18px;
+  margin-bottom: 14px;
+}
+.cbs-patient-header .item-label {
+  color: #666;
+  font-size: 12px;
+}
+.cbs-patient-header .item-value {
+  color: #014d88;
+  font-weight: bold;
+  font-size: 16px;
+}
+.cbs-status-boxes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.cbs-status-box {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  border: 1px solid #dde5ee;
+  border-radius: 6px;
+  padding: 10px 14px;
+  background: #fff;
+}
+.cbs-status-box .box-label {
+  color: #666;
+  font-size: 12px;
+}
+.cbs-status-box .box-value {
+  font-weight: bold;
+  font-size: 16px;
+  color: #222;
+}
+.cbs-status-box .box-evidence {
+  color: #777;
+  font-size: 12px;
+}
+
+.cbs-tracker-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+@media (max-width: 992px) {
+  .cbs-tracker-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cbs-timeline {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.cbs-timeline li {
+  display: flex;
+  gap: 14px;
+  padding: 12px 4px;
+  border-bottom: 1px solid #eef2f6;
+}
+.cbs-timeline li.supporting {
+  opacity: 0.85;
+}
+.cbs-timeline .event-title {
+  font-weight: bold;
+  color: #014d88;
+}
+.cbs-timeline li.supporting .event-title {
+  color: #555;
+}
+.cbs-timeline .event-meta {
+  color: #666;
+  font-size: 13px;
+}
+.cbs-timeline .event-right {
+  margin-left: auto;
+  text-align: right;
+}
+
+.cbs-side-card {
+  border: 1px solid #dde5ee;
+  border-radius: 6px;
+  margin-bottom: 14px;
+  background: #fff;
+}
+.cbs-side-card h6 {
+  background: #f5f8fb;
+  color: #014d88;
+  font-weight: bold;
+  padding: 10px 12px;
+  margin: 0;
+  border-bottom: 1px solid #dde5ee;
+}
+.cbs-side-card .body {
+  padding: 10px 12px;
+  font-size: 13px;
+}
+.cbs-side-card.issue {
+  border-color: #ed6c02;
+}
+.cbs-side-card.issue h6 {
+  background: #fff4e5;
+  color: #c62828;
+}
+
+.cbs-kv {
+  width: 100%;
+  font-size: 13px;
+}
+.cbs-kv td {
+  padding: 4px 6px;
+  border-bottom: 1px solid #f0f0f0;
+  vertical-align: top;
+}
+.cbs-kv td:first-child {
+  color: #666;
+  width: 45%;
+}
+
+.cbs-history {
+  list-style: none;
+  padding-left: 0;
+}
+.cbs-history li {
+  border-left: 3px solid #014d88;
+  padding: 6px 12px;
+  margin-bottom: 8px;
+  background: #f9fbfd;
+}
+.cbs-history .who {
+  color: #777;
+  font-size: 12px;
+}
+
+.cbs-empty {
+  padding: 24px;
+  text-align: center;
+  color: #777;
+}
