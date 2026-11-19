@@ -189,8 +189,6 @@ public class CbsEngine {
         }
     }
 
-    // ---------------------------------------------------------------- events
-
     /**
      * EV01: the earliest confirmed diagnosis. That is either the HTS final positive result
      * (hts_encounter) or the historical "date confirmed HIV positive" on the enrolment form.
@@ -523,8 +521,6 @@ public class CbsEngine {
         return out;
     }
 
-    // ---------------------------------------------------------------- statuses
-
     private StatusResult vitalStatus(PatientSource s, LocalDate asOf, LocalDate deathDate, CbsSettings cfg) {
         if (deathDate != null) {
             return new StatusResult(DECEASED, deathDate, "Confirmed death recorded in client tracking");
@@ -626,7 +622,6 @@ public class CbsEngine {
         }
     }
 
-    // ---------------------------------------------------------------- rules
 
     private void runRules(Context c) {
         PatientSource s = c.s;
@@ -1127,7 +1122,6 @@ public class CbsEngine {
         return "the enrolment is dated after the as-of date";
     }
 
-    // ---------------------------------------------------------------- event summary
 
     private void eventSummary(Context c) {
         List<EventSummary> out = c.a.getEventSummary();
@@ -1231,7 +1225,6 @@ public class CbsEngine {
         a.getIndicators().put("Open data quality findings", a.getFindings().size());
     }
 
-    // ---------------------------------------------------------------- helpers
 
     private static class Service {
         final LocalDate date;

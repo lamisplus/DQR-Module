@@ -185,7 +185,6 @@ public class CbsIssueService {
         return queryService.issue(issueId);
     }
 
-    // ---------------------------------------------------------------- helpers
 
     private CbsIssueDetailDto move(long issueId, List<String> allowedFrom, String to, String action) {
         CbsIssue issue = openIssue(issueId);
